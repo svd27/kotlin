@@ -236,7 +236,7 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         }
     }
 
-    private void generateMethodBody(
+    public void generateMethodBody(
             @NotNull MethodVisitor mv,
             @NotNull FunctionDescriptor functionDescriptor,
             @NotNull MethodContext context,
@@ -276,9 +276,10 @@ public class FunctionCodegen extends ParentCodegenAwareImpl {
         Label methodEnd = new Label();
         mv.visitLabel(methodEnd);
 
-
-        Type thisType = getThisTypeForFunction(functionDescriptor, context);
-        generateLocalVariableTable(mv, signature, functionDescriptor, thisType, methodBegin, methodEnd, localVariableNames, labelsForSharedVars, context.getContextKind());
+        if (strategy.generateLocalVarTable()) {
+            Type thisType = getThisTypeForFunction(functionDescriptor, context);
+            generateLocalVariableTable(mv, signature, functionDescriptor, thisType, methodBegin, methodEnd, localVariableNames, labelsForSharedVars, context.getContextKind());
+        }
     }
 
     @NotNull

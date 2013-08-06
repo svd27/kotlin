@@ -83,7 +83,7 @@ public class CodegenUtil {
                                     fd.getReturnType(),
                                     Modality.FINAL,
                                     Visibilities.PUBLIC,
-                                    /*isInline = */false
+                                    fd instanceof SimpleFunctionDescriptor && ((SimpleFunctionDescriptor) fd).isInline()
         );
         return invokeDescriptor;
     }
@@ -105,6 +105,11 @@ public class CodegenUtil {
 
 
     public static JvmMethodSignature erasedInvokeSignature(FunctionDescriptor fd) {
+        return erasedInvokeSignature(fd, null, false);
+    }
+
+    public static JvmMethodSignature erasedInvokeSignature(FunctionDescriptor fd, JetTypeMapper mapper, boolean addFunction) {
+
         BothSignatureWriter signatureWriter = new BothSignatureWriter(BothSignatureWriter.Mode.METHOD, false);
 
         boolean isExtensionFunction = fd.getReceiverParameter() != null;
@@ -118,6 +123,11 @@ public class CodegenUtil {
         for (int i = 0; i < paramCount; ++i) {
             signatureWriter.writeParameterType(JvmMethodParameterKind.VALUE);
             signatureWriter.writeAsmType(OBJECT_TYPE);
+            signatureWriter.writeParameterTypeEnd();
+        }
+        if (addFunction) {
+            signatureWriter.writeParameterType(JvmMethodParameterKind.VALUE);
+            signatureWriter.writeAsmType(mapper.mapType(fd.getOriginal().getExpectedThisObject().getType()));
             signatureWriter.writeParameterTypeEnd();
         }
 
@@ -278,7 +288,7 @@ public class CodegenUtil {
 
     @Nullable
     public static ClassDescriptor getExpectedThisObjectForConstructorCall(
-            @NotNull ConstructorDescriptor descriptor,
+            @NotNull CallableDescriptor descriptor,
             @Nullable CalculatedClosure closure
     ) {
         //for compilation against sources

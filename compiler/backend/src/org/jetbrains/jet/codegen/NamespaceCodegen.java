@@ -29,6 +29,7 @@ import org.jetbrains.asm4.Type;
 import org.jetbrains.jet.codegen.context.CodegenContext;
 import org.jetbrains.jet.codegen.context.FieldOwnerContext;
 import org.jetbrains.jet.codegen.state.GenerationState;
+import org.jetbrains.jet.codegen.state.GenerationStateAware;
 import org.jetbrains.jet.descriptors.serialization.BitEncoding;
 import org.jetbrains.jet.descriptors.serialization.DescriptorSerializer;
 import org.jetbrains.jet.descriptors.serialization.PackageData;
@@ -53,7 +54,7 @@ import static org.jetbrains.jet.codegen.AsmUtil.asmTypeByFqNameWithoutInnerClass
 import static org.jetbrains.jet.descriptors.serialization.NameSerializationUtil.createNameResolver;
 import static org.jetbrains.jet.lang.resolve.java.PackageClassUtils.getPackageClassFqName;
 
-public class NamespaceCodegen extends MemberCodegen {
+public class NamespaceCodegen extends GenerationStateAware {
     @NotNull
     private final ClassBuilderOnDemand v;
 
@@ -70,7 +71,7 @@ public class NamespaceCodegen extends MemberCodegen {
             @NotNull GenerationState state,
             @NotNull Collection<JetFile> namespaceFiles
     ) {
-        super(state, null);
+        super(state);
         checkAllFilesHaveSameNamespace(namespaceFiles);
 
         this.v = v;
@@ -192,10 +193,10 @@ public class NamespaceCodegen extends MemberCodegen {
         new NamespacePartCodegen(builder, file, packageFragmentType, packageFragmentContext, state).generate();
 
         FieldOwnerContext namespaceFacade = CodegenContext.STATIC.intoNamespaceFacade(packageFragmentType, descriptor);
-
+        MemberCodegen memberCodegen = new MemberCodegen(state, null, namespaceFacade, null);
         for (JetDeclaration declaration : file.getDeclarations()) {
             if (declaration instanceof JetNamedFunction || declaration instanceof JetProperty) {
-                genFunctionOrProperty(namespaceFacade, (JetTypeParameterListOwner) declaration, v.getClassBuilder());
+                memberCodegen.genFunctionOrProperty(namespaceFacade, (JetTypeParameterListOwner) declaration, v.getClassBuilder());
             }
         }
 
@@ -204,7 +205,7 @@ public class NamespaceCodegen extends MemberCodegen {
 
     public void generateClassOrObject(@NotNull JetClassOrObject classOrObject) {
         CodegenContext context = CodegenContext.STATIC.intoNamespace(descriptor);
-        genClassOrObject(context, classOrObject);
+        MemberCodegen.genClassOrObject(context, classOrObject, state, null);
     }
 
     /**

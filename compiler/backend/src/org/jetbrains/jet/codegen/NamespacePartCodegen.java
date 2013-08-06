@@ -57,7 +57,7 @@ public class NamespacePartCodegen extends MemberCodegen {
             @NotNull FieldOwnerContext context,
             @NotNull GenerationState state
     ) {
-        super(state, null);
+        super(state, null, context, v);
         this.v = v;
         this.jetFile = jetFile;
         this.namespacePartName = namespacePartName;

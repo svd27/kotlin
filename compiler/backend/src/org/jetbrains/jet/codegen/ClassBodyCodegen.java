@@ -41,7 +41,6 @@ public abstract class ClassBodyCodegen extends MemberCodegen {
     protected final OwnerKind kind;
     protected final ClassDescriptor descriptor;
     protected final ClassBuilder v;
-    protected final ClassContext context;
 
     private MethodVisitor clInitMethod;
 
@@ -54,10 +53,9 @@ public abstract class ClassBodyCodegen extends MemberCodegen {
             @NotNull GenerationState state,
             @Nullable MemberCodegen parentCodegen
     ) {
-        super(state, parentCodegen);
+        super(state, parentCodegen, context, v);
         descriptor = state.getBindingContext().get(BindingContext.CLASS, aClass);
         myClass = aClass;
-        this.context = context;
         this.kind = context.getContextKind();
         this.v = v;
     }

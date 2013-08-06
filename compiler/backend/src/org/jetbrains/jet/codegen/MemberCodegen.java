@@ -24,15 +24,33 @@ import org.jetbrains.jet.codegen.context.CodegenContext;
 import org.jetbrains.jet.codegen.context.FieldOwnerContext;
 import org.jetbrains.jet.codegen.state.GenerationState;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
+import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.types.ErrorUtils;
 
+import java.util.HashMap;
+import java.util.Map;
+
 
 public class MemberCodegen extends ParentCodegenAwareImpl {
 
-    public MemberCodegen(@NotNull GenerationState state, @Nullable MemberCodegen parentCodegen) {
+    protected final FieldOwnerContext context;
+
+    private final ClassBuilder builder;
+
+    @NotNull
+    private Map<FunctionDescriptor, ClosureCodegen> inlinedClosures = new HashMap<FunctionDescriptor, ClosureCodegen>();
+
+    public MemberCodegen(
+            @NotNull GenerationState state,
+            @Nullable MemberCodegen parentCodegen,
+            FieldOwnerContext context,
+            ClassBuilder builder
+    ) {
         super(state, parentCodegen);
+        this.context = context;
+        this.builder = builder;
     }
 
     public void genFunctionOrProperty(
@@ -74,7 +92,12 @@ public class MemberCodegen extends ParentCodegenAwareImpl {
         }
     }
 
-    public void genClassOrObject(CodegenContext parentContext, JetClassOrObject aClass) {
+    public static void genClassOrObject(
+            @NotNull CodegenContext parentContext,
+            @NotNull JetClassOrObject aClass,
+            @NotNull GenerationState state,
+            @Nullable MemberCodegen parentCodegen
+    ) {
         ClassDescriptor descriptor = state.getBindingContext().get(BindingContext.CLASS, aClass);
 
         if (descriptor == null || ErrorUtils.isError(descriptor) || descriptor.getName().equals(JetPsiUtil.NO_NAME_PROVIDED)) {
@@ -87,14 +110,23 @@ public class MemberCodegen extends ParentCodegenAwareImpl {
 
         ClassBuilder classBuilder = state.getFactory().forClassImplementation(descriptor, aClass.getContainingFile());
         ClassContext classContext = parentContext.intoClass(descriptor, OwnerKind.IMPLEMENTATION, state);
-        new ImplementationBodyCodegen(aClass, classContext, classBuilder, state, this).generate();
+        new ImplementationBodyCodegen(aClass, classContext, classBuilder, state, parentCodegen).generate();
         classBuilder.done();
 
         if (aClass instanceof JetClass && ((JetClass) aClass).isTrait()) {
             ClassBuilder traitBuilder = state.getFactory().forTraitImplementation(descriptor, state, aClass.getContainingFile());
-            new TraitImplBodyCodegen(aClass, parentContext.intoClass(descriptor, OwnerKind.TRAIT_IMPL, state), traitBuilder, state, this)
+            new TraitImplBodyCodegen(aClass, parentContext.intoClass(descriptor, OwnerKind.TRAIT_IMPL, state), traitBuilder, state, parentCodegen)
                     .generate();
             traitBuilder.done();
         }
+    }
+
+    public void genClassOrObject(CodegenContext parentContext, JetClassOrObject aClass) {
+        genClassOrObject(parentContext, aClass, state, this);
+    }
+
+    @NotNull
+    public ClassBuilder getBuilder() {
+        return builder;
     }
 }

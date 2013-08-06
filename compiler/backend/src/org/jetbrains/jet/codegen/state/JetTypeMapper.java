@@ -571,9 +571,11 @@ public class JetTypeMapper extends BindingTraceAware {
         else {
             receiverParameterType = null;
         }
-        return new CallableMethod(
+        CallableMethod method = new CallableMethod(
                 owner, ownerForDefaultImpl, ownerForDefaultParam, descriptor, invokeOpcode,
                 thisClass, receiverParameterType, calleeType);
+        method.setFunctionDescriptor(functionDescriptor);
+        return method;
     }
 
     public static boolean isAccessor(@NotNull CallableMemberDescriptor descriptor) {
