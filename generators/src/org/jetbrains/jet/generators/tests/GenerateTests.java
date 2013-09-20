@@ -120,6 +120,20 @@ public class GenerateTests {
 
         generateTest(
                 "compiler/tests/",
+                "BlackBoxInlineCodegenTestGenerated",
+                AbstractBlackBoxCodegenTest.class,
+                testModelWithDirectories("compiler/testData/codegen/boxInline", "doTestMultiFile")
+        );
+
+        generateTest(
+                "compiler/tests/",
+                "CompileKotlinAgainstInlineKotlinTestGenerated",
+                AbstractCompileKotlinAgainstKotlinTest.class,
+                testModelWithDirectories("compiler/testData/codegen/boxInline", "doBoxTest")
+        );
+
+        generateTest(
+                "compiler/tests/",
                 "BlackBoxMultiFileCodegenTestGenerated",
                 AbstractBlackBoxCodegenTest.class,
                 testModelWithDirectories(("compiler/testData/codegen/boxMultiFile"), "doTestMultiFile")

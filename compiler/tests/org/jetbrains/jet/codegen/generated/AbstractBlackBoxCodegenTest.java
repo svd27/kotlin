@@ -54,6 +54,11 @@ public abstract class AbstractBlackBoxCodegenTest extends CodegenTestCase {
         blackBoxFileByFullPath(filename);
     }
 
+    public void doInlineTest(@NotNull String filename) {
+        blackBoxFileWithJavaByFullPath(filename);
+        //also i need separate file
+    }
+
     public void doTestMultiFile(@NotNull String folderName) {
         createEnvironmentWithMockJdkAndIdeaAnnotations(ConfigurationKind.ALL);
 
