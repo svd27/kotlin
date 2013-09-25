@@ -30,6 +30,7 @@ import org.jetbrains.asm4.tree.AbstractInsnNode;
 import org.jetbrains.asm4.tree.MethodInsnNode;
 import org.jetbrains.asm4.tree.MethodNode;
 import org.jetbrains.asm4.tree.VarInsnNode;
+import org.jetbrains.asm4.tree.analysis.*;
 import org.jetbrains.jet.codegen.*;
 import org.jetbrains.jet.codegen.context.CodegenContext;
 import org.jetbrains.jet.codegen.context.EnclosedValueDescriptor;
@@ -159,19 +160,19 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                                                    new FunctionGenerationStrategy.FunctionDefault(state,
                                                                                                   functionDescriptor,
                                                                                                   (JetDeclarationWithBody) element));
+                node.visitMaxs(10, 10);
+                node.visitEnd();
             }
             else {
-
-                    node = getMethodNode(file.getInputStream(), functionDescriptor.getName().asString(),
-                                         callableMethod.getSignature().getAsmMethod().getDescriptor());
-
+                node = getMethodNode(file.getInputStream(), functionDescriptor.getName().asString(),
+                                     callableMethod.getSignature().getAsmMethod().getDescriptor());
             }
         }
         catch (Exception e) {
-            throw new RuntimeException("Coudn't inline method call " +
+            throw new RuntimeException("Coudn't inline method call '" +
                                        functionDescriptor.getName() +
-                                       " in " + codegen.getContext().getCallableDescriptorWithReceiver().getName() +
-                                       " cause: " +
+                                       "' into \n" + BindingContextUtils.descriptorToDeclaration(bindingContext, codegen.getContext().getContextDescriptor()).getText() +
+                                       "\ncause: " +
                                        e.getMessage(), e);
         }
         inlineCall(node, true);
@@ -179,40 +180,14 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
 
     private void inlineCall(MethodNode node, boolean inlineClosures) {
         if (inlineClosures) {
-            AbstractInsnNode cur = node.instructions.getFirst();
-            while (cur != null && cur.getNext() != null) {
-                AbstractInsnNode next = cur.getNext();
-                if (next.getType() == AbstractInsnNode.METHOD_INSN) {
-                    MethodInsnNode methodInsnNode = (MethodInsnNode) next;
-                    //TODO check closure
-                    if (methodInsnNode.name.equals(INVOKE) && methodInsnNode.owner.equals(INLINE_RUNTIME)) {
-                        //cur is closure aload
-                        assert cur.getType() == AbstractInsnNode.VAR_INSN && cur.getOpcode() == Opcodes.ALOAD;
-                        int varIndex = ((VarInsnNode) cur).var;
-                        ClosureInfo closureInfo = expressionMap.get(varIndex);
-                        if (closureInfo != null) { //TODO: maybe add separate map for noninlinable closures
-                            closures.add(new ClosureUsage(varIndex, true));
-                            node.instructions.remove(cur);
-                        } else {
-                            closures.add(new ClosureUsage(varIndex, false));
-                        }
-                    }
-                    if (methodInsnNode.name.equals("checkParameterIsNotNull") && methodInsnNode.owner.equals("jet/runtime/Intrinsics")) {
-                        AbstractInsnNode prev = cur.getPrevious();
-                        assert prev.getType() == AbstractInsnNode.VAR_INSN && prev.getOpcode() == Opcodes.ALOAD;
-                        int varIndex = ((VarInsnNode) prev).var;
-                        ClosureInfo closure = expressionMap.get(varIndex);
-                        if (closure != null) {
-                            node.instructions.remove(prev);
-                            node.instructions.remove(cur);
-                            cur = next.getNext();
-                            node.instructions.remove(next);
-                            next = cur;
-                        }
-                    }
-                }
-                cur = next;
+            removeClosureAssertions(node);
+            try {
+                prepareInlinedMethod2(node);
             }
+            catch (AnalyzerException e) {
+                throw new RuntimeException(e);
+            }
+            //prepareInlinedMethod(node);
         }
 
         int valueParamSize = originalFunctionFrame.getCurrentSize();
@@ -223,6 +198,86 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         VarRemapper remapper = new VarRemapper.DeltaRemapper(initialFrameSize, valueParamSize, additionalParams, getClosureIndexes());
 
         doInline(node.access, node.desc, codegen.getMethodVisitor(), node, remapper.doRemap(initialFrameSize + valueParamSize + additionalParams), inlineClosures, remapper);
+    }
+
+    private void prepareInlinedMethod(MethodNode node) {
+        AbstractInsnNode cur = node.instructions.getFirst();
+        while (cur != null && cur.getNext() != null) {
+            AbstractInsnNode next = cur.getNext();
+            if (next.getType() == AbstractInsnNode.METHOD_INSN) {
+                MethodInsnNode methodInsnNode = (MethodInsnNode) next;
+                //TODO check closure
+                if (methodInsnNode.name.equals(INVOKE) && methodInsnNode.owner.equals(INLINE_RUNTIME)) {
+                    assert cur.getType() == AbstractInsnNode.VAR_INSN && cur.getOpcode() == Opcodes.ALOAD;
+                    int varIndex = ((VarInsnNode) cur).var;
+                    ClosureInfo closureInfo = expressionMap.get(varIndex);
+                    if (closureInfo != null) { //TODO: maybe add separate map for noninlinable closures
+                        closures.add(new ClosureUsage(varIndex, true));
+                        node.instructions.remove(cur);
+                    } else {
+                        closures.add(new ClosureUsage(varIndex, false));
+                    }
+                }
+            }
+            cur = next;
+        }
+    }
+
+    private void removeClosureAssertions(MethodNode node) {
+        AbstractInsnNode cur = node.instructions.getFirst();
+        while (cur != null && cur.getNext() != null) {
+            AbstractInsnNode next = cur.getNext();
+            if (next.getType() == AbstractInsnNode.METHOD_INSN) {
+                MethodInsnNode methodInsnNode = (MethodInsnNode) next;
+                if (methodInsnNode.name.equals("checkParameterIsNotNull") && methodInsnNode.owner.equals("jet/runtime/Intrinsics")) {
+                    AbstractInsnNode prev = cur.getPrevious();
+                    assert prev.getType() == AbstractInsnNode.VAR_INSN && prev.getOpcode() == Opcodes.ALOAD;
+                    int varIndex = ((VarInsnNode) prev).var;
+                    ClosureInfo closure = expressionMap.get(varIndex);
+                    if (closure != null) {
+                        node.instructions.remove(prev);
+                        node.instructions.remove(cur);
+                        cur = next.getNext();
+                        node.instructions.remove(next);
+                        next = cur;
+                    }
+                }
+            }
+            cur = next;
+        }
+    }
+
+    private void prepareInlinedMethod2(MethodNode node) throws AnalyzerException {
+
+        Analyzer<SourceValue> analyzer = new Analyzer<SourceValue>(new SourceInterpreter());
+        Frame<SourceValue>[] sources = analyzer.analyze("fake", node);
+
+        AbstractInsnNode cur = node.instructions.getFirst();
+        int index = 0;
+        while (cur != null) {
+            if (cur.getType() == AbstractInsnNode.METHOD_INSN) {
+                MethodInsnNode methodInsnNode = (MethodInsnNode) cur;
+                //TODO check closure
+                if (methodInsnNode.name.equals(INVOKE) /*&& methodInsnNode.owner.equals(INLINE_RUNTIME)*/) {
+                    Frame<SourceValue> frame = sources[index];
+                    SourceValue sourceValue = frame.getStack(frame.getStackSize() - Type.getArgumentTypes(methodInsnNode.desc).length - 1);
+                    assert sourceValue.insns.size() == 1;
+
+                    AbstractInsnNode insnNode = sourceValue.insns.iterator().next();
+                    assert insnNode.getType() == AbstractInsnNode.VAR_INSN && insnNode.getOpcode() == Opcodes.ALOAD;
+                    int varIndex = ((VarInsnNode) insnNode).var;
+                    ClosureInfo closureInfo = expressionMap.get(varIndex);
+                    if (closureInfo != null) { //TODO: maybe add separate map for noninlinable closures
+                        closures.add(new ClosureUsage(varIndex, true));
+                        node.instructions.remove(insnNode);
+                    } else {
+                        closures.add(new ClosureUsage(varIndex, false));
+                    }
+                }
+            }
+            cur = cur.getNext();
+            index++;
+        }
     }
 
     private void doInline(
@@ -244,7 +299,7 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         InliningAdapter inliner = new InliningAdapter(methodVisitor, Opcodes.ASM4, desc, end, frameSize, remapper) {
             @Override
             public void visitMethodInsn(int opcode, String owner, String name, String desc) {
-                if (inlineClosures && INLINE_RUNTIME.equals(owner) && INVOKE.equals(name)) { //TODO add method
+                if (inlineClosures && /*INLINE_RUNTIME.equals(owner) &&*/ INVOKE.equals(name)) { //TODO add method
                     assert !infos.isEmpty();
                     ClosureUsage closureUsage = infos.remove();
                     ClosureInfo info = expressionMap.get(closureUsage.index);
@@ -258,7 +313,7 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                     //TODO replace with codegen
                     int valueParamShift = getNextLocalIndex();
                     remapper.setNestedRemap(true);
-                    putStackValuesIntoLocals(info.getValuesParams(), valueParamShift, this, desc);
+                    putStackValuesIntoLocals(info.getParamsWithoutCapturedValOrVar(), valueParamShift, this, desc);
                     Label closureEnd = new Label();
                     InliningAdapter closureInliner = new InliningAdapter(mv, Opcodes.ASM4, desc, closureEnd, getNextLocalIndex(),
                                                               new VarRemapper.ClosureRemapper(info, valueParamShift));
@@ -384,7 +439,7 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
 
     private static void putStackValuesIntoLocals(List<Type> directOrder, int shift, InstructionAdapter mv, String descriptor) {
         Type [] actualParams = Type.getArgumentTypes(descriptor); //last param is closure itself
-        assert actualParams.length - 1 == directOrder.size() : "Number of expected and actual params should be equals!";
+        assert actualParams.length == directOrder.size() : "Number of expected and actual params should be equals!";
 
         int size = 0;
         for (Iterator<Type> iterator = directOrder.iterator(); iterator.hasNext(); ) {

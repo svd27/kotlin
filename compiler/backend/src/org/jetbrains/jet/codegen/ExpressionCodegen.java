@@ -2136,13 +2136,13 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         int mask = 0;
 
         ReceiverValue thisObject = resolvedCall.getThisObject();
-        boolean wrapClosureCall = getContext().isInlineFunction() &&
+        boolean wrapClosureCall = false;/*getContext().isInlineFunction() &&
                                   thisObject != null ? resolvedCall.getCandidateDescriptor().getName().asString()
                                                                                  .equals("invoke") &&
                                                        (thisObject.getType().getConstructor().getDeclarationDescriptor().getName().
                                                                asString().startsWith("Function") || thisObject.getType().getConstructor().getDeclarationDescriptor().getName().
                                                                asString().startsWith("ExtensionFunction"))
-                                                                       : false;
+                                                                       : false;*/
 
         if (wrapClosureCall) {
             mask = pushMethodArguments(resolvedCall, callableMethod.getValueParameterTypes(), inliner);

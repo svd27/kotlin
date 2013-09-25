@@ -114,16 +114,31 @@ public class ClosureInfo {
         this.capturedVarsOffset = capturedVarsOffset;
     }
 
-    public List<Type> getValuesParams() {
-        List<Type> result = new ArrayList<Type>();
-        List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
-        for (Iterator<ValueParameterDescriptor> iterator = parameters.iterator(); iterator.hasNext(); ) {
-            ValueParameterDescriptor valueParameterDescriptor = iterator.next();
-            //TODO ???: default returns simple int
-            Type type = typeMapper.mapType(valueParameterDescriptor.getType());
-            result.add(type);
-        }
-        return result;
+    //public List<Type> getValuesParams() {
+    //    List<Type> result = new ArrayList<Type>();
+    //    List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
+    //    for (Iterator<ValueParameterDescriptor> iterator = parameters.iterator(); iterator.hasNext(); ) {
+    //        ValueParameterDescriptor valueParameterDescriptor = iterator.next();
+    //        //TODO ???: default returns simple int
+    //        Type type = typeMapper.mapType(valueParameterDescriptor.getType());
+    //        result.add(type);
+    //    }
+    //    return result;
+    //}
+
+    public List<Type> getParamsWithoutCapturedValOrVar() {
+        Type[] types = typeMapper.mapSignature(functionDescriptor).getAsmMethod().getArgumentTypes();
+        return Arrays.asList(types);
+        //new ArrayList(Collections.)
+        //List<Type> result = new ArrayList<Type>();
+        //List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
+        //for (Iterator<ValueParameterDescriptor> iterator = parameters.iterator(); iterator.hasNext(); ) {
+        //    ValueParameterDescriptor valueParameterDescriptor = iterator.next();
+        //    //TODO ???: default returns simple int
+        //    Type type = typeMapper.mapType(valueParameterDescriptor.getType());
+        //    result.add(type);
+        //}
+        //return result;
     }
 
     public int getCapturedVarsSize() {
