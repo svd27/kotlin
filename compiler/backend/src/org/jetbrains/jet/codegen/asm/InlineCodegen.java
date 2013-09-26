@@ -31,11 +31,15 @@ import org.jetbrains.asm4.tree.MethodInsnNode;
 import org.jetbrains.asm4.tree.MethodNode;
 import org.jetbrains.asm4.tree.VarInsnNode;
 import org.jetbrains.asm4.tree.analysis.*;
+import org.jetbrains.asm4.util.Textifier;
+import org.jetbrains.asm4.util.TraceMethodVisitor;
 import org.jetbrains.jet.codegen.*;
 import org.jetbrains.jet.codegen.context.CodegenContext;
 import org.jetbrains.jet.codegen.context.EnclosedValueDescriptor;
 import org.jetbrains.jet.codegen.context.MethodContext;
 import org.jetbrains.jet.codegen.context.NamespaceContext;
+import org.jetbrains.jet.codegen.signature.JvmMethodParameterKind;
+import org.jetbrains.jet.codegen.signature.JvmMethodParameterSignature;
 import org.jetbrains.jet.codegen.signature.JvmMethodSignature;
 import org.jetbrains.jet.codegen.state.GenerationState;
 import org.jetbrains.jet.codegen.state.JetTypeMapper;
@@ -47,12 +51,12 @@ import org.jetbrains.jet.lang.psi.JetFunctionLiteralExpression;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.BindingContextUtils;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
+import org.jetbrains.jet.lang.resolve.java.AsmTypeConstants;
 import org.jetbrains.jet.lang.resolve.java.PackageClassUtils;
 import org.jetbrains.jet.lang.resolve.kotlin.VirtualFileFinder;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.*;
 
 import static org.jetbrains.jet.codegen.AsmUtil.getMethodAsmFlags;
@@ -92,6 +96,8 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
 
     private final int initialFrameSize;
 
+    private final JvmMethodSignature jvmSignature;
+
     @Nullable
     public static MethodNode getMethodNode(
             InputStream classData,
@@ -119,13 +125,14 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         this.notSeparateInline = notSeparateInline;
         this.state = state;
         this.disabled = disabled;
-        this.functionDescriptor = functionDescriptor;
+        this.functionDescriptor = functionDescriptor.getOriginal();
         typeMapper = codegen.getTypeMapper();
         bindingContext = codegen.getBindingContext();
         initialFrameSize = codegen.getFrameMap().getCurrentSize();
 
         context = (MethodContext) getContext(functionDescriptor, state);
-        originalFunctionFrame = new FrameMap();
+        originalFunctionFrame = context.prepareFrame(typeMapper);
+        jvmSignature = typeMapper.mapSignature(functionDescriptor, true, context.getContextKind());
     }
 
 
@@ -169,11 +176,19 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             }
         }
         catch (Exception e) {
+            StringWriter sw = null;
+            if (node != null) {
+                Textifier p = new Textifier();
+                node.accept(new TraceMethodVisitor(p));
+                sw = new StringWriter();
+                p.print(new PrintWriter(sw));
+                sw.flush();
+            }
             throw new RuntimeException("Coudn't inline method call '" +
                                        functionDescriptor.getName() +
                                        "' into \n" + BindingContextUtils.descriptorToDeclaration(bindingContext, codegen.getContext().getContextDescriptor()).getText() +
                                        "\ncause: " +
-                                       e.getMessage(), e);
+                                       sw.getBuffer().toString(), e);
         }
         inlineCall(node, true);
     }
@@ -421,6 +436,39 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             StackValue.local(index, type).store(type, codegen.getInstructionAdapter());
             tempTypes.add(type);
             originalFunctionFrame.enterTemp(type);
+        }
+    }
+
+    @Override
+    public void putHiddenParams() {
+        List<JvmMethodParameterSignature> types = jvmSignature.getKotlinParameterTypes();
+        List<Type> params = new LinkedList();
+        int index = 0; int size = 0;
+
+        if ((getMethodAsmFlags(functionDescriptor, context.getContextKind()) & Opcodes.ACC_STATIC) != Opcodes.ACC_STATIC) {
+            Type type = AsmTypeConstants.OBJECT_TYPE;
+            index = codegen.getFrameMap().enterTemp(type) + type.getSize();
+            tempTypes.add(type);
+            params.add(0, type);
+            size = type.getSize();
+        }
+
+        for (int i = 0; i < types.size(); i++) {
+            JvmMethodParameterSignature param = types.get(i);
+            if (param.getKind() == JvmMethodParameterKind.VALUE) {
+                break;
+            }
+            Type type = param.getAsmType();
+            index = codegen.getFrameMap().enterTemp(type) + type.getSize();
+            tempTypes.add(type);
+            params.add(0, type);
+            size += type.getSize();
+        }
+
+        for (int i = 0; i < params.size(); i++) {
+            Type type =  params.get(i);
+            index -= type.getSize();
+            StackValue.local(index, type).store(type, codegen.getInstructionAdapter());
         }
     }
 

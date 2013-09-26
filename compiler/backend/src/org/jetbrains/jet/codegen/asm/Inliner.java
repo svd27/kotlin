@@ -51,11 +51,18 @@ public interface Inliner {
         public void rememberClosure(JetFunctionLiteralExpression expression, Type type) {
             throw new UnsupportedOperationException();
         }
+
+        @Override
+        public void putHiddenParams() {
+
+        }
     };
 
     void inlineCall(CallableMethod callableMethod, ClassVisitor visitor);
 
     void putInLocal(Type type);
+
+    void putHiddenParams();
 
     void leaveTemps();
 

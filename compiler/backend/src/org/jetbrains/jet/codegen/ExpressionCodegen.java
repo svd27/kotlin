@@ -2021,7 +2021,7 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         if (callable instanceof CallableMethod) {
             CallableMethod callableMethod = (CallableMethod) callable;
             invokeMethodWithArguments(callableMethod, resolvedCall, call, receiver, null,
-                                      fd instanceof SimpleFunctionDescriptor && ((SimpleFunctionDescriptor) fd).isInline());
+                                      fd instanceof SimpleFunctionDescriptor && ((SimpleFunctionDescriptor) fd.getOriginal()).isInline());
 
             Type callReturnType = callableMethod.getReturnType();
             return returnValueAsStackValue(fd, callReturnType);
@@ -2133,28 +2133,12 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
                           ? Inliner.NOT_INLINE
                           : new InlineCodegen(this, isInline, state, disable, (SimpleFunctionDescriptor) callableMethod.getFunctionDescriptor());
 
-        int mask = 0;
-
-        ReceiverValue thisObject = resolvedCall.getThisObject();
-        boolean wrapClosureCall = false;/*getContext().isInlineFunction() &&
-                                  thisObject != null ? resolvedCall.getCandidateDescriptor().getName().asString()
-                                                                                 .equals("invoke") &&
-                                                       (thisObject.getType().getConstructor().getDeclarationDescriptor().getName().
-                                                               asString().startsWith("Function") || thisObject.getType().getConstructor().getDeclarationDescriptor().getName().
-                                                               asString().startsWith("ExtensionFunction"))
-                                                                       : false;*/
-
-        if (wrapClosureCall) {
-            mask = pushMethodArguments(resolvedCall, callableMethod.getValueParameterTypes(), inliner);
-        }
-
         Type calleeType = callableMethod.getGenerateCalleeType();
 
         if (calleeType != null) {
             assert !callableMethod.isNeedsThis();
             assert callToGenerateCallee != null : "Call can't be null when generating callee: " + resolvedCall.getResultingDescriptor();
             gen(callToGenerateCallee.getCalleeExpression(), calleeType);
-            inliner.putInLocal(calleeType);
         }
 
         if (resolvedCall instanceof VariableAsFunctionResolvedCall) {
@@ -2164,22 +2148,10 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         if (!(resolvedCall.getResultingDescriptor() instanceof ConstructorDescriptor)) { // otherwise already
             receiver = StackValue.receiver(resolvedCall, receiver, this, callableMethod);
             receiver.put(receiver.type, v);
-            inliner.putInLocal(receiver.type);
-            if (calleeType != null) {
-                StackValue.onStack(receiver.type).put(boxType(receiver.type), v);
-                inliner.putInLocal(boxType(receiver.type));
-            }
         }
+        inliner.putHiddenParams();
 
-        if (!wrapClosureCall) {
-            mask = pushMethodArguments(resolvedCall, callableMethod.getValueParameterTypes(), inliner);
-        }
-
-        if (wrapClosureCall) {
-            callableMethod = new CallableMethod(Type.getObjectType("jet/InlineRuntime"), null, null,
-                                                CodegenUtil.erasedInvokeSignature(callableMethod.getFunctionDescriptor(), typeMapper, true),
-                                                INVOKESTATIC, null, null, null);
-        }
+        int mask = pushMethodArguments(resolvedCall, callableMethod.getValueParameterTypes(), inliner);
 
         if (mask == 0) {
             if (isInline) {
