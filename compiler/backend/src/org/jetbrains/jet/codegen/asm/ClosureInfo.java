@@ -19,6 +19,7 @@ package org.jetbrains.jet.codegen.asm;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.asm4.Type;
 import org.jetbrains.asm4.tree.MethodNode;
+import org.jetbrains.jet.codegen.AsmUtil;
 import org.jetbrains.jet.codegen.binding.CalculatedClosure;
 import org.jetbrains.jet.codegen.context.EnclosedValueDescriptor;
 import org.jetbrains.jet.codegen.state.JetTypeMapper;
@@ -53,8 +54,6 @@ public class ClosureInfo {
     private final ClassDescriptor classDescriptor;
 
     private final Type closureClassType;
-
-    private int capturedVarsOffset;
 
     private int paramOffset;
 
@@ -99,21 +98,23 @@ public class ClosureInfo {
     public Collection<EnclosedValueDescriptor> getCapturedVars() {
         //lazy initialization cause it would be calculated after object creation
         if (capturedVars == null) {
+            capturedVars = new ArrayList<EnclosedValueDescriptor>();
+
+            if (closure.getCaptureThis() != null) {
+                EnclosedValueDescriptor descriptor = new EnclosedValueDescriptor(AsmUtil.CAPTURED_THIS_FIELD, null, null, typeMapper.mapType(closure.getCaptureThis()));
+                capturedVars.add(descriptor);
+            }
+
+            if (closure.getCaptureReceiver() != null) {
+                EnclosedValueDescriptor descriptor = new EnclosedValueDescriptor(AsmUtil.CAPTURED_RECEIVER_FIELD, null, null, typeMapper.mapType(closure.getCaptureReceiver()));
+                capturedVars.add(descriptor);
+            }
+
             if (closure != null) {
-                capturedVars = closure.getCaptureVariables().values();
-            } else {
-                capturedVars = Collections.emptyList();
+                capturedVars.addAll(closure.getCaptureVariables().values());
             }
         }
         return capturedVars;
-    }
-
-    public int getCapturedVarsOffset() {
-        return capturedVarsOffset;
-    }
-
-    public void setCapturedVarsOffset(int capturedVarsOffset) {
-        this.capturedVarsOffset = capturedVarsOffset;
     }
 
     public int getParamOffset() {
@@ -124,31 +125,9 @@ public class ClosureInfo {
         this.paramOffset = paramOffset;
     }
 
-    //public List<Type> getValuesParams() {
-    //    List<Type> result = new ArrayList<Type>();
-    //    List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
-    //    for (Iterator<ValueParameterDescriptor> iterator = parameters.iterator(); iterator.hasNext(); ) {
-    //        ValueParameterDescriptor valueParameterDescriptor = iterator.next();
-    //        //TODO ???: default returns simple int
-    //        Type type = typeMapper.mapType(valueParameterDescriptor.getType());
-    //        result.add(type);
-    //    }
-    //    return result;
-    //}
-
     public List<Type> getParamsWithoutCapturedValOrVar() {
         Type[] types = typeMapper.mapSignature(functionDescriptor).getAsmMethod().getArgumentTypes();
         return Arrays.asList(types);
-        //new ArrayList(Collections.)
-        //List<Type> result = new ArrayList<Type>();
-        //List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
-        //for (Iterator<ValueParameterDescriptor> iterator = parameters.iterator(); iterator.hasNext(); ) {
-        //    ValueParameterDescriptor valueParameterDescriptor = iterator.next();
-        //    //TODO ???: default returns simple int
-        //    Type type = typeMapper.mapType(valueParameterDescriptor.getType());
-        //    result.add(type);
-        //}
-        //return result;
     }
 
     public int getCapturedVarsSize() {

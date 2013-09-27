@@ -369,9 +369,10 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         JetFunctionLiteral declaration = info.getFunctionLiteral();
         FunctionDescriptor descriptor = info.getFunctionDescriptor();
 
-        FunctionCodegen functionCodegen = new FunctionCodegen(codegen.getContext(), null, codegen.getState(), codegen.getParentCodegen());
+        MethodContext parentContext = codegen.getContext();
 
-        MethodContext context = codegen.getContext().intoClosure(descriptor, codegen, typeMapper).intoFunction(descriptor);
+        FunctionCodegen functionCodegen = new FunctionCodegen(parentContext, null, codegen.getState(), codegen.getParentCodegen());
+        MethodContext context = parentContext.intoClosure(descriptor, codegen, typeMapper).intoFunction(descriptor);
 
         JvmMethodSignature jvmMethodSignature = typeMapper.mapSignature(descriptor);
         Method asmMethod = jvmMethodSignature.getAsmMethod();
@@ -571,9 +572,8 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             ClosureInfo next = iterator.next();
             if (next.closure != null) {
                 int size = tempTypes.size();
-                next.setCapturedVarsOffset(codegen.getFrameMap().getCurrentSize());
                 next.setParamOffset(size);
-                codegen.pushClosureOnStack(next.closure, true, this);
+                codegen.pushClosureOnStack(next.closure, false, this);
             }
         }
     }
