@@ -56,6 +56,8 @@ public class ClosureInfo {
 
     private int capturedVarsOffset;
 
+    private int paramOffset;
+
     ClosureInfo(@NotNull JetFunctionLiteralExpression expression, @NotNull JetTypeMapper typeMapper) {
         this.expression = expression;
         this.typeMapper = typeMapper;
@@ -112,6 +114,14 @@ public class ClosureInfo {
 
     public void setCapturedVarsOffset(int capturedVarsOffset) {
         this.capturedVarsOffset = capturedVarsOffset;
+    }
+
+    public int getParamOffset() {
+        return paramOffset;
+    }
+
+    public void setParamOffset(int paramOffset) {
+        this.paramOffset = paramOffset;
     }
 
     //public List<Type> getValuesParams() {

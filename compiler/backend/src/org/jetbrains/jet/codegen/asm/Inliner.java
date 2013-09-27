@@ -19,6 +19,8 @@ package org.jetbrains.jet.codegen.asm;
 import org.jetbrains.asm4.ClassVisitor;
 import org.jetbrains.asm4.Type;
 import org.jetbrains.jet.codegen.CallableMethod;
+import org.jetbrains.jet.codegen.StackValue;
+import org.jetbrains.jet.codegen.context.MethodContext;
 import org.jetbrains.jet.lang.psi.JetExpression;
 import org.jetbrains.jet.lang.psi.JetFunctionLiteralExpression;
 
@@ -33,7 +35,7 @@ public interface Inliner {
         }
 
         @Override
-        public void putInLocal(Type type) {
+        public void putInLocal(Type type, StackValue stackValue) {
 
         }
 
@@ -56,11 +58,20 @@ public interface Inliner {
         public void putHiddenParams() {
 
         }
+
+        @Override
+        public boolean shouldPutValue(
+                Type type, StackValue stackValue, MethodContext context
+        ) {
+            return true;
+        }
     };
 
     void inlineCall(CallableMethod callableMethod, ClassVisitor visitor);
 
-    void putInLocal(Type type);
+    void putInLocal(Type type, StackValue stackValue);
+
+    boolean shouldPutValue(Type type, StackValue stackValue, MethodContext context);
 
     void putHiddenParams();
 

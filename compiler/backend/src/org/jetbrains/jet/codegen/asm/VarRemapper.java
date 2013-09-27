@@ -18,6 +18,7 @@ package org.jetbrains.jet.codegen.asm;
 
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 public abstract class VarRemapper {
 
@@ -38,18 +39,20 @@ public abstract class VarRemapper {
     public static class ClosureRemapper extends ShiftRemapper {
 
         private final ClosureInfo info;
+        private final List<InlineCodegen.ParameterInfo> originalParams;
         private final int capturedSize;
 
-        public ClosureRemapper(ClosureInfo info, int valueParametersShift) {
+        public ClosureRemapper(ClosureInfo info, int valueParametersShift, List<InlineCodegen.ParameterInfo> originalParams) {
             super(valueParametersShift);
             this.info = info;
+            this.originalParams = originalParams;
             capturedSize = info.getCapturedVarsSize();
         }
 
         @Override
         public int doRemap(int index) {
             if (index < capturedSize) {
-                return index + info.getCapturedVarsOffset();
+                return originalParams.get(info.getParamOffset() + index).getInlinedIndex();
             }
             return super.doRemap(index - capturedSize);
         }
@@ -90,6 +93,43 @@ public abstract class VarRemapper {
             return delta;
         }
     }
+
+    public static class ParamRemapper extends VarRemapper {
+
+        private final int paramShift;
+        private final int paramSize;
+        private final int additionalParamsSize;
+        private final List<InlineCodegen.ParameterInfo> params;
+        private final int actualParams;
+
+        public ParamRemapper(int paramShift, int paramSize, int additionalParamsSize, List<InlineCodegen.ParameterInfo> params) {
+            this.paramShift = paramShift;
+            this.paramSize = paramSize;
+            this.additionalParamsSize = additionalParamsSize;
+            this.params = params;
+
+            int paramCount = 0;
+            for (int i = 0; i < params.size(); i++) {
+                InlineCodegen.ParameterInfo info = params.get(i);
+                if (!info.isSkippedOrRemapped()) {
+                    paramCount += info.getType().getSize();
+                }
+            }
+            actualParams = paramCount;
+        }
+
+        @Override
+        public int doRemap(int index) {
+            if (index < paramSize) {
+                InlineCodegen.ParameterInfo info = params.get(index);
+                assert !info.isSkipped;
+                return info.getInlinedIndex();
+            } else {
+                return paramShift + actualParams + index; //captured params not used directly in this inlined method, they used in closure
+            }
+        }
+    }
+
 
 
     protected boolean nestedRemmapper;
