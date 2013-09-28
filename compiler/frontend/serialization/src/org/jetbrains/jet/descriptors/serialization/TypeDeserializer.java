@@ -32,6 +32,9 @@ import org.jetbrains.jet.lang.types.checker.JetTypeChecker;
 import org.jetbrains.jet.storage.MemoizedFunctionToNullable;
 import org.jetbrains.jet.storage.NotNullLazyValue;
 import org.jetbrains.jet.storage.StorageManager;
+import org.jetbrains.jet.storage.MemoizedFunctionToNullable;
+import org.jetbrains.jet.storage.NotNullLazyValue;
+import org.jetbrains.jet.storage.StorageManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -273,20 +276,12 @@ public class TypeDeserializer {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (!(o instanceof JetType)) return false;
-
-            JetType type = (JetType) o;
-
-            return isNullable() == type.isNullable() && JetTypeChecker.INSTANCE.equalTypes(this, type);
+            return TypeUtils.equals(this, o);
         }
 
         @Override
         public int hashCode() {
-            int result = getConstructor().hashCode();
-            result = 31 * result + getArguments().hashCode();
-            result = 31 * result + (isNullable() ? 1 : 0);
-            return result;
+            return TypeUtils.hashCode(this);
         }
     }
 }

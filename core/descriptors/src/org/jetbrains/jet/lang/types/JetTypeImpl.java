@@ -21,7 +21,6 @@ import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotatedImpl;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
-import org.jetbrains.jet.lang.types.checker.JetTypeChecker;
 
 import java.util.Collections;
 import java.util.List;
@@ -94,19 +93,11 @@ public final class JetTypeImpl extends AnnotatedImpl implements JetType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof JetType)) return false;
-
-        JetType type = (JetType) o;
-
-        return nullable == type.isNullable() && JetTypeChecker.INSTANCE.equalTypes(this, type);
+        return TypeUtils.equals(this, o);
     }
 
     @Override
     public int hashCode() {
-        int result = constructor.hashCode();
-        result = 31 * result + arguments.hashCode();
-        result = 31 * result + (nullable ? 1 : 0);
-        return result;
+        return TypeUtils.hashCode(this);
     }
 }

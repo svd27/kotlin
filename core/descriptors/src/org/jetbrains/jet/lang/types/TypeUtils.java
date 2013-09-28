@@ -221,6 +221,22 @@ public class TypeUtils {
                 new ChainedScope(null, scopes)); // TODO : check intersectibility, don't use a chanied scope
     }
 
+    public static boolean equals(@NotNull JetType _this, @Nullable Object other) {
+        if (_this == other) return true;
+        if (!(other instanceof JetType)) return false;
+
+        JetType type = (JetType) other;
+
+        return _this.isNullable() == type.isNullable() && JetTypeChecker.INSTANCE.equalTypes(_this, type);
+    }
+
+    public static int hashCode(@NotNull JetType type) {
+        int result = type.getConstructor().hashCode();
+        result = 31 * result + type.getArguments().hashCode();
+        result = 31 * result + (type.isNullable() ? 1 : 0);
+        return result;
+    }
+
     @NotNull
     public static String toString(@NotNull JetType type) {
         List<TypeProjection> arguments = type.getArguments();
