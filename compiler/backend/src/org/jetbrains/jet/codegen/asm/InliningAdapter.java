@@ -46,6 +46,11 @@ public class InliningAdapter extends InstructionAdapter {
     }
 
     @Override
+    public void visitIincInsn(int var, int increment) {
+        super.visitIincInsn(remapper.remap(var), increment);
+    }
+
+    @Override
     public void visitVarInsn(int opcode, int var) {
         int newVar = remapper.remap(var);
         super.visitVarInsn(opcode, newVar);
@@ -55,15 +60,7 @@ public class InliningAdapter extends InstructionAdapter {
         }
     }
 
-    /*public void visitTryCatchBlock(Label start, Label end, Label handler, String type
-    ) {
-        blocks.add(new CatchBlock(start, end, handler, type));
-    }*/
 
-    @Override
-    public void visitEnd() {
-        super.visitEnd();
-    }
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -79,17 +76,4 @@ public class InliningAdapter extends InstructionAdapter {
         return nextLocalIndex;
     }
 
-    private class CatchBlock {
-        public Label start;
-        public Label end;
-        public Label handler;
-        public String type;
-
-        public CatchBlock(Label start, Label end, Label handler, String type) {
-            this.start = start;
-            this.end = end;
-            this.handler = handler;
-            this.type = type;
-        }
-    }
 }

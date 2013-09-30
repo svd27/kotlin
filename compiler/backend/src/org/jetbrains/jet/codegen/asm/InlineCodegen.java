@@ -26,10 +26,7 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.asm4.*;
 import org.jetbrains.asm4.commons.InstructionAdapter;
 import org.jetbrains.asm4.commons.Method;
-import org.jetbrains.asm4.tree.AbstractInsnNode;
-import org.jetbrains.asm4.tree.MethodInsnNode;
-import org.jetbrains.asm4.tree.MethodNode;
-import org.jetbrains.asm4.tree.VarInsnNode;
+import org.jetbrains.asm4.tree.*;
 import org.jetbrains.asm4.tree.analysis.*;
 import org.jetbrains.asm4.util.Textifier;
 import org.jetbrains.asm4.util.TraceMethodVisitor;
@@ -167,7 +164,7 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                                                    new FunctionGenerationStrategy.FunctionDefault(state,
                                                                                                   functionDescriptor,
                                                                                                   (JetDeclarationWithBody) element));
-                node.visitMaxs(10, 10);
+                node.visitMaxs(20, 20);
                 node.visitEnd();
             }
             else {
@@ -200,7 +197,7 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                 prepareInlinedMethod2(node);
             }
             catch (AnalyzerException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException(e.getMessage() + "\n " + printNode(node), e);
             }
             //prepareInlinedMethod(node);
         }
@@ -347,8 +344,6 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             }
         };
 
-
-
         methodNode.instructions.accept(inliner);
 
         methodVisitor.visitLabel(end);
@@ -396,44 +391,69 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             private boolean remappingCaptured = false;
             @Override
             public void visitVarInsn(int opcode, int var) {
-                if (!remappingCaptured && var == 0) {
-                    return; //skip this - there is no object
-                }
                 super.visitVarInsn(opcode, var + (remappingCaptured ?  0 : localVarSHift - 1/*remove this*/));
             }
+        };
+        node.accept(transformedNode);
 
-            @Override
-            public void visitFieldInsn(int opcode, String owner, String name, String desc) {
-                if (info.getClosureClassType().getInternalName().equals(owner)) {
-                    assert opcode == Opcodes.GETFIELD || opcode == Opcodes.PUTFIELD;
+
+        //remove all field access to local var
+        AbstractInsnNode cur = transformedNode.instructions.getFirst();
+        while (cur != null) {
+            if (cur.getType() == AbstractInsnNode.FIELD_INSN) {
+                FieldInsnNode fieldInsnNode = (FieldInsnNode) cur;
+                //TODO check closure
+                String owner = fieldInsnNode.owner;
+                if (info.getClosureClassType().getInternalName().equals(fieldInsnNode.owner)) {
+                    int opcode = fieldInsnNode.getOpcode();
+                    String name = fieldInsnNode.name;
+                    String desc = fieldInsnNode.desc;
 
                     Collection<EnclosedValueDescriptor> vars = info.getCapturedVars();
-                    int index = 0;
+                    int index = 0;//skip this
+                    boolean found = false;
                     for (Iterator<EnclosedValueDescriptor> iterator = vars.iterator(); iterator.hasNext(); ) {
                         EnclosedValueDescriptor valueDescriptor = iterator.next();
                         Type type = valueDescriptor.getType();
                         if (valueDescriptor.getFieldName().equals(name)) {
-                            remappingCaptured = true;
-                            visitVarInsn(opcode == Opcodes.GETFIELD ?  type.getOpcode(Opcodes.ILOAD) : type.getOpcode(Opcodes.ISTORE), index);
-                            remappingCaptured = false;
-                            return;
+                            opcode = opcode == Opcodes.GETFIELD ?  type.getOpcode(Opcodes.ILOAD) : type.getOpcode(Opcodes.ISTORE);
+                            found = true;
+                            break;
                         }
                         index += type.getSize();
                     }
-                    throw new UnsupportedOperationException("Coudn't find field " +
-                                                            owner +
-                                                            "." +
-                                                            name +
-                                                            " (" +
-                                                            desc +
-                                                            ") in captured vars of " +
-                                                            info.getFunctionLiteral().getText());
-                }
+                    if (!found) {
+                        throw new UnsupportedOperationException("Coudn't find field " +
+                                                                owner +
+                                                                "." +
+                                                                name +
+                                                                " (" +
+                                                                desc +
+                                                                ") in captured vars of " +
+                                                                info.getFunctionLiteral().getText());
+                    }
 
-                super.visitFieldInsn(opcode, owner, name, desc);
+
+                    VarInsnNode varInsNode = new VarInsnNode(opcode, index);
+
+                    AbstractInsnNode prev = cur.getPrevious();
+                    while (prev.getType() == AbstractInsnNode.LABEL || prev.getType() == AbstractInsnNode.LINE) {
+                        prev = prev.getPrevious();
+                    }
+
+                    assert prev.getType() == AbstractInsnNode.VAR_INSN;
+                    VarInsnNode loadThis = (VarInsnNode) prev;
+                    assert /*loadThis.var == info.getCapturedVarsSize() - 1 && */loadThis.getOpcode() == Opcodes.ALOAD;
+
+                    transformedNode.instructions.remove(prev);
+                    transformedNode.instructions.insertBefore(cur, varInsNode);
+                    transformedNode.instructions.remove(cur);
+                    cur = varInsNode;
+
+                }
             }
-        };
-        node.accept(transformedNode);
+            cur = cur.getNext();
+        }
 
         return transformedNode;
     }
@@ -721,5 +741,14 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         public Type getType() {
             return type;
         }
+    }
+
+    private String printNode(MethodNode node) {
+        Textifier p = new Textifier();
+        node.accept(new TraceMethodVisitor(p));
+        StringWriter sw = new StringWriter();
+        p.print(new PrintWriter(sw));
+        sw.flush();
+        return node.name + ": \n " + sw.getBuffer().toString();
     }
 }
