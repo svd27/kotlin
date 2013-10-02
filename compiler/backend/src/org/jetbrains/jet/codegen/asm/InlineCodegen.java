@@ -141,34 +141,38 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         boolean isSources = !file.getExtension().equalsIgnoreCase("class");
 
         MethodNode node = null;
-        if (isSources) {
-            JvmMethodSignature jvmSignature = typeMapper.mapSignature(functionDescriptor, true, context.getContextKind());
-            Method asmMethod = jvmSignature.getAsmMethod();
-            node = new MethodNode(Opcodes.ASM4,
-                                           getMethodAsmFlags(functionDescriptor, context.getContextKind()),
-                                           asmMethod.getName(),
-                                           asmMethod.getDescriptor(),
-                                           jvmSignature.getGenericsSignature(),
-                                           null);
 
-            FunctionCodegen functionCodegen = new FunctionCodegen(context, null, state, getParentCodegen());
-            functionCodegen.generateMethodBody(node, functionDescriptor, context.getParentContext().intoFunction(functionDescriptor),
-                                               jvmSignature,
-                                               new FunctionGenerationStrategy.FunctionDefault(state,
-                                                                                              functionDescriptor,
-                                                                                              (JetDeclarationWithBody) element));
+        try {
+            if (isSources) {
+                JvmMethodSignature jvmSignature = typeMapper.mapSignature(functionDescriptor, true, context.getContextKind());
+                Method asmMethod = jvmSignature.getAsmMethod();
+                node = new MethodNode(Opcodes.ASM4,
+                                               getMethodAsmFlags(functionDescriptor, context.getContextKind()),
+                                               asmMethod.getName(),
+                                               asmMethod.getDescriptor(),
+                                               jvmSignature.getGenericsSignature(),
+                                               null);
+
+                FunctionCodegen functionCodegen = new FunctionCodegen(context, null, state, getParentCodegen());
+                functionCodegen.generateMethodBody(node, functionDescriptor, context.getParentContext().intoFunction(functionDescriptor),
+                                                   jvmSignature,
+                                                   new FunctionGenerationStrategy.FunctionDefault(state,
+                                                                                                  functionDescriptor,
+                                                                                                  (JetDeclarationWithBody) element));
+            }
+            else {
+
+                    node = getMethodNode(file.getInputStream(), functionDescriptor.getName().asString(),
+                                         callableMethod.getSignature().getAsmMethod().getDescriptor());
+
+            }
         }
-        else {
-            try {
-                node = getMethodNode(file.getInputStream(), functionDescriptor.getName().asString(),
-                                     callableMethod.getSignature().getAsmMethod().getDescriptor());
-            }
-            catch (ClassNotFoundException e) {
-                throw new RuntimeException("Coudn't inline method: " + e.getMessage(), e);
-            }
-            catch (IOException e) {
-                throw new RuntimeException("Coudn't inline method: " + e.getMessage(), e);
-            }
+        catch (Exception e) {
+            throw new RuntimeException("Coudn't inline method call " +
+                                       functionDescriptor.getName() +
+                                       " in " + codegen.getContext().getCallableDescriptorWithReceiver().getName() +
+                                       " cause: " +
+                                       e.getMessage(), e);
         }
         inlineCall(node, true);
     }
@@ -185,9 +189,13 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                         //cur is closure aload
                         assert cur.getType() == AbstractInsnNode.VAR_INSN && cur.getOpcode() == Opcodes.ALOAD;
                         int varIndex = ((VarInsnNode) cur).var;
-                        JetFunctionLiteralExpression expression = expressionMap.get(varIndex).expression;
-                        closures.add(new ClosureUsage(expression, varIndex));
-                        node.instructions.remove(cur);
+                        ClosureInfo closureInfo = expressionMap.get(varIndex);
+                        if (closureInfo != null) { //TODO: maybe add separate map for noninlinable closures
+                            closures.add(new ClosureUsage(varIndex, true));
+                            node.instructions.remove(cur);
+                        } else {
+                            closures.add(new ClosureUsage(varIndex, false));
+                        }
                     }
                     if (methodInsnNode.name.equals("checkParameterIsNotNull") && methodInsnNode.owner.equals("jet/runtime/Intrinsics")) {
                         AbstractInsnNode prev = cur.getPrevious();
@@ -240,6 +248,12 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                     assert !infos.isEmpty();
                     ClosureUsage closureUsage = infos.remove();
                     ClosureInfo info = expressionMap.get(closureUsage.index);
+
+                    if (!closureUsage.isInlinable()) {
+                        //noninlinable closure
+                        super.visitMethodInsn(opcode, owner, name, desc);
+                        return;
+                    }
 
                     //TODO replace with codegen
                     int valueParamShift = getNextLocalIndex();
@@ -423,15 +437,18 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
 
     private static class ClosureUsage {
 
-        private JetFunctionLiteralExpression expression;
+        private final int index;
 
-        private int index;
+        private final boolean inlinable;
 
-        private ClosureUsage(JetFunctionLiteralExpression expression, int index) {
-            this.expression = expression;
+        private ClosureUsage(int index, boolean isInlinable) {
             this.index = index;
+            inlinable = isInlinable;
         }
 
+        public boolean isInlinable() {
+            return inlinable;
+        }
     }
 
     @Nullable
