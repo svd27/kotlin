@@ -376,7 +376,7 @@ public class DescriptorResolver {
                 returnType,
                 Modality.FINAL,
                 property.getVisibility(),
-                true
+                false
         );
 
         trace.record(BindingContext.DATA_CLASS_COMPONENT_FUNCTION, parameter, functionDescriptor);
@@ -424,7 +424,7 @@ public class DescriptorResolver {
                 returnType,
                 Modality.FINAL,
                 classDescriptor.getVisibility(),
-                true
+                false
         );
 
         trace.record(BindingContext.DATA_CLASS_COPY_FUNCTION, classDescriptor, functionDescriptor);
