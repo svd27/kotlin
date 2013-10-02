@@ -143,6 +143,8 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
             file = element.getContainingFile().getVirtualFile();
         }
 
+        assert file != null : "Coudn't find declaration for " + functionDescriptor.getName();
+
         boolean isSources = !file.getExtension().equalsIgnoreCase("class");
 
         MethodNode node = null;
@@ -171,6 +173,8 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                 node = getMethodNode(file.getInputStream(), functionDescriptor.getName().asString(),
                                      callableMethod.getSignature().getAsmMethod().getDescriptor());
             }
+
+            inlineCall(node, true);
         }
         catch (Exception e) {
             StringWriter sw = null;
@@ -187,7 +191,6 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
                                        "\ncause: " +
                                        sw.getBuffer().toString(), e);
         }
-        inlineCall(node, true);
     }
 
     private void inlineCall(MethodNode node, boolean inlineClosures) {
@@ -349,9 +352,6 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         methodVisitor.visitLabel(end);
     }
 
-    private Collection<Integer> getClosureIndexes() {
-        return expressionMap.keySet();
-    }
 
     private void generateClosuresBodies() {
         for (Iterator<ClosureInfo> iterator = expressionMap.values().iterator(); iterator.hasNext(); ) {
