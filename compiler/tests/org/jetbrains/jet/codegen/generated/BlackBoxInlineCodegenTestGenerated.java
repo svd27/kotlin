@@ -36,9 +36,19 @@ public class BlackBoxInlineCodegenTestGenerated extends AbstractBlackBoxCodegenT
         JetTestUtils.assertAllTestsPresentByMetadata(this.getClass(), "org.jetbrains.jet.generators.tests.GenerateTests", new File("compiler/testData/codegen/boxInline"), Pattern.compile("^(.+)$"), false);
     }
     
+    @TestMetadata("captureThisAndReceiver")
+    public void testCaptureThisAndReceiver() throws Exception {
+        doTestMultiFile("compiler/testData/codegen/boxInline/captureThisAndReceiver");
+    }
+    
     @TestMetadata("closureChain")
     public void testClosureChain() throws Exception {
         doTestMultiFile("compiler/testData/codegen/boxInline/closureChain");
+    }
+    
+    @TestMetadata("cycles")
+    public void testCycles() throws Exception {
+        doTestMultiFile("compiler/testData/codegen/boxInline/cycles");
     }
     
     @TestMetadata("differentObjects")
@@ -89,6 +99,11 @@ public class BlackBoxInlineCodegenTestGenerated extends AbstractBlackBoxCodegenT
     @TestMetadata("simpleObject")
     public void testSimpleObject() throws Exception {
         doTestMultiFile("compiler/testData/codegen/boxInline/simpleObject");
+    }
+    
+    @TestMetadata("tryCatchFinally")
+    public void testTryCatchFinally() throws Exception {
+        doTestMultiFile("compiler/testData/codegen/boxInline/tryCatchFinally");
     }
     
 }

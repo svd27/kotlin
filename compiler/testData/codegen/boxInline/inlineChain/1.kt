@@ -11,7 +11,7 @@ inline fun My.someWork(job: (String) -> Any): Unit {
     }
 }
 
-fun My.doWork (closure : (param : String) -> Unit) : Unit {
+inline fun My.doWork (closure : (param : String) -> Unit) : Unit {
     this.someWork(closure)
 }
 

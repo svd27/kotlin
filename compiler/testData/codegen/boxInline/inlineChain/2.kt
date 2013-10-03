@@ -1,7 +1,7 @@
 fun test1(): String {
     val inlineX = My()
     var d = "";
-    inlineX.someWork({(z: String) -> d = z; z})
+    inlineX.doWork({(z: String) -> d = z; z})
     return d
 }
 
@@ -12,7 +12,7 @@ fun test2(): Int {
 
 fun box(): String {
     if (test1() != "OK") return "test1: ${test1()}"
-    //if (test2() != 11) return "test1: ${test2()}"
+    if (test2() != 11) return "test1: ${test2()}"
 
     return "OK"
 }
