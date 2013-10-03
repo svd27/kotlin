@@ -60,7 +60,26 @@ public class InliningAdapter extends InstructionAdapter {
         }
     }
 
+    public int getNextLocalIndex() {
+        return nextLocalIndex;
+    }
 
+    @Override
+    public void visitLocalVariable(
+            String name, String desc, String signature, Label start, Label end, int index
+    ) {
+        //super.visitLocalVariable(name, desc, signature, start, end, index);
+    }
+
+    @Override
+    public AnnotationVisitor visitAnnotationDefault() {
+        return null;
+    }
+
+    @Override
+    public void visitMaxs(int maxStack, int maxLocals) {
+
+    }
 
     @Override
     public AnnotationVisitor visitAnnotation(String desc, boolean visible) {
@@ -70,10 +89,6 @@ public class InliningAdapter extends InstructionAdapter {
     @Override
     public AnnotationVisitor visitParameterAnnotation(int parameter, String desc, boolean visible) {
         return null;
-    }
-
-    public int getNextLocalIndex() {
-        return nextLocalIndex;
     }
 
 }
