@@ -242,8 +242,7 @@ public class DescriptorDeserializer {
                 local.typeDeserializer.type(proto.getReturnType()),
                 modality(Flags.MODALITY.get(flags)),
                 visibility(Flags.VISIBILITY.get(flags)),
-                Flags.INLINE.get(flags)
-
+                false
         );
         return function;
     }
