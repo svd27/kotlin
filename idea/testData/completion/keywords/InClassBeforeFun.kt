@@ -30,7 +30,7 @@ public class Test {
 // ABSENT: if
 // ABSENT: import
 // ABSENT: in
-// EXIST:  inline
+// ABSENT: inline
 // EXIST:  internal
 // ABSENT: is
 // ABSENT: null

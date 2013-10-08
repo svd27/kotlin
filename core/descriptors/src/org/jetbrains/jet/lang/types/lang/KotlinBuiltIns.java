@@ -28,6 +28,8 @@ import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.NamespaceDescriptorImpl;
 import org.jetbrains.jet.lang.descriptors.impl.ValueParameterDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
+import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstant;
+import org.jetbrains.jet.lang.resolve.constants.EnumValue;
 import org.jetbrains.jet.storage.LockBasedStorageManager;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
@@ -371,6 +373,11 @@ public class KotlinBuiltIns {
     @NotNull
     public ClassDescriptor getDataClassAnnotation() {
         return getBuiltInClassByName("data");
+    }
+
+    @NotNull
+    public ClassDescriptor getInlineClassAnnotation() {
+        return getBuiltInClassByName("inline");
     }
 
     @NotNull
@@ -929,6 +936,30 @@ public class KotlinBuiltIns {
         return containsAnnotation(classDescriptor, getDataClassAnnotation());
     }
 
+    public InlineStrategy getInlineType(@NotNull FunctionDescriptor functionDescriptor) {
+        return getInlineType(functionDescriptor.getOriginal().getAnnotations());
+    }
+
+    public InlineStrategy getInlineType(@Nullable List<AnnotationDescriptor> annotations) {
+        ClassDescriptor annotationClass = getInlineClassAnnotation();
+        AnnotationDescriptor annotation = getAnnotation(annotations, annotationClass);
+        if (annotation != null) {
+            ValueParameterDescriptor parameterDescriptor = annotationClass.getConstructors().iterator().next().getValueParameters().iterator().next();
+            CompileTimeConstant<?> argument = annotation.getValueArgument(parameterDescriptor);
+            if (argument == null) {
+                //default parameter
+                return InlineStrategy.AS_FUNCTION;
+            } else {
+                assert argument instanceof EnumValue : "Inline annotation parameter should be inline entry but was: " + argument + "!";
+                PropertyDescriptor value = ((EnumValue)argument).getValue();
+                String name = value.getName().asString();
+                return name.equals(InlineStrategy.IN_PLACE.name()) ? InlineStrategy.IN_PLACE : InlineStrategy.AS_FUNCTION;
+            }
+        } else {
+            return InlineStrategy.NOT_INLINE;
+        }
+    }
+
     public boolean isDeprecated(@NotNull DeclarationDescriptor declarationDescriptor) {
         return containsAnnotation(declarationDescriptor, getDeprecatedAnnotation());
     }
@@ -943,6 +974,17 @@ public class KotlinBuiltIns {
             }
         }
         return false;
+    }
+
+    private static AnnotationDescriptor getAnnotation(List<AnnotationDescriptor> annotations, ClassDescriptor annotationClass) {
+        if (annotations != null) {
+            for (AnnotationDescriptor annotation : annotations) {
+                if (annotationClass.equals(annotation.getType().getConstructor().getDeclarationDescriptor())) {
+                    return annotation;
+                }
+            }
+        }
+        return null;
     }
 
     public boolean isVolatile(@NotNull PropertyDescriptor descriptor) {
