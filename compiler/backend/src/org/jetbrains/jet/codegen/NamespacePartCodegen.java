@@ -31,6 +31,7 @@ import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.java.JvmAbi;
 import org.jetbrains.jet.lang.resolve.java.JvmAnnotationNames;
 import org.jetbrains.jet.lang.resolve.name.Name;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 
 import java.util.Collections;
 import java.util.List;
@@ -96,7 +97,6 @@ public class NamespacePartCodegen extends MemberCodegen {
         av.visitEnd();
     }
 
-
     private void generateStaticInitializers() {
         List<JetProperty> properties = collectPropertiesToInitialize();
         if (properties.isEmpty()) return;
@@ -112,7 +112,7 @@ public class NamespacePartCodegen extends MemberCodegen {
                                                      Name.special("<clinit>"),
                                                      CallableMemberDescriptor.Kind.SYNTHESIZED);
             clInit.initialize(null, null, Collections.<TypeParameterDescriptor>emptyList(),
-                              Collections.<ValueParameterDescriptor>emptyList(), null, null, Visibilities.PRIVATE, false);
+                              Collections.<ValueParameterDescriptor>emptyList(), null, null, Visibilities.PRIVATE, InlineStrategy.NOT_INLINE);
 
             ExpressionCodegen codegen = new ExpressionCodegen(mv, frameMap, Type.VOID_TYPE, this.context.intoFunction(clInit), state, this);
 

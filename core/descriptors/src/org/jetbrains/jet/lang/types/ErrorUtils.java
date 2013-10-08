@@ -31,6 +31,7 @@ import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.error.ErrorClassDescriptor;
 import org.jetbrains.jet.lang.types.error.ErrorSimpleFunctionDescriptorImpl;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
 import java.util.Collection;
@@ -300,7 +301,7 @@ public class ErrorUtils {
                 createErrorType("<ERROR FUNCTION RETURN TYPE>"),
                 Modality.OPEN,
                 Visibilities.INTERNAL,
-                /*isInline = */ false
+                /*isInline = */ InlineStrategy.NOT_INLINE
         );
         return function;
     }

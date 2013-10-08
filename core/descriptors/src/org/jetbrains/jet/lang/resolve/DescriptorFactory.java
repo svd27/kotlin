@@ -26,6 +26,7 @@ import org.jetbrains.jet.lang.resolve.scopes.receivers.ClassReceiver;
 import org.jetbrains.jet.lang.resolve.scopes.receivers.ExtensionReceiver;
 import org.jetbrains.jet.lang.resolve.scopes.receivers.ReceiverValue;
 import org.jetbrains.jet.lang.types.JetType;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
 import java.util.Collections;
@@ -89,7 +90,7 @@ public class DescriptorFactory {
         return values.initialize(null, classObject.getThisAsReceiverParameter(), Collections.<TypeParameterDescriptor>emptyList(),
                                  Collections.<ValueParameterDescriptor>emptyList(),
                                  returnType, Modality.FINAL,
-                                 Visibilities.PUBLIC, false);
+                                 Visibilities.PUBLIC, InlineStrategy.NOT_INLINE);
     }
 
     @NotNull
@@ -112,7 +113,7 @@ public class DescriptorFactory {
                                  Collections.<TypeParameterDescriptor>emptyList(),
                                  Collections.singletonList(parameterDescriptor),
                                  returnType, Modality.FINAL,
-                                 Visibilities.PUBLIC, false);
+                                 Visibilities.PUBLIC, InlineStrategy.NOT_INLINE);
     }
 
     @Nullable

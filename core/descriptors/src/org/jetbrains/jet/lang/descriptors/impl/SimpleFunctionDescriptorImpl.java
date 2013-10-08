@@ -23,12 +23,13 @@ import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.TypeSubstitutor;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 
 import java.util.List;
 
 public class SimpleFunctionDescriptorImpl extends FunctionDescriptorImpl implements SimpleFunctionDescriptor {
 
-    private boolean isInline = false;
+    private InlineStrategy inlineStrategy;
 
     public SimpleFunctionDescriptorImpl(
             @NotNull DeclarationDescriptor containingDeclaration,
@@ -56,9 +57,11 @@ public class SimpleFunctionDescriptorImpl extends FunctionDescriptorImpl impleme
             @Nullable JetType unsubstitutedReturnType,
             @Nullable Modality modality,
             @NotNull Visibility visibility,
-            boolean isInline) {
-        super.initialize(receiverParameterType, expectedThisObject, typeParameters, unsubstitutedValueParameters, unsubstitutedReturnType, modality, visibility);
-        this.isInline = isInline;
+            @NotNull InlineStrategy inlineStrategy
+    ) {
+        super.initialize(receiverParameterType, expectedThisObject, typeParameters, unsubstitutedValueParameters, unsubstitutedReturnType,
+                         modality, visibility);
+        this.inlineStrategy = inlineStrategy;
         return this;
     }
 
@@ -93,12 +96,16 @@ public class SimpleFunctionDescriptorImpl extends FunctionDescriptorImpl impleme
     @Override
     public SimpleFunctionDescriptor copy(DeclarationDescriptor newOwner, Modality modality, Visibility visibility, Kind kind, boolean copyOverrides) {
         SimpleFunctionDescriptorImpl copy = (SimpleFunctionDescriptorImpl)doSubstitute(TypeSubstitutor.EMPTY, newOwner, modality, visibility, false, copyOverrides, kind);
-        copy.isInline = isInline;
+        copy.inlineStrategy = inlineStrategy;
         return copy;
     }
 
     @Override
     public boolean isInline() {
-        return isInline;
+        return inlineStrategy != InlineStrategy.NOT_INLINE;
+    }
+
+    public InlineStrategy getInlineStrategy() {
+        return inlineStrategy;
     }
 }

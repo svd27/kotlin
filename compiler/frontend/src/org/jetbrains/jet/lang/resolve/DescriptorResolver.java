@@ -340,8 +340,7 @@ public class DescriptorResolver {
         boolean hasBody = function.getBodyExpression() != null;
         Modality modality = resolveModalityFromModifiers(function, getDefaultModality(containingDescriptor, hasBody));
         Visibility visibility = resolveVisibilityFromModifiers(function, getDefaultVisibility(function, containingDescriptor));
-        JetModifierList modifierList = function.getModifierList();
-        boolean isInline = KotlinBuiltIns.getInstance().getInlineType(functionDescriptor) != InlineStrategy.NOT_INLINE;
+        InlineStrategy inlineStrategy = KotlinBuiltIns.getInstance().getInlineType(functionDescriptor);
         functionDescriptor.initialize(
                 receiverType,
                 getExpectedThisObjectIfNeeded(containingDescriptor),
@@ -350,7 +349,7 @@ public class DescriptorResolver {
                 returnType,
                 modality,
                 visibility,
-                isInline);
+                inlineStrategy);
 
         BindingContextUtils.recordFunctionDeclarationToDescriptor(trace, function, functionDescriptor);
         return functionDescriptor;
@@ -382,7 +381,7 @@ public class DescriptorResolver {
                 returnType,
                 Modality.FINAL,
                 property.getVisibility(),
-                true
+                InlineStrategy.NOT_INLINE
         );
 
         trace.record(BindingContext.DATA_CLASS_COMPONENT_FUNCTION, parameter, functionDescriptor);
@@ -430,7 +429,7 @@ public class DescriptorResolver {
                 returnType,
                 Modality.FINAL,
                 classDescriptor.getVisibility(),
-                true
+                InlineStrategy.NOT_INLINE
         );
 
         trace.record(BindingContext.DATA_CLASS_COPY_FUNCTION, classDescriptor, functionDescriptor);

@@ -41,6 +41,7 @@ import org.jetbrains.jet.lang.resolve.calls.CallResolverUtil;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.TypeUtils;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
 import java.util.*;
@@ -83,7 +84,7 @@ public class CodegenUtil {
                                     fd.getReturnType(),
                                     Modality.FINAL,
                                     Visibilities.PUBLIC,
-                                    /*isInline = */false
+                                    /*isInline = */InlineStrategy.NOT_INLINE
         );
         return invokeDescriptor;
     }

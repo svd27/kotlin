@@ -48,6 +48,7 @@ import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.resolve.scopes.receivers.ReceiverValue;
 import org.jetbrains.jet.lang.types.*;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lexer.JetTokens;
 
 import java.util.Collection;
@@ -120,7 +121,7 @@ public class ControlStructureTypingUtils {
                 type,
                 Modality.FINAL,
                 Visibilities.PUBLIC,
-                /*isInline = */ false
+                /*isInline = */ InlineStrategy.NOT_INLINE
         );
         return function;
     }

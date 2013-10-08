@@ -31,6 +31,7 @@ import org.jetbrains.jet.lang.resolve.java.structure.*;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.types.*;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
 import java.util.*;
@@ -162,7 +163,7 @@ public class SingleAbstractMethodUtils {
                 returnType,
                 Modality.FINAL,
                 samInterface.getVisibility(),
-                false
+                InlineStrategy.NOT_INLINE
         );
 
         return result;
@@ -199,7 +200,7 @@ public class SingleAbstractMethodUtils {
                         returnType,
                         Modality.FINAL,
                         original.getVisibility(),
-                        false
+                        InlineStrategy.NOT_INLINE
                 );
             }
         });

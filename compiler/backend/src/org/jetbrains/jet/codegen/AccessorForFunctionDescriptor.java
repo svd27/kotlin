@@ -22,6 +22,7 @@ import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.SimpleFunctionDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.name.Name;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,6 +40,7 @@ public class AccessorForFunctionDescriptor extends SimpleFunctionDescriptorImpl 
               Name.identifier((descriptor instanceof ConstructorDescriptor ? "$init" : descriptor.getName()) + "$b$" + index),
               Kind.DECLARATION);
 
+
         initialize(DescriptorUtils.getReceiverParameterType(descriptor.getReceiverParameter()),
                    descriptor instanceof ConstructorDescriptor ? NO_RECEIVER_PARAMETER : descriptor.getExpectedThisObject(),
                    Collections.<TypeParameterDescriptor>emptyList(),
@@ -46,7 +48,7 @@ public class AccessorForFunctionDescriptor extends SimpleFunctionDescriptorImpl 
                    descriptor.getReturnType(),
                    Modality.FINAL,
                    Visibilities.INTERNAL,
-                   /*isInline = */ false);
+                   /*isInline = */ InlineStrategy.NOT_INLINE);
     }
 
     @NotNull

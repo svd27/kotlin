@@ -32,6 +32,7 @@ import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.TypeUtils;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -170,7 +171,7 @@ public final class JavaFunctionResolver {
                 effectiveSignature.getReturnType(),
                 Modality.convertFromFlags(method.isAbstract(), !method.isFinal()),
                 method.getVisibility(),
-                /*isInline = */ false
+                /*isInline = */ InlineStrategy.NOT_INLINE
         );
 
         if (record) {

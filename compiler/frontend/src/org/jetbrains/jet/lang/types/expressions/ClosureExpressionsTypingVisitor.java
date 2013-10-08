@@ -33,6 +33,7 @@ import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.*;
 import org.jetbrains.jet.lang.types.checker.JetTypeChecker;
+import org.jetbrains.jet.lang.types.lang.InlineStrategy;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 import org.jetbrains.jet.util.slicedmap.WritableSlice;
 
@@ -199,7 +200,7 @@ public class ClosureExpressionsTypingVisitor extends ExpressionTypingVisitor {
                                       /*unsubstitutedReturnType = */ null,
                                       Modality.FINAL,
                                       Visibilities.LOCAL,
-                                      /*isInline = */ false
+                                      /*isInline = */ InlineStrategy.NOT_INLINE
         );
         BindingContextUtils.recordFunctionDeclarationToDescriptor(context.trace, functionLiteral, functionDescriptor);
         return functionDescriptor;
