@@ -25,10 +25,9 @@ import org.jetbrains.jet.codegen.state.GenerationState;
 import org.jetbrains.jet.codegen.state.GenerationStateAware;
 import org.jetbrains.jet.codegen.state.JetTypeMapperMode;
 import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
 import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
 import org.jetbrains.jet.lang.psi.JetFile;
-import org.jetbrains.jet.lang.resolve.BindingContext;
+import org.jetbrains.jet.lang.psi.JetPsiUtil;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.java.JvmClassName;
 import org.jetbrains.jet.lang.resolve.java.PackageClassUtils;
@@ -134,11 +133,8 @@ public class SamWrapperCodegen extends GenerationStateAware {
     }
 
     private String getWrapperName(@NotNull JetFile containingFile) {
-        NamespaceDescriptor namespace = state.getBindingContext().get(BindingContext.FILE_TO_NAMESPACE, containingFile);
-        assert namespace != null : "couldn't find namespace for file: " + containingFile.getVirtualFile();
-        FqName fqName = DescriptorUtils.getFQName(namespace).toSafe();
-        String packageInternalName = JvmClassName.byFqNameWithoutInnerClasses(
-                PackageClassUtils.getPackageClassFqName(fqName)).getInternalName();
+        FqName packageClassFqName = PackageClassUtils.getPackageClassFqName(JetPsiUtil.getFQName(containingFile));
+        String packageInternalName = JvmClassName.byFqNameWithoutInnerClasses(packageClassFqName).getInternalName();
         return packageInternalName + "$sam$" + samInterface.getName().asString() + "$" +
                Integer.toHexString(CodegenUtil.getPathHashCode(containingFile) * 31 + DescriptorUtils.getFQName(samInterface).hashCode());
     }
