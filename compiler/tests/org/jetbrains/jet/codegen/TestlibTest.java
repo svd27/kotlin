@@ -109,7 +109,7 @@ public class TestlibTest extends UsefulTestCase {
 
         classLoader = new GeneratedClassLoader(classFileFactory,
                                                new URLClassLoader(new URL[] {ForTestCompileRuntime.runtimeJarForTests().toURI().toURL(), junitJar.toURI().toURL()},
-                                                                  TestCase.class.getClassLoader()));
+                                                                  null));
 
         typeMapper = generationState.getTypeMapper();
 

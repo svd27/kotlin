@@ -179,7 +179,7 @@ public class CliTest {
         AnalyzerScriptParameter parameter = new AnalyzerScriptParameter(Name.identifier("num"), JetTypeName.parse("jet.Int"));
         scriptParameters.add(parameter);
         Class aClass = KotlinToJVMBytecodeCompiler
-                .compileScript(getClass().getClassLoader(), JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.ktscript", scriptParameters, null);
+                .compileScript(null, JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.ktscript", scriptParameters, null);
         Assert.assertNotNull(aClass);
 
         try {
@@ -196,7 +196,7 @@ public class CliTest {
         AnalyzerScriptParameter parameter = new AnalyzerScriptParameter(Name.identifier("num"), JetTypeName.parse("jet.Int"));
         scriptParameters.add(parameter);
         Class aClass = KotlinToJVMBytecodeCompiler
-                .compileScript(getClass().getClassLoader(), JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.kt", scriptParameters, null);
+                .compileScript(null, JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.kt", scriptParameters, null);
         Assert.assertNotNull(aClass);
 
         try {
@@ -213,7 +213,7 @@ public class CliTest {
         AnalyzerScriptParameter parameter = new AnalyzerScriptParameter(Name.identifier("num"), JetTypeName.parse("jet.Int"));
         scriptParameters.add(parameter);
         Class aClass = KotlinToJVMBytecodeCompiler
-                .compileScript(getClass().getClassLoader(), JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.fib.kt", null, Arrays.asList(new JetScriptDefinition(".fib.kt",scriptParameters)));
+                .compileScript(null, JetTestUtils.getPathsForTests(), "compiler/testData/cli/fib.fib.kt", null, Arrays.asList(new JetScriptDefinition(".fib.kt",scriptParameters)));
         Assert.assertNotNull(aClass);
 
         try {

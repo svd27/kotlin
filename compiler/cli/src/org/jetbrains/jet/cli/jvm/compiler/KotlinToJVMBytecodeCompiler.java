@@ -251,7 +251,7 @@ public class KotlinToJVMBytecodeCompiler {
                         // TODO: add all classpath
                         paths.getRuntimePath().toURI().toURL()
                     },
-                    parentLoader == null ? AllModules.class.getClassLoader() : parentLoader));
+                    parentLoader));
 
             JetFile scriptFile = environment.getSourceFiles().get(0);
             return classLoader.loadClass(ScriptNameUtil.classNameForScript(scriptFile));
@@ -344,7 +344,7 @@ public class KotlinToJVMBytecodeCompiler {
     }
 
     public static Class compileScript(
-            @NotNull ClassLoader parentLoader,
+            @Nullable ClassLoader parentLoader,
             @NotNull KotlinPaths paths,
             @NotNull String scriptPath,
             @Nullable List<AnalyzerScriptParameter> scriptParameters,
@@ -355,7 +355,9 @@ public class KotlinToJVMBytecodeCompiler {
         try {
             CompilerConfiguration compilerConfiguration = new CompilerConfiguration();
             compilerConfiguration.put(CLIConfigurationKeys.MESSAGE_COLLECTOR_KEY, messageCollector);
-            compilerConfiguration.addAll(JVMConfigurationKeys.CLASSPATH_KEY, getClasspath(parentLoader));
+            if (parentLoader != null) {
+                compilerConfiguration.addAll(JVMConfigurationKeys.CLASSPATH_KEY, getClasspath(parentLoader));
+            }
             compilerConfiguration.add(JVMConfigurationKeys.CLASSPATH_KEY, PathUtil.findRtJar());
             compilerConfiguration.addAll(JVMConfigurationKeys.ANNOTATIONS_PATH_KEY, Collections.singletonList(
                     paths.getJdkAnnotationsPath()));

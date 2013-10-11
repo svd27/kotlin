@@ -25,6 +25,7 @@ import org.jetbrains.jet.JetTestCaseBuilder;
 import org.jetbrains.jet.JetTestUtils;
 import org.jetbrains.jet.cli.jvm.JVMConfigurationKeys;
 import org.jetbrains.jet.cli.jvm.compiler.JetCoreEnvironment;
+import org.jetbrains.jet.codegen.forTestCompile.ForTestCompileRuntime;
 import org.jetbrains.jet.lang.psi.JetPsiUtil;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.utils.ExceptionUtils;
@@ -109,7 +110,8 @@ public abstract class CodegenTestCase extends UsefulTestCase {
             fail("Double initialization of class loader in same test");
         }
 
-        initializedClassLoader = new GeneratedClassLoader(factory, CodegenTestCase.class.getClassLoader(), getClassPathURLs());
+        initializedClassLoader = new GeneratedClassLoader(factory, null, getClassPathURLs());
+        //also add runtime library if it not present
         return initializedClassLoader;
     }
 
@@ -122,6 +124,13 @@ public abstract class CodegenTestCase extends UsefulTestCase {
             } catch (MalformedURLException e) {
                 throw new RuntimeException(e);
             }
+        }
+        try {
+            //add runtime library
+            urls.add(ForTestCompileRuntime.runtimeJarForTests().toURI().toURL());
+        }
+        catch (MalformedURLException e) {
+            throw new RuntimeException(e);
         }
 
         return urls.toArray(new URL[urls.size()]);
@@ -200,5 +209,20 @@ public abstract class CodegenTestCase extends UsefulTestCase {
             throw new IllegalArgumentException("Couldn't find method " + name + " in class " + aClass);
         }
         return method;
+    }
+
+    public static void assertEqualsWithClassLoader(Class<?> expected, Class<?> actual) {
+        if (actual == null) {
+            assertNull(expected);
+        }
+        else {
+            try {
+                assertEquals(actual.getClassLoader().loadClass(expected.getName()), actual);
+            }
+            catch (ClassNotFoundException e) {
+                e.printStackTrace();
+                fail(e.getMessage());
+            }
+        }
     }
 }

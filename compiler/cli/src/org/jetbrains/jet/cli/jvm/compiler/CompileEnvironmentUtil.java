@@ -149,8 +149,7 @@ public class CompileEnvironmentUtil {
         GeneratedClassLoader loader;
         if (stdlibJar.exists()) {
             try {
-                loader = new GeneratedClassLoader(factory, new URLClassLoader(new URL[]{stdlibJar.toURI().toURL()},
-                                                                              AllModules.class.getClassLoader()));
+                loader = new GeneratedClassLoader(factory, new URLClassLoader(new URL[]{stdlibJar.toURI().toURL()}, null));
             }
             catch (MalformedURLException e) {
                 throw new RuntimeException(e);

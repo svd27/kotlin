@@ -104,7 +104,7 @@ public class JetValueParameterAnnotationTest extends CodegenTestCase {
         for (int i = 0, length = annotations.length; i < length; i++) {
             assertSize(1, annotations[i]);
             Annotation annotation = annotations[i][0];
-            assertEquals(JetValueParameter.class, annotation.annotationType());
+            assertEqualsWithClassLoader(JetValueParameter.class, annotation.annotationType());
             assertEquals(expected[i].name(), ((JetValueParameter) annotation).name());
             assertEquals(expected[i].type(), ((JetValueParameter) annotation).type());
         }
