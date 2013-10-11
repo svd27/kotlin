@@ -22,6 +22,7 @@ import com.intellij.util.Function;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.JetLiteFixture;
 import org.jetbrains.jet.JetTestUtils;
+import org.jetbrains.jet.analyzer.AnalyzeExhaust;
 import org.jetbrains.jet.cli.jvm.compiler.JetCoreEnvironment;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
@@ -44,9 +45,10 @@ import java.util.List;
 public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     private static final String PATH = "compiler/testData/resolveAnnotations/testFile.kt";
 
-    private static final FqName NAMESPACE = new FqName("test");
+    private static final FqName PACKAGE = new FqName("test");
 
     private BindingContext context;
+    private AnalyzeExhaust analyzeExhaust;
 
     @Override
     protected JetCoreEnvironment createEnvironment() {
@@ -126,7 +128,7 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     private void doTest(@NotNull String content, @NotNull String expectedAnnotation) {
-        NamespaceDescriptor test = getNamespaceDescriptor(content);
+        PackageViewDescriptor test = getPackage(content);
         ClassDescriptor myClass = getClassDescriptor(test, "MyClass");
         checkDescriptor(expectedAnnotation, myClass);
         checkDescriptor(expectedAnnotation, getClassObjectDescriptor(myClass));
@@ -169,11 +171,11 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     @NotNull
-    private static FunctionDescriptor getFunctionDescriptor(@NotNull NamespaceDescriptor namespaceDescriptor, @NotNull String name) {
+    private static FunctionDescriptor getFunctionDescriptor(@NotNull PackageViewDescriptor packageView, @NotNull String name) {
         Name functionName = Name.identifier(name);
-        JetScope memberScope = namespaceDescriptor.getMemberScope();
+        JetScope memberScope = packageView.getMemberScope();
         Collection<FunctionDescriptor> functions = memberScope.getFunctions(functionName);
-        assert functions.size() == 1 : "Failed to find function " + functionName + " in class" + "." + namespaceDescriptor.getName();
+        assert functions.size() == 1 : "Failed to find function " + functionName + " in class" + "." + packageView.getName();
         return functions.iterator().next();
     }
 
@@ -187,11 +189,11 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     @NotNull
-    private static PropertyDescriptor getPropertyDescriptor(@NotNull NamespaceDescriptor namespaceDescriptor, @NotNull String name) {
+    private static PropertyDescriptor getPropertyDescriptor(@NotNull PackageViewDescriptor packageView, @NotNull String name) {
         Name propertyName = Name.identifier(name);
-        JetScope memberScope = namespaceDescriptor.getMemberScope();
+        JetScope memberScope = packageView.getMemberScope();
         Collection<VariableDescriptor> properties = memberScope.getProperties(propertyName);
-        assert properties.size() == 1 : "Failed to find property " + propertyName + " in class " + namespaceDescriptor.getName();
+        assert properties.size() == 1 : "Failed to find property " + propertyName + " in class " + packageView.getName();
         return (PropertyDescriptor) properties.iterator().next();
     }
 
@@ -205,19 +207,19 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     @NotNull
-    private static ClassDescriptor getClassDescriptor(@NotNull NamespaceDescriptor namespaceDescriptor, @NotNull String name) {
+    private static ClassDescriptor getClassDescriptor(@NotNull PackageViewDescriptor packageView, @NotNull String name) {
         Name className = Name.identifier(name);
-        ClassifierDescriptor aClass = namespaceDescriptor.getMemberScope().getClassifier(className);
-        assertNotNull("Failed to find class: " + namespaceDescriptor.getName() + "." + className, aClass);
+        ClassifierDescriptor aClass = packageView.getMemberScope().getClassifier(className);
+        assertNotNull("Failed to find class: " + packageView.getName() + "." + className, aClass);
         assert aClass instanceof ClassDescriptor;
         return (ClassDescriptor) aClass;
     }
 
     @NotNull
-    private static ClassDescriptor getObjectDescriptor(@NotNull NamespaceDescriptor namespaceDescriptor, @NotNull String name) {
+    private static ClassDescriptor getObjectDescriptor(@NotNull PackageViewDescriptor packageView, @NotNull String name) {
         Name className = Name.identifier(name);
-        ClassDescriptor aClass = namespaceDescriptor.getMemberScope().getObjectDescriptor(className);
-        assertNotNull("Failed to find class: " + namespaceDescriptor.getName() + "." + className, aClass);
+        ClassDescriptor aClass = packageView.getMemberScope().getObjectDescriptor(className);
+        assertNotNull("Failed to find class: " + packageView.getName() + "." + className, aClass);
         return aClass;
     }
 
@@ -337,13 +339,14 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     @NotNull
-    private NamespaceDescriptor getNamespaceDescriptor(@NotNull String content) {
+    private PackageViewDescriptor getPackage(@NotNull String content) {
         JetFile ktFile = JetTestUtils.createFile("dummy.kt", content, getProject());
-        context = JetTestUtils.analyzeFile(ktFile).getBindingContext();
+        analyzeExhaust = JetTestUtils.analyzeFile(ktFile);
+        context = analyzeExhaust.getBindingContext();
 
-        NamespaceDescriptor namespaceDescriptor = context.get(BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR, NAMESPACE);
-        assertNotNull("Failed to find namespace: " + NAMESPACE, namespaceDescriptor);
-        return namespaceDescriptor;
+        PackageViewDescriptor packageView = analyzeExhaust.getModuleDescriptor().getPackage(PACKAGE);
+        assertNotNull("Failed to find namespace: " + PACKAGE, packageView);
+        return packageView;
     }
 
     private static String getContent(@NotNull String annotationText) throws IOException {

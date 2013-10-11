@@ -87,8 +87,8 @@ public interface Importer {
 
         protected void importAllUnderDeclaration(@NotNull DeclarationDescriptor descriptor, @NotNull PlatformToKotlinClassMap platformToKotlinClassMap) {
             JetScope scopeToImport = null;
-            if (descriptor instanceof NamespaceDescriptor) {
-                scopeToImport = ((NamespaceDescriptor) descriptor).getMemberScope();
+            if (descriptor instanceof PackageViewDescriptor) {
+                scopeToImport = ((PackageViewDescriptor) descriptor).getMemberScope();
             }
             if (descriptor instanceof ClassDescriptor && ((ClassDescriptor) descriptor).getKind() != ClassKind.OBJECT) {
                 ClassDescriptor classDescriptor = (ClassDescriptor) descriptor;
@@ -107,8 +107,8 @@ public interface Importer {
             if (descriptor instanceof ClassifierDescriptor) {
                 namespaceScope.importClassifierAlias(aliasName, (ClassifierDescriptor) descriptor);
             }
-            else if (descriptor instanceof NamespaceDescriptor) {
-                namespaceScope.importNamespaceAlias(aliasName, (NamespaceDescriptor) descriptor);
+            else if (descriptor instanceof PackageViewDescriptor) {
+                namespaceScope.importPackageAlias(aliasName, (PackageViewDescriptor) descriptor);
             }
             else if (descriptor instanceof FunctionDescriptor) {
                 namespaceScope.importFunctionAlias(aliasName, (FunctionDescriptor) descriptor);

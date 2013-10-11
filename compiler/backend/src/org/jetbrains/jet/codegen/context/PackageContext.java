@@ -19,10 +19,10 @@ package org.jetbrains.jet.codegen.context;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.codegen.OwnerKind;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageFragmentDescriptor;
 
-public class NamespaceContext extends FieldOwnerContext<NamespaceDescriptor> {
-    public NamespaceContext(@NotNull NamespaceDescriptor contextDescriptor, @Nullable CodegenContext parent, @NotNull OwnerKind kind) {
+public class PackageContext extends FieldOwnerContext<PackageFragmentDescriptor> {
+    public PackageContext(@NotNull PackageFragmentDescriptor contextDescriptor, @Nullable CodegenContext parent, @NotNull OwnerKind kind) {
         super(contextDescriptor, kind, parent, null, null, null);
     }
 

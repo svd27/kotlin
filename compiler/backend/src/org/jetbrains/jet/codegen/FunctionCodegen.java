@@ -554,7 +554,7 @@ public class FunctionCodegen extends GenerationStateAware {
         int flags = ACC_PUBLIC | ACC_SYNTHETIC; // TODO.
 
         Type ownerType;
-        if (contextClass instanceof NamespaceDescriptor) {
+        if (contextClass instanceof PackageFragmentDescriptor) {
             ownerType = state.getTypeMapper().getOwner(functionDescriptor, kind, true);
         }
         else if (contextClass instanceof ClassDescriptor) {

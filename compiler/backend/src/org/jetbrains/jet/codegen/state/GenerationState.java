@@ -71,7 +71,12 @@ public class GenerationState {
 
     private final boolean generateDeclaredClasses;
 
-    public GenerationState(Project project, ClassBuilderFactory builderFactory, BindingContext bindingContext, List<JetFile> files) {
+    public GenerationState(
+            @NotNull Project project,
+            @NotNull ClassBuilderFactory builderFactory,
+            @NotNull BindingContext bindingContext,
+            @NotNull List<JetFile> files
+    ) {
         this(project, builderFactory, Progress.DEAF, bindingContext, files, BuiltinToJavaTypesMapping.ENABLED, true, false, true);
     }
 

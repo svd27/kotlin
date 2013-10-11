@@ -115,8 +115,8 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
         if (descriptor instanceof ClassDescriptor) {
             return kotlinClassFinder.find(kotlinFqNameToJavaFqName(naiveKotlinFqName((ClassDescriptor) descriptor)));
         }
-        else if (descriptor instanceof NamespaceDescriptor) {
-            return kotlinClassFinder.find(PackageClassUtils.getPackageClassFqName(DescriptorUtils.getFQName(descriptor).toSafe()));
+        else if (descriptor instanceof PackageFragmentDescriptor) {
+            return kotlinClassFinder.find(PackageClassUtils.getPackageClassFqName(((PackageFragmentDescriptor) descriptor).getFqName()));
         }
         else {
             throw new IllegalStateException("Unrecognized descriptor: " + descriptor);
@@ -247,10 +247,10 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
             @NotNull ProtoBuf.Callable proto,
             @NotNull NameResolver nameResolver
     ) {
-        if (container instanceof NamespaceDescriptor) {
+        if (container instanceof PackageFragmentDescriptor) {
             Name name = loadSrcClassName(proto, nameResolver);
             if (name != null) {
-                return kotlinClassFinder.find(getSrcClassFqName((NamespaceDescriptor) container, name));
+                return kotlinClassFinder.find(getSrcClassFqName((PackageFragmentDescriptor) container, name));
             }
             return null;
         }
@@ -265,8 +265,8 @@ public class AnnotationDescriptorDeserializer implements AnnotationDeserializer 
     }
 
     @NotNull
-    private static FqName getSrcClassFqName(@NotNull NamespaceDescriptor container, @NotNull Name name) {
-        return PackageClassUtils.getPackageClassFqName(DescriptorUtils.getFQName(container).toSafe()).parent().child(name);
+    private static FqName getSrcClassFqName(@NotNull PackageFragmentDescriptor container, @NotNull Name name) {
+        return PackageClassUtils.getPackageClassFqName(container.getFqName()).parent().child(name);
     }
 
     @Nullable

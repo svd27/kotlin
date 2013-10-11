@@ -2,7 +2,7 @@ package org.jetbrains.jet.descriptors.serialization;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.ClassOrNamespaceDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageFragmentDescriptor;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.FqNameUnsafe;
@@ -19,10 +19,10 @@ public final class ClassId {
             @NotNull FqNameUnsafe fqName,
             @NotNull ClassOrNamespaceDescriptor containingDeclaration
     ) {
-        NamespaceDescriptor containingNamespace = DescriptorUtils.getParentOfType(containingDeclaration, NamespaceDescriptor.class, false);
-        assert containingNamespace != null;
+        PackageFragmentDescriptor containingPackage = DescriptorUtils.getParentOfType(containingDeclaration, PackageFragmentDescriptor.class, false);
+        assert containingPackage != null;
         List<Name> fullNameSegments = fqName.pathSegments();
-        FqName namespaceFqName = DescriptorUtils.getFQName(containingNamespace).toSafe();
+        FqName namespaceFqName = containingPackage.getFqName();
         List<Name> namespaceNameSegments = namespaceFqName.pathSegments();
         assert fullNameSegments.subList(0, namespaceNameSegments.size()).equals(namespaceNameSegments);
         List<Name> relativeNameSegments = fullNameSegments.subList(namespaceNameSegments.size(), fullNameSegments.size());

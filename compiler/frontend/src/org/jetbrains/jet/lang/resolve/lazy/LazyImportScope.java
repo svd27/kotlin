@@ -42,7 +42,7 @@ import static org.jetbrains.jet.lang.resolve.QualifiedExpressionResolver.LookupM
 
 public class LazyImportScope implements JetScope {
     private final ResolveSession resolveSession;
-    private final NamespaceDescriptor packageDescriptor;
+    private final PackageViewDescriptor packageDescriptor;
     private final ImportsProvider importsProvider;
     private final JetScope rootScope;
     private final BindingTrace traceForImportResolve;
@@ -97,7 +97,7 @@ public class LazyImportScope implements JetScope {
                                 packageDescriptor.getMemberScope(),
                                 importer,
                                 traceForImportResolve,
-                                resolveSession.getRootModuleDescriptor(),
+                                resolveSession.getModuleDescriptor(),
                                 mode);
                     }
                     finally {
@@ -118,7 +118,7 @@ public class LazyImportScope implements JetScope {
 
     public LazyImportScope(
             @NotNull ResolveSession resolveSession,
-            @NotNull NamespaceDescriptor packageDescriptor,
+            @NotNull PackageViewDescriptor packageDescriptor,
             @NotNull List<JetImportDirective> imports,
             @NotNull BindingTrace traceForImportResolve,
             @NotNull String debugName
@@ -136,16 +136,16 @@ public class LazyImportScope implements JetScope {
             }
         });
 
-        NamespaceDescriptor rootPackageDescriptor = resolveSession.getPackageDescriptorByFqName(FqName.ROOT);
-        if (rootPackageDescriptor == null) {
+        PackageViewDescriptor rootPackage = resolveSession.getModuleDescriptor().getPackage(FqName.ROOT);
+        if (rootPackage == null) {
             throw new IllegalStateException("Root package not found");
         }
-        rootScope = rootPackageDescriptor.getMemberScope();
+        rootScope = rootPackage.getMemberScope();
     }
 
     public static LazyImportScope createImportScopeForFile(
             @NotNull ResolveSession resolveSession,
-            @NotNull NamespaceDescriptor packageDescriptor,
+            @NotNull PackageViewDescriptor packageDescriptor,
             @NotNull JetFile jetFile,
             @NotNull BindingTrace traceForImportResolve,
             @NotNull String debugName
@@ -256,8 +256,8 @@ public class LazyImportScope implements JetScope {
 
     @Nullable
     @Override
-    public NamespaceDescriptor getNamespace(@NotNull Name name) {
-        return selectFirstFromImports(name, LookupMode.ONLY_CLASSES, JetScopeSelectorUtil.NAMESPACE_SCOPE_SELECTOR);
+    public PackageViewDescriptor getPackage(@NotNull Name name) {
+        return selectFirstFromImports(name, LookupMode.ONLY_CLASSES, JetScopeSelectorUtil.PACKAGE_SCOPE_SELECTOR);
     }
 
     @NotNull

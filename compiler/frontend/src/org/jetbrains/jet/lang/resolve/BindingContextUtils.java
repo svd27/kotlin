@@ -75,12 +75,7 @@ public class BindingContextUtils {
             return bindingContext.get(BindingContext.LABEL_TARGET, referenceExpression);
         }
 
-        PsiElement element = descriptorToDeclaration(bindingContext, declarationDescriptor);
-        if (element != null) {
-            return element;
-        }
-
-        return null;
+        return descriptorToDeclaration(bindingContext, declarationDescriptor);
     }
 
     @NotNull
@@ -132,7 +127,8 @@ public class BindingContextUtils {
     // NOTE this is used by KDoc
     @Nullable
     public static NamespaceDescriptor namespaceDescriptor(@NotNull BindingContext context, @NotNull JetFile source) {
-        return context.get(BindingContext.FILE_TO_NAMESPACE, source);
+        // TODO 1
+        return null;
     }
 
     @Nullable

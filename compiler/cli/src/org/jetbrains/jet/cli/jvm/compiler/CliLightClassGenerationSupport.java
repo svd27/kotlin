@@ -33,14 +33,12 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.asJava.KotlinLightClassForExplicitDeclaration;
 import org.jetbrains.jet.asJava.LightClassConstructionContext;
 import org.jetbrains.jet.asJava.LightClassGenerationSupport;
-import org.jetbrains.jet.codegen.binding.PsiCodegenPredictor;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
 import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.*;
 import org.jetbrains.jet.lang.resolve.java.JvmAbi;
-import org.jetbrains.jet.lang.resolve.java.JvmClassName;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 
 import java.util.Collection;
@@ -124,17 +122,14 @@ public class CliLightClassGenerationSupport extends LightClassGenerationSupport 
     @NotNull
     @Override
     public Collection<JetFile> findFilesForPackage(@NotNull FqName fqName, @NotNull final GlobalSearchScope searchScope) {
-        NamespaceDescriptor namespaceDescriptor = getTrace().get(BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR, fqName);
-        if (namespaceDescriptor != null) {
-            Collection<JetFile> files = getTrace().get(BindingContext.NAMESPACE_TO_FILES, namespaceDescriptor);
-            if (files != null) {
-                return Collections2.filter(files, new Predicate<JetFile>() {
-                    @Override
-                    public boolean apply(JetFile input) {
-                        return PsiSearchScopeUtil.isInScope(searchScope, input);
-                    }
-                });
-            }
+        Collection<JetFile> files = getTrace().get(BindingContext.PACKAGE_TO_FILES, fqName);
+        if (files != null) {
+            return Collections2.filter(files, new Predicate<JetFile>() {
+                @Override
+                public boolean apply(JetFile input) {
+                    return PsiSearchScopeUtil.isInScope(searchScope, input);
+                }
+            });
         }
         return Collections.emptyList();
     }

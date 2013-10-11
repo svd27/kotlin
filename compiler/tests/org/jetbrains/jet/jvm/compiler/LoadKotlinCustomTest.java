@@ -19,15 +19,15 @@ package org.jetbrains.jet.jvm.compiler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.ConfigurationKind;
 import org.jetbrains.jet.analyzer.AnalyzeExhaust;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
-import org.jetbrains.jet.lang.resolve.BindingContext;
+import org.jetbrains.jet.lang.descriptors.PackageViewDescriptor;
 import org.jetbrains.jet.test.TestCaseWithTmpdir;
 import org.jetbrains.jet.test.util.RecursiveDescriptorComparator;
 
 import java.io.File;
 
 import static org.jetbrains.jet.jvm.compiler.LoadDescriptorUtil.*;
-import static org.jetbrains.jet.test.util.RecursiveDescriptorComparator.*;
+import static org.jetbrains.jet.test.util.RecursiveDescriptorComparator.DONT_INCLUDE_METHODS_OF_OBJECT;
+import static org.jetbrains.jet.test.util.RecursiveDescriptorComparator.validateAndCompareDescriptorWithFile;
 
 /*
  *  This test should be implemented via AbstractLoadCompiledKotlinTest.
@@ -41,16 +41,15 @@ public final class LoadKotlinCustomTest extends TestCaseWithTmpdir {
 
     private void loadDescriptorsFromCompiledAndCompareWithTxt(@NotNull File expectedFile, @NotNull File kotlinFile)
             throws Exception {
-        NamespaceDescriptor namespaceFromClass =
+        PackageViewDescriptor packageFromBinary =
                 compileKotlinAndLoadTestNamespaceDescriptorFromBinary(kotlinFile, tmpdir, myTestRootDisposable, ConfigurationKind.JDK_ONLY);
-        validateAndCompareDescriptorWithFile(namespaceFromClass, DONT_INCLUDE_METHODS_OF_OBJECT, expectedFile);
+        validateAndCompareDescriptorWithFile(packageFromBinary, DONT_INCLUDE_METHODS_OF_OBJECT, expectedFile);
     }
 
     private void loadDescriptorsFromSourceAndCompareWithTxt(@NotNull File expectedFile, @NotNull File kotlinFile)
             throws Exception {
         AnalyzeExhaust exhaust = compileKotlinToDirAndGetAnalyzeExhaust(kotlinFile, tmpdir, getTestRootDisposable(), ConfigurationKind.JDK_ONLY);
-        NamespaceDescriptor namespaceFromSource = exhaust.getBindingContext().get(BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR,
-                                                                                  TEST_PACKAGE_FQNAME);
+        PackageViewDescriptor namespaceFromSource = exhaust.getModuleDescriptor().getPackage(TEST_PACKAGE_FQNAME);
         assert namespaceFromSource != null;
         validateAndCompareDescriptorWithFile(namespaceFromSource,
                                              RecursiveDescriptorComparator.DONT_INCLUDE_METHODS_OF_OBJECT.checkPrimaryConstructors(true),

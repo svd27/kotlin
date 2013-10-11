@@ -101,7 +101,7 @@ public abstract class CodegenContext<T extends DeclarationDescriptor> {
         while (true) {
             assert c != null;
             DeclarationDescriptor contextDescriptor = c.getContextDescriptor();
-            if (!(contextDescriptor instanceof ClassDescriptor) && !(contextDescriptor instanceof NamespaceDescriptor)) {
+            if (!(contextDescriptor instanceof ClassDescriptor) && !(contextDescriptor instanceof PackageFragmentDescriptor)) {
                 c = c.getParentContext();
             }
             else {
@@ -147,13 +147,13 @@ public abstract class CodegenContext<T extends DeclarationDescriptor> {
     }
 
     @NotNull
-    public FieldOwnerContext intoNamespace(@NotNull NamespaceDescriptor descriptor) {
-        return new NamespaceContext(descriptor, this, OwnerKind.NAMESPACE);
+    public FieldOwnerContext intoPackage(@NotNull PackageFragmentDescriptor descriptor) {
+        return new PackageContext(descriptor, this, OwnerKind.NAMESPACE);
     }
 
     @NotNull
-    public FieldOwnerContext intoNamespacePart(@NotNull Type delegateTo, @NotNull NamespaceDescriptor descriptor) {
-        return new NamespaceContext(descriptor, this, new OwnerKind.StaticDelegateKind(delegateTo));
+    public FieldOwnerContext intoPackagePart(@NotNull Type delegateTo, @NotNull PackageFragmentDescriptor descriptor) {
+        return new PackageContext(descriptor, this, new OwnerKind.StaticDelegateKind(delegateTo));
     }
 
     @NotNull

@@ -25,9 +25,11 @@ import com.intellij.util.ArrayUtil;
 import org.jetbrains.jet.ConfigurationKind;
 import org.jetbrains.jet.JetTestUtils;
 import org.jetbrains.jet.TestJdkKind;
+import org.jetbrains.jet.analyzer.AnalyzeExhaust;
 import org.jetbrains.jet.cli.jvm.compiler.JetCoreEnvironment;
 import org.jetbrains.jet.config.CompilerConfiguration;
 import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageViewDescriptor;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.AnalyzerScriptParameter;
 import org.jetbrains.jet.lang.resolve.BindingContext;
@@ -59,17 +61,17 @@ public abstract class AbstractCompileKotlinAgainstCustomBinariesTest extends Tes
     }
 
     private void checkNamespace(File ktFile, FqName namespaceFqn, File expectedFile) throws IOException {
-        BindingContext bindingContext = analyzeFile(ktFile);
+        AnalyzeExhaust exhaust = analyzeFile(ktFile);
 
-        NamespaceDescriptor namespaceDescriptor = bindingContext.get(BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR, namespaceFqn);
-        assertNotNull("Failed to find namespace: " + namespaceFqn, namespaceDescriptor);
+        PackageViewDescriptor packageView = exhaust.getModuleDescriptor().getPackage(namespaceFqn);
+        assertNotNull("Failed to find namespace: " + namespaceFqn, packageView);
 
-        validateAndCompareDescriptorWithFile(namespaceDescriptor,
+        validateAndCompareDescriptorWithFile(packageView,
                                              RecursiveDescriptorComparator.DONT_INCLUDE_METHODS_OF_OBJECT.withValidationStrategy(
                                                      DescriptorValidator.ValidationVisitor.ALLOW_ERROR_TYPES), expectedFile);
     }
 
-    protected BindingContext analyzeFile(File ktFile) throws IOException {
+    protected AnalyzeExhaust analyzeFile(File ktFile) throws IOException {
         JetCoreEnvironment environment = getEnvironment(ktFile);
         Project project = environment.getProject();
 
@@ -77,7 +79,7 @@ public abstract class AbstractCompileKotlinAgainstCustomBinariesTest extends Tes
 
         return AnalyzerFacadeForJVM.analyzeFilesWithJavaIntegration(
                 project, jetFiles, Collections.<AnalyzerScriptParameter>emptyList(),
-                Predicates.<PsiFile>alwaysTrue()).getBindingContext();
+                Predicates.<PsiFile>alwaysTrue());
     }
 
     private JetCoreEnvironment getEnvironment(File ktFile) {

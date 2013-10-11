@@ -20,7 +20,7 @@ public class DeserializedPackageMemberScope extends DeserializedMemberScope {
 
     public DeserializedPackageMemberScope(
             @NotNull StorageManager storageManager,
-            @NotNull NamespaceDescriptor packageDescriptor,
+            @NotNull PackageFragmentDescriptor packageDescriptor,
             @NotNull AnnotationDeserializer annotationDeserializer,
             @NotNull DescriptorFinder descriptorFinder,
             @NotNull ProtoBuf.Package proto,
@@ -30,12 +30,12 @@ public class DeserializedPackageMemberScope extends DeserializedMemberScope {
               DescriptorDeserializer.create(storageManager, packageDescriptor, nameResolver, descriptorFinder, annotationDeserializer),
               proto.getMemberList());
         this.descriptorFinder = descriptorFinder;
-        this.packageFqName = DescriptorUtils.getFQName(packageDescriptor).toSafe();
+        this.packageFqName = packageDescriptor.getFqName();
     }
 
     public DeserializedPackageMemberScope(
             @NotNull StorageManager storageManager,
-            @NotNull NamespaceDescriptor packageDescriptor,
+            @NotNull PackageFragmentDescriptor packageDescriptor,
             @NotNull AnnotationDeserializer annotationDeserializer,
             @NotNull DescriptorFinder descriptorFinder,
             @NotNull PackageData packageData
@@ -91,12 +91,6 @@ public class DeserializedPackageMemberScope extends DeserializedMemberScope {
     @Override
     protected void addNonDeclaredDescriptors(@NotNull Collection<DeclarationDescriptor> result) {
         // Do nothing
-    }
-
-    @Nullable
-    @Override
-    public NamespaceDescriptor getNamespace(@NotNull Name name) {
-        return descriptorFinder.findPackage(packageFqName.child(name));
     }
 
     @Nullable

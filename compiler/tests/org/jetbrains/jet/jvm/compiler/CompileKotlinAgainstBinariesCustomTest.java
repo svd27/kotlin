@@ -16,26 +16,25 @@
 package org.jetbrains.jet.jvm.compiler;
 
 import junit.framework.Assert;
+import org.jetbrains.jet.analyzer.AnalyzeExhaust;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageViewDescriptor;
 import org.jetbrains.jet.lang.descriptors.VariableDescriptorForObject;
-import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.types.ErrorUtils;
 
 import java.io.File;
 import java.util.Collection;
 
 import static org.jetbrains.jet.jvm.compiler.LoadDescriptorUtil.TEST_PACKAGE_FQNAME;
-import static org.jetbrains.jet.lang.resolve.BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR;
 
 public final class CompileKotlinAgainstBinariesCustomTest extends AbstractCompileKotlinAgainstCustomBinariesTest {
 
     public void testDuplicateObjectInSourcesAndBinaries() throws Exception {
-        BindingContext context = analyzeFile(new File(
+        AnalyzeExhaust exhaust = analyzeFile(new File(
                 "compiler/testData/compileKotlinAgainstBinariesCustom/duplicateObjectInBinaryAndSources/duplicateObjectInBinaryAndSources.kt"));
-        NamespaceDescriptor namespaceDescriptor = context.get(FQNAME_TO_NAMESPACE_DESCRIPTOR, TEST_PACKAGE_FQNAME);
-        assert namespaceDescriptor != null;
-        Collection<DeclarationDescriptor> allDescriptors = namespaceDescriptor.getMemberScope().getAllDescriptors();
+        PackageViewDescriptor packageView = exhaust.getModuleDescriptor().getPackage(TEST_PACKAGE_FQNAME);
+        assert packageView != null;
+        Collection<DeclarationDescriptor> allDescriptors = packageView.getMemberScope().getAllDescriptors();
         Assert.assertEquals(allDescriptors.size(), 2);
         for (DeclarationDescriptor descriptor : allDescriptors) {
             Assert.assertTrue(descriptor.getName().asString().equals("Lol"));
@@ -45,11 +44,11 @@ public final class CompileKotlinAgainstBinariesCustomTest extends AbstractCompil
     }
 
     public void testBrokenJarWithNoClassForObjectProperty() throws Exception {
-        BindingContext context = analyzeFile(new File(
+        AnalyzeExhaust exhaust = analyzeFile(new File(
                 "compiler/testData/compileKotlinAgainstBinariesCustom/brokenJarWithNoClassForObjectProperty/brokenJarWithNoClassForObjectProperty.kt"));
-        NamespaceDescriptor namespaceDescriptor = context.get(FQNAME_TO_NAMESPACE_DESCRIPTOR, TEST_PACKAGE_FQNAME);
-        assert namespaceDescriptor != null;
-        Collection<DeclarationDescriptor> allDescriptors = namespaceDescriptor.getMemberScope().getAllDescriptors();
+        PackageViewDescriptor packageView = exhaust.getModuleDescriptor().getPackage(TEST_PACKAGE_FQNAME);
+        assert packageView != null;
+        Collection<DeclarationDescriptor> allDescriptors = packageView.getMemberScope().getAllDescriptors();
         Assert.assertEquals(allDescriptors.size(), 1);
         DeclarationDescriptor descriptor = allDescriptors.iterator().next();
         Assert.assertTrue(descriptor.getName().asString().equals("Lol"));

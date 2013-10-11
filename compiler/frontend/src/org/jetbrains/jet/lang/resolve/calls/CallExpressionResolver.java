@@ -130,7 +130,7 @@ public class CallExpressionResolver {
             scopes.add(classObjectType.getMemberScope());
             scopes.add(getStaticNestedClassesScope((ClassDescriptor) classifier));
 
-            NamespaceDescriptor namespace = context.scope.getNamespace(referencedName);
+            PackageViewDescriptor namespace = context.scope.getPackage(referencedName);
             if (namespace != null) {
                 //for enums loaded from java binaries
                 scopes.add(namespace.getMemberScope());
@@ -163,7 +163,7 @@ public class CallExpressionResolver {
     @Nullable
     private NamespaceType lookupNamespaceType(@NotNull JetSimpleNameExpression expression, @NotNull ResolutionContext context) {
         Name name = expression.getReferencedNameAsName();
-        NamespaceDescriptor namespace = context.scope.getNamespace(name);
+        PackageViewDescriptor namespace = context.scope.getPackage(name);
         if (namespace == null) {
             return null;
         }

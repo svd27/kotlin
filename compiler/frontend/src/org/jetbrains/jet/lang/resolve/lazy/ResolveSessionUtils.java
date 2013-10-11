@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.ClassifierDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageViewDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorBase;
 import org.jetbrains.jet.lang.psi.JetNamed;
 import org.jetbrains.jet.lang.resolve.name.FqName;
@@ -67,7 +67,7 @@ public class ResolveSessionUtils {
 
         FqName packageFqName = fqName.parent();
         while (true) {
-            NamespaceDescriptor packageDescriptor = analyzer.getPackageDescriptorByFqName(packageFqName);
+            PackageViewDescriptor packageDescriptor = analyzer.getModuleDescriptor().getPackage(packageFqName);
             if (packageDescriptor != null) {
                 FqName classInPackagePath = new FqName(QualifiedNamesUtil.tail(packageFqName, fqName));
                 Collection<ClassDescriptor> descriptors = getClassOrObjectDescriptorsByFqName(packageDescriptor, classInPackagePath,
@@ -87,7 +87,7 @@ public class ResolveSessionUtils {
     }
 
     private static Collection<ClassDescriptor> getClassOrObjectDescriptorsByFqName(
-            NamespaceDescriptor packageDescriptor,
+            PackageViewDescriptor packageDescriptor,
             FqName path,
             boolean includeObjectDeclarations
     ) {

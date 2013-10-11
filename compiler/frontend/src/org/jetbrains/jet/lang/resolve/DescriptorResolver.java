@@ -817,7 +817,7 @@ public class DescriptorResolver {
             @NotNull JetClassOrObject objectDeclaration,
             @NotNull ClassDescriptor classDescriptor, BindingTrace trace
     ) {
-        boolean isProperty = (containingDeclaration instanceof NamespaceDescriptor) || (containingDeclaration instanceof ClassDescriptor);
+        boolean isProperty = (containingDeclaration instanceof PackageFragmentDescriptor) || (containingDeclaration instanceof ClassDescriptor);
         if (isProperty) {
             return resolveObjectDeclarationAsPropertyDescriptor(scope, containingDeclaration, objectDeclaration, classDescriptor, trace);
         }

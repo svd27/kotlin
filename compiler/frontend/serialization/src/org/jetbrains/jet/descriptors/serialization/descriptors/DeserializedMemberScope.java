@@ -187,7 +187,7 @@ public abstract class DeserializedMemberScope implements JetScope {
 
     @Nullable
     @Override
-    public NamespaceDescriptor getNamespace(@NotNull Name name) {
+    public PackageViewDescriptor getPackage(@NotNull Name name) {
         return null;
     }
 
