@@ -669,8 +669,8 @@ public class InlineCodegen implements ParentCodegenAware, Inliner {
         else if (descriptor instanceof FunctionDescriptor) {
             return parent.intoFunction((FunctionDescriptor) descriptor);
         }
-
-        return null;
+        System.out.println("Coudn't build context for " + descriptor);
+        throw new IllegalStateException("Coudn't build context for " + descriptor);
     }
 
     @NotNull
