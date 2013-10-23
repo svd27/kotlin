@@ -232,8 +232,16 @@ public class DescriptorUtils {
         return isKindOf(descriptor, ClassKind.CLASS_OBJECT);
     }
 
-    public static boolean isAnonymous(@NotNull ClassifierDescriptor descriptor) {
-        return isKindOf(descriptor, ClassKind.OBJECT) && descriptor.getName().isSpecial();
+    public static boolean isObject(@Nullable DeclarationDescriptor descriptor) {
+        return isKindOf(descriptor, ClassKind.OBJECT);
+    }
+
+    public static boolean isAnonymous(@NotNull DeclarationDescriptor descriptor) {
+        if (isClassObject(descriptor)) {
+            DeclarationDescriptor container = descriptor.getContainingDeclaration();
+            return container != null && isObject(container) && container.getName().isSpecial();
+        }
+        return false;
     }
 
     public static boolean isEnumEntry(@NotNull DeclarationDescriptor descriptor) {

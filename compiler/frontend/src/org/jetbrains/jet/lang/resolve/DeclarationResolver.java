@@ -41,6 +41,8 @@ import javax.inject.Inject;
 import java.util.*;
 
 import static org.jetbrains.jet.lang.diagnostics.Errors.*;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObject;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
 
 public class DeclarationResolver {
     @NotNull
@@ -127,35 +129,33 @@ public class DeclarationResolver {
     }
 
     private void resolveAnnotationConstructors() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            if (DescriptorUtils.isAnnotationClass(classDescriptor)) {
-                processPrimaryConstructor(classDescriptor, entry.getKey());
+            if (classOrObject instanceof JetClass && DescriptorUtils.isAnnotationClass(classDescriptor)) {
+                processPrimaryConstructor(classDescriptor, (JetClass) classOrObject);
             }
         }
     }
 
     private void resolveConstructorHeaders() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            if (!DescriptorUtils.isAnnotationClass(classDescriptor)) {
-                processPrimaryConstructor(classDescriptor, entry.getKey());
+            if (classOrObject instanceof JetClass && !DescriptorUtils.isAnnotationClass(classDescriptor)) {
+                processPrimaryConstructor(classDescriptor, (JetClass) classOrObject);
             }
         }
     }
 
     private void resolveAnnotationStubsOnClassesAndConstructors() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
-            JetClass jetClass = entry.getKey();
-            MutableClassDescriptor descriptor = entry.getValue();
-            resolveAnnotationsForClassOrObject(annotationResolver, jetClass, descriptor);
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            resolveAnnotationsForClassOrObject(annotationResolver, entry.getKey(), entry.getValue());
         }
         for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
-            JetObjectDeclaration objectDeclaration = entry.getKey();
-            MutableClassDescriptor descriptor = entry.getValue();
-            resolveAnnotationsForClassOrObject(annotationResolver, objectDeclaration, descriptor);
+            resolveAnnotationsForClassOrObject(annotationResolver, entry.getKey(), entry.getValue());
         }
     }
 
@@ -175,31 +175,27 @@ public class DeclarationResolver {
 
             resolveFunctionAndPropertyHeaders(namespace.getDeclarations(), namespaceScope, namespaceScope, namespaceScope, namespaceDescriptor);
         }
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
-            JetClass jetClass = entry.getKey();
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            JetClassBody jetClassBody = jetClass.getBody();
+            JetClassBody jetClassBody = classOrObject.getBody();
             if (classDescriptor.getKind() == ClassKind.ANNOTATION_CLASS && jetClassBody != null) {
                 trace.report(ANNOTATION_CLASS_WITH_BODY.on(jetClassBody));
             }
 
             resolveFunctionAndPropertyHeaders(
-                    jetClass.getDeclarations(), classDescriptor.getScopeForMemberResolution(),
+                    classOrObject.getDeclarations(), classDescriptor.getScopeForMemberResolution(),
                     classDescriptor.getScopeForInitializers(), classDescriptor.getScopeForMemberResolution(),
                     classDescriptor.getBuilder());
-            //            processPrimaryConstructor(classDescriptor, jetClass);
-            //            for (JetSecondaryConstructor jetConstructor : jetClass.getSecondaryConstructors()) {
-            //                processSecondaryConstructor(classDescriptor, jetConstructor);
-            //            }
         }
         for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
             JetObjectDeclaration object = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
             resolveFunctionAndPropertyHeaders(object.getDeclarations(), classDescriptor.getScopeForMemberResolution(),
-                    classDescriptor.getScopeForInitializers(), classDescriptor.getScopeForMemberResolution(),
-                    classDescriptor.getBuilder());
+                                              classDescriptor.getScopeForInitializers(), classDescriptor.getScopeForMemberResolution(),
+                                              classDescriptor.getBuilder());
         }
 
         scriptHeaderResolver.resolveScriptDeclarations();
@@ -252,14 +248,6 @@ public class DeclarationResolver {
                 }
 
                 @Override
-                public void visitObjectDeclaration(JetObjectDeclaration declaration) {
-                    PropertyDescriptor propertyDescriptor = descriptorResolver.resolveObjectDeclarationAsPropertyDescriptor(
-                            scopeForFunctions, namespaceLike.getOwnerForChildren(), declaration, context.getObjects().get(declaration), trace);
-
-                    namespaceLike.addPropertyDescriptor(propertyDescriptor);
-                }
-
-                @Override
                 public void visitEnumEntry(JetEnumEntry enumEntry) {
                     // FIX: Bad cast
                     MutableClassDescriptorLite classObjectDescriptor =
@@ -274,11 +262,11 @@ public class DeclarationResolver {
     }
 
     private void createFunctionsForDataClasses() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
-            JetClass jetClass = entry.getKey();
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            JetClassOrObject klass = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            if (jetClass.hasPrimaryConstructor() && KotlinBuiltIns.getInstance().isData(classDescriptor)) {
+            if (klass instanceof JetClass && klass.hasPrimaryConstructor() && KotlinBuiltIns.getInstance().isData(classDescriptor)) {
                 ConstructorDescriptor constructor = DescriptorUtils.getConstructorOfDataClass(classDescriptor);
                 createComponentFunctions(classDescriptor, constructor);
                 createCopyFunction(classDescriptor, constructor);
@@ -405,8 +393,8 @@ public class DeclarationResolver {
     private void checkRedeclarationsInInnerClassNames() {
         Iterable<MutableClassDescriptor> classesAndObjects = Iterables.concat(context.getClasses().values(), context.getObjects().values());
         for (MutableClassDescriptor classDescriptor : classesAndObjects) {
-            if (classDescriptor.getKind() == ClassKind.CLASS_OBJECT) {
-                // Class objects should be considered during analysing redeclarations in classes
+            if (isClassObject(classDescriptor) && !isObject(classDescriptor.getContainingDeclaration())) {
+                // Class objects of classes should be considered during analysing redeclarations in classes
                 continue;
             }
 

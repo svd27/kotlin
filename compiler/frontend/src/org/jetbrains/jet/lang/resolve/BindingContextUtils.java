@@ -41,6 +41,7 @@ import static org.jetbrains.jet.lang.descriptors.CallableMemberDescriptor.Kind.*
 import static org.jetbrains.jet.lang.diagnostics.Errors.AMBIGUOUS_LABEL;
 import static org.jetbrains.jet.lang.resolve.BindingContext.AMBIGUOUS_LABEL_TARGET;
 import static org.jetbrains.jet.lang.resolve.BindingContext.DECLARATION_TO_DESCRIPTOR;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
 
 public class BindingContextUtils {
     private BindingContextUtils() {
@@ -48,20 +49,17 @@ public class BindingContextUtils {
 
     private static final Slices.KeyNormalizer<DeclarationDescriptor> DECLARATION_DESCRIPTOR_NORMALIZER = new Slices.KeyNormalizer<DeclarationDescriptor>() {
         @Override
-        public DeclarationDescriptor normalize(DeclarationDescriptor declarationDescriptor) {
-            if (declarationDescriptor instanceof CallableMemberDescriptor) {
-                CallableMemberDescriptor callable = (CallableMemberDescriptor) declarationDescriptor;
+        public DeclarationDescriptor normalize(DeclarationDescriptor descriptor) {
+            if (descriptor instanceof CallableMemberDescriptor) {
+                CallableMemberDescriptor callable = (CallableMemberDescriptor) descriptor;
                 if (callable.getKind() != DECLARATION) {
                     throw new IllegalStateException("non-declaration descriptors should be filtered out earlier: " + callable);
                 }
             }
-            //if (declarationDescriptor instanceof VariableAsFunctionDescriptor) {
-            //    VariableAsFunctionDescriptor descriptor = (VariableAsFunctionDescriptor) declarationDescriptor;
-            //    if (descriptor.getOriginal() != descriptor) {
-            //        throw new IllegalStateException("original should be resolved earlier: " + descriptor);
-            //    }
-            //}
-            return declarationDescriptor.getOriginal();
+            if (isObject(descriptor)) {
+                return ((ClassDescriptor) descriptor).getClassObjectDescriptor();
+            }
+            return descriptor.getOriginal();
         }
     };
 

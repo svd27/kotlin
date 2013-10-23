@@ -307,10 +307,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     public void addClassifierDescriptor(@NotNull ClassifierDescriptor classDescriptor) {
         checkMayWrite();
 
-        if (isObject(classDescriptor)) {
-            throw new IllegalStateException("must not be object: " + classDescriptor);
-        }
-
         addClassifierAlias(classDescriptor.getName(), classDescriptor);
     }
 
@@ -493,18 +489,5 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     @Override
     public Collection<DeclarationDescriptor> getOwnDeclaredDescriptors() {
         return declaredDescriptorsAccessibleBySimpleName.values();
-    }
-
-    private static boolean isObject(@NotNull ClassifierDescriptor classifier) {
-        if (classifier instanceof ClassDescriptor) {
-            ClassDescriptor clazz = (ClassDescriptor) classifier;
-            return clazz.getKind().isObject();
-        }
-        else if (classifier instanceof TypeParameterDescriptor) {
-            return false;
-        }
-        else {
-            throw new IllegalStateException("unknown classifier: " + classifier);
-        }
     }
 }

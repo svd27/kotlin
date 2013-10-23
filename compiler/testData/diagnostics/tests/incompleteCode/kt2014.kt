@@ -14,7 +14,7 @@ fun x(f : Foo) {
 
     f.<!FUNCTION_EXPECTED!>a<!>()
     <!EXPRESSION_EXPECTED_NAMESPACE_FOUND, FUNCTION_EXPECTED!>c<!>()
-    <!FUNCTION_EXPECTED!>R<!>()
+    <!INVISIBLE_MEMBER!>R<!>()
 }
 
 object R {}

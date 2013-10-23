@@ -41,8 +41,8 @@ import org.jetbrains.jet.lang.types.expressions.ExpressionTypingServices;
 import org.jetbrains.jet.lang.types.expressions.LabelResolver;
 import org.jetbrains.jet.lexer.JetTokens;
 import org.jetbrains.jet.util.Box;
-import org.jetbrains.jet.util.slicedmap.WritableSlice;
 import org.jetbrains.jet.util.ReenteringLazyValueComputationException;
+import org.jetbrains.jet.util.slicedmap.WritableSlice;
 
 import javax.inject.Inject;
 import java.util.*;
@@ -160,7 +160,7 @@ public class BodyResolver {
 
     private void resolveDelegationSpecifierLists() {
         // TODO : Make sure the same thing is not initialized twice
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
             resolveDelegationSpecifierList(entry.getKey(), entry.getValue());
         }
         for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
@@ -335,7 +335,7 @@ public class BodyResolver {
     }
 
     private void resolveClassAnnotations() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
             resolveAnnotationArguments(entry.getValue().getScopeForSupertypeResolution(), entry.getKey());
         }
         for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
@@ -344,7 +344,7 @@ public class BodyResolver {
     }
 
     private void resolveAnonymousInitializers() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
             resolveAnonymousInitializers(entry.getKey(), entry.getValue());
         }
         for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
@@ -377,8 +377,9 @@ public class BodyResolver {
     }
 
     private void resolvePrimaryConstructorParameters() {
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
-            JetClass klass = entry.getKey();
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            if (!(entry.getKey() instanceof JetClass)) continue;
+            JetClass klass = (JetClass) entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
             ConstructorDescriptor unsubstitutedPrimaryConstructor = classDescriptor.getUnsubstitutedPrimaryConstructor();
 
@@ -412,8 +413,9 @@ public class BodyResolver {
 
         // Member properties
         Set<JetProperty> processed = Sets.newHashSet();
-        for (Map.Entry<JetClass, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
-            JetClass jetClass = entry.getKey();
+        for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
+            if (!(entry.getKey() instanceof JetClass)) continue;
+            JetClass jetClass = (JetClass) entry.getKey();
             if (!context.completeAnalysisNeeded(jetClass)) continue;
             MutableClassDescriptor classDescriptor = entry.getValue();
 
