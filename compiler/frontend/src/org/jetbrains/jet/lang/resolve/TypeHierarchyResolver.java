@@ -28,6 +28,7 @@ import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.impl.*;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.name.Name;
+import org.jetbrains.jet.lang.resolve.name.SpecialNames;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.resolve.scopes.RedeclarationHandler;
 import org.jetbrains.jet.lang.resolve.scopes.WritableScope;
@@ -181,6 +182,13 @@ public class TypeHierarchyResolver {
             MutableClassDescriptor descriptor = entry.getValue();
             if (classOrObject instanceof JetClass) {
                 descriptorResolver.resolveMutableClassDescriptor((JetClass) classOrObject, descriptor, trace);
+                descriptor.createTypeConstructor();
+            }
+            else if (classOrObject instanceof JetObjectDeclaration && descriptor.getKind() == ClassKind.CLASS) {
+                // Anonymous object
+                descriptor.setModality(Modality.FINAL);
+                descriptor.setVisibility(Visibilities.INTERNAL);
+                descriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
                 descriptor.createTypeConstructor();
             }
         }
@@ -473,11 +481,22 @@ public class TypeHierarchyResolver {
 
         @Override
         public void visitObjectDeclaration(JetObjectDeclaration declaration) {
-            String name = declaration.getName();
-            Name safeName = JetPsiUtil.safeName(name);
+            if (declaration.isObjectLiteral()) {
+                MutableClassDescriptor object =
+                        createClassDescriptorForObject(declaration, owner.getOwnerForChildren(), outerScope, SpecialNames.ANONYMOUS_OBJECT,
+                                                       ClassKind.CLASS);
+                owner.addClassifierDescriptor(object);
+                context.getClasses().put(declaration, object);
+                trace.record(FQNAME_TO_CLASS_DESCRIPTOR, JetPsiUtil.getFQName(declaration), object);
+                return;
+            }
+
+            String nameStr = declaration.getName();
+            assert nameStr != null : "Object declaration should have a name: " + declaration.getText();
+            Name name = Name.identifier(nameStr);
 
             MutableClassDescriptor fakeClass =
-                    new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, ClassKind.OBJECT, false, safeName);
+                    new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, ClassKind.OBJECT, false, name);
             Visibility visibility = resolveVisibilityFromModifiers(declaration);
             fakeClass.setModality(Modality.FINAL);
             fakeClass.setVisibility(visibility);
@@ -485,10 +504,9 @@ public class TypeHierarchyResolver {
             fakeClass.createTypeConstructor();
             createPrimaryConstructorForObject(null, fakeClass).setReturnType(fakeClass.getDefaultType());
 
-            Name classObjectName = name == null ? Name.special("<anonymous-object>") : getClassObjectName(safeName);
             MutableClassDescriptor objectDescriptor =
-                    createClassDescriptorForObject(declaration, fakeClass, fakeClass.getScopeForMemberResolution(), classObjectName,
-                                                   ClassKind.CLASS_OBJECT);
+                    createClassDescriptorForObject(declaration, fakeClass, fakeClass.getScopeForMemberResolution(),
+                                                   getClassObjectName(name), ClassKind.CLASS_OBJECT);
             objectDescriptor.setModality(Modality.FINAL);
             objectDescriptor.setVisibility(resolveVisibilityFromModifiers(declaration, visibility));
             objectDescriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());

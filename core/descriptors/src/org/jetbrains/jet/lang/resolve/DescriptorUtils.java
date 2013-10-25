@@ -236,11 +236,7 @@ public class DescriptorUtils {
     }
 
     public static boolean isAnonymous(@NotNull DeclarationDescriptor descriptor) {
-        if (isClassObject(descriptor)) {
-            DeclarationDescriptor container = descriptor.getContainingDeclaration();
-            return container != null && isObject(container) && container.getName().isSpecial();
-        }
-        return false;
+        return isClass(descriptor) && descriptor.getName().equals(SpecialNames.ANONYMOUS_OBJECT);
     }
 
     public static boolean isEnumEntry(@NotNull DeclarationDescriptor descriptor) {
