@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@SuppressWarnings("UseOfSystemOutOrSystemErr")
 public class BuiltInsSerializer {
     private static final String BUILT_INS_SRC_DIR = "idea/builtinsSrc";
     public static final String DEST_DIR = "compiler/frontend/builtins";
