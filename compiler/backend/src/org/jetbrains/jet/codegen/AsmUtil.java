@@ -31,7 +31,10 @@ import org.jetbrains.jet.codegen.state.GenerationState;
 import org.jetbrains.jet.codegen.state.JetTypeMapper;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCall;
-import org.jetbrains.jet.lang.resolve.java.*;
+import org.jetbrains.jet.lang.resolve.java.AsmTypeConstants;
+import org.jetbrains.jet.lang.resolve.java.JavaVisibilities;
+import org.jetbrains.jet.lang.resolve.java.JvmClassName;
+import org.jetbrains.jet.lang.resolve.java.JvmPrimitiveType;
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaCallableMemberDescriptor;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.types.JetType;
@@ -318,13 +321,6 @@ public class AsmUtil {
         for (Pair<String, Type> field : fields) {
             v.newField(null, access, field.first, field.second.getDescriptor(), null, null);
         }
-    }
-
-    public static void genInitSingletonField(@NotNull Type classAsmType, @NotNull InstructionAdapter iv) {
-        iv.anew(classAsmType);
-        iv.dup();
-        iv.invokespecial(classAsmType.getInternalName(), "<init>", "()V");
-        iv.putstatic(classAsmType.getInternalName(), JvmAbi.INSTANCE_FIELD, classAsmType.getDescriptor());
     }
 
     public static int genAssignInstanceFieldFromParam(FieldInfo info, int index, InstructionAdapter iv) {
