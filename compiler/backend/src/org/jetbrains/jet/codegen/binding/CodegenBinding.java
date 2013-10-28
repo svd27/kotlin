@@ -349,18 +349,15 @@ public class CodegenBinding {
 
         String containerInternalName = getAsmType(bindingTrace, container).getInternalName();
 
-        if (descriptor instanceof ClassDescriptor && container instanceof ClassDescriptor) {
-            ClassDescriptor klass = (ClassDescriptor) descriptor;
-            if (klass.getKind() == ClassKind.OBJECT || klass.getKind() == ClassKind.CLASS_OBJECT) {
-                if (isEnumClass(container)) {
-                    return containerInternalName;
-                }
-                else if (klass.getKind() == ClassKind.OBJECT) {
-                    return containerInternalName + "$" + klass.getName();
-                }
-                else {
-                    return containerInternalName + JvmAbi.CLASS_OBJECT_SUFFIX;
-                }
+        if (isClassObject(descriptor)) {
+            if (isEnumClass(container)) {
+                return containerInternalName;
+            }
+            else if (isObject(container)) {
+                return containerInternalName + "$" + descriptor.getName();
+            }
+            else {
+                return containerInternalName + JvmAbi.CLASS_OBJECT_SUFFIX;
             }
         }
 
