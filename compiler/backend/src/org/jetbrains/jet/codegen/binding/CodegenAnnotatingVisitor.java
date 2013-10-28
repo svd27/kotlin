@@ -53,6 +53,7 @@ import static org.jetbrains.jet.codegen.CodegenUtil.peekFromStack;
 import static org.jetbrains.jet.codegen.FunctionTypesUtil.getSuperTypeForClosure;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.*;
 import static org.jetbrains.jet.lang.resolve.BindingContext.*;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfObject;
 import static org.jetbrains.jet.lexer.JetTokens.*;
 
 class CodegenAnnotatingVisitor extends JetVisitorVoid {
@@ -179,21 +180,22 @@ class CodegenAnnotatingVisitor extends JetVisitorVoid {
     public void visitObjectDeclaration(JetObjectDeclaration declaration) {
         if (declaration.getParent() instanceof JetObjectLiteralExpression || declaration.getParent() instanceof JetClassObject) {
             super.visitObjectDeclaration(declaration);
+            return;
         }
-        else {
-            ClassDescriptor classDescriptor = bindingContext.get(CLASS, declaration);
-            // working around a problem with shallow analysis
-            if (classDescriptor == null) return;
 
-            String name = getName(classDescriptor);
-            recordClosure(declaration, classDescriptor, name);
+        ClassDescriptor classObject = bindingContext.get(CLASS, declaration);
+        // working around a problem with shallow analysis
+        if (classObject == null) return;
 
-            classStack.push(classDescriptor);
-            nameStack.push(name);
-            super.visitObjectDeclaration(declaration);
-            nameStack.pop();
-            classStack.pop();
-        }
+        assert isClassObjectOfObject(classObject) : "CLASS slice should store a class object for object declaration: " + classObject;
+        String name = getName((ClassDescriptor) classObject.getContainingDeclaration());
+        recordClosure(declaration, classObject, name);
+
+        classStack.push(classObject);
+        nameStack.push(name);
+        super.visitObjectDeclaration(declaration);
+        nameStack.pop();
+        classStack.pop();
     }
 
     @Override

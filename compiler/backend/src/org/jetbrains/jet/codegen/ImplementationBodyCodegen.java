@@ -1031,21 +1031,20 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
             iv.load(0, OBJECT_TYPE);
         }
 
-        for (int paramIndex = 0; paramIndex < argTypes.length; paramIndex++) {
-            Type argType = argTypes[paramIndex];
+        for (Type argType : argTypes) {
             iv.load(reg, argType);
-            //noinspection AssignmentToForLoopParameter
             reg += argType.getSize();
         }
         callableMethod.invokeWithoutAssertions(iv);
     }
 
     private void generateFieldForSingleton() {
-        boolean hasClassObject = descriptor.getClassObjectDescriptor() != null;
-        boolean isEnumClass = DescriptorUtils.isEnumClass(descriptor);
-        boolean isObjectDeclaration = descriptor.getKind() == ClassKind.OBJECT && isNonLiteralObject(myClass) ;
+        if (isEnumClass(descriptor)) return;
 
-        if (!isObjectDeclaration && !hasClassObject || isEnumClass) return;
+        boolean hasClassObject = descriptor.getClassObjectDescriptor() != null;
+        boolean isObjectDeclaration = isClassObjectOfObject(descriptor);
+
+        if (!isObjectDeclaration && !hasClassObject) return;
 
         ClassDescriptor fieldTypeDescriptor = hasClassObject ? descriptor.getClassObjectDescriptor() : descriptor;
         assert fieldTypeDescriptor != null;

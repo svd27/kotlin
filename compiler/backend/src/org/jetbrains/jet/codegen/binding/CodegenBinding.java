@@ -42,7 +42,7 @@ import java.util.*;
 import static org.jetbrains.jet.codegen.CodegenUtil.isInterface;
 import static org.jetbrains.jet.lang.resolve.BindingContext.*;
 import static org.jetbrains.jet.lang.resolve.BindingContextUtils.descriptorToDeclaration;
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumClass;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.*;
 
 public class CodegenBinding {
     public static final WritableSlice<ClassDescriptor, MutableClosure> CLOSURE = Slices.createSimpleSlice();
@@ -160,7 +160,7 @@ public class CodegenBinding {
         bindingTrace.record(CLASS_FOR_SCRIPT, scriptDescriptor, classDescriptor);
     }
 
-    public static boolean canHaveOuter(BindingContext bindingContext, @NotNull ClassDescriptor classDescriptor) {
+    public static boolean canHaveOuter(@NotNull BindingContext bindingContext, @NotNull ClassDescriptor classDescriptor) {
         if (isSingleton(bindingContext, classDescriptor)) {
             return false;
         }
@@ -170,28 +170,15 @@ public class CodegenBinding {
             return false;
         }
 
-        ClassKind kind = classDescriptor.getKind();
-        if (kind == ClassKind.CLASS) {
+        if (classDescriptor.getKind() == ClassKind.CLASS) {
             return classDescriptor.isInner() || !(classDescriptor.getContainingDeclaration() instanceof ClassDescriptor);
-        }
-        else if (kind == ClassKind.OBJECT) {
-            return !isSingleton(bindingContext, enclosing);
-        }
-        else {
-            return false;
-        }
-    }
-
-    public static boolean isSingleton(BindingContext bindingContext, @NotNull ClassDescriptor classDescriptor) {
-        if (isObjectDeclaration(bindingContext, classDescriptor)) {
-            return true;
-        }
-
-        if (classDescriptor.getKind() == ClassKind.ENUM_ENTRY) {
-            return true;
         }
 
         return false;
+    }
+
+    public static boolean isSingleton(@NotNull BindingContext bindingContext, @NotNull ClassDescriptor classDescriptor) {
+        return isObjectDeclaration(bindingContext, classDescriptor) || isEnumEntry(classDescriptor);
     }
 
     static void recordClosure(
@@ -323,6 +310,12 @@ public class CodegenBinding {
     @NotNull
     public static Type getAsmType(@NotNull BindingTrace bindingTrace, @NotNull DeclarationDescriptor descriptor) {
         descriptor = descriptor.getOriginal();
+        if (isObject(descriptor)) {
+            ClassDescriptor classObject = ((ClassDescriptor) descriptor).getClassObjectDescriptor();
+            assert classObject != null : "Object should have a class object: " + descriptor;
+            descriptor = classObject;
+        }
+
         Type alreadyComputedType = bindingTrace.getBindingContext().get(ASM_TYPE, descriptor);
         if (alreadyComputedType != null) {
             return alreadyComputedType;

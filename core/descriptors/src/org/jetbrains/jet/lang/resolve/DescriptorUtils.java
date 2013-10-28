@@ -227,6 +227,14 @@ public class DescriptorUtils {
         return descriptor instanceof AnonymousFunctionDescriptor;
     }
 
+    public static boolean isClassObjectOfObject(@NotNull DeclarationDescriptor descriptor) {
+        return isClassObject(descriptor) && isObject(descriptor.getContainingDeclaration());
+    }
+
+    public static boolean isClassObjectOfSingleton(@NotNull DeclarationDescriptor descriptor) {
+        return isClassObjectOfObject(descriptor);
+    }
+
     public static boolean isClassObject(@NotNull DeclarationDescriptor descriptor) {
         return isKindOf(descriptor, ClassKind.CLASS_OBJECT);
     }
@@ -321,15 +329,23 @@ public class DescriptorUtils {
 
     @NotNull
     public static Visibility getDefaultConstructorVisibility(@NotNull ClassDescriptor classDescriptor) {
-        ClassKind classKind = classDescriptor.getKind();
-        if (classKind == ClassKind.ENUM_CLASS) {
+        if (isAnonymous(classDescriptor)) {
             return Visibilities.PRIVATE;
         }
-        if (classKind.isObject()) {
-            return Visibilities.PRIVATE;
+
+        switch (classDescriptor.getKind()) {
+            case CLASS:
+            case TRAIT:
+            case ANNOTATION_CLASS:
+                return Visibilities.PUBLIC;
+            case ENUM_CLASS:
+            case ENUM_ENTRY:
+            case OBJECT:
+            case CLASS_OBJECT:
+                return Visibilities.PRIVATE;
+            default:
+                throw new IllegalStateException("Unknown class kind: " + classDescriptor);
         }
-        assert classKind == ClassKind.CLASS || classKind == ClassKind.TRAIT || classKind == ClassKind.ANNOTATION_CLASS;
-        return Visibilities.PUBLIC;
     }
 
     @NotNull

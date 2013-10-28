@@ -30,7 +30,6 @@ import org.jetbrains.jet.codegen.binding.CalculatedClosure;
 import org.jetbrains.jet.codegen.state.GenerationState;
 import org.jetbrains.jet.codegen.state.JetTypeMapper;
 import org.jetbrains.jet.lang.descriptors.*;
-import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.calls.model.ResolvedCall;
 import org.jetbrains.jet.lang.resolve.java.*;
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaCallableMemberDescriptor;
@@ -202,7 +201,8 @@ public class AsmUtil {
         Classes in byte code should be public or package private
      */
     public static int getVisibilityAccessFlagForClass(ClassDescriptor descriptor) {
-        if (DescriptorUtils.isTopLevelDeclaration(descriptor) ||
+        if (isTopLevelDeclaration(descriptor) ||
+            (isClassObjectOfSingleton(descriptor) && isTopLevelDeclaration(descriptor.getContainingDeclaration())) ||
             descriptor.getVisibility() == Visibilities.PUBLIC ||
             descriptor.getVisibility() == Visibilities.INTERNAL) {
             return ACC_PUBLIC;
@@ -249,14 +249,13 @@ public class AsmUtil {
             return NO_FLAG_PACKAGE_PRIVATE;
         }
         if (memberDescriptor instanceof ConstructorDescriptor) {
-            ClassKind kind = ((ClassDescriptor) containingDeclaration).getKind();
-            if (kind == ClassKind.OBJECT) {
+            if (isClassObjectOfSingleton(containingDeclaration) ||
+                isAnonymous(containingDeclaration) ||
+                isEnumEntry(containingDeclaration)) {
                 return NO_FLAG_PACKAGE_PRIVATE;
             }
-            else if (kind == ClassKind.ENUM_ENTRY) {
-                return NO_FLAG_PACKAGE_PRIVATE;
-            }
-            else if (kind == ClassKind.ENUM_CLASS) {
+
+            if (isEnumClass(containingDeclaration)) {
                 //TODO: should be ACC_PRIVATE
                 // see http://youtrack.jetbrains.com/issue/KT-2680
                 return ACC_PROTECTED;
@@ -321,20 +320,11 @@ public class AsmUtil {
         }
     }
 
-    public static void genInitSingletonField(Type classAsmType, InstructionAdapter iv) {
-        genInitSingletonField(classAsmType, JvmAbi.INSTANCE_FIELD, classAsmType, iv);
-    }
-
-    public static void genInitSingletonField(FieldInfo info, InstructionAdapter iv) {
-        assert info.isStatic();
-        genInitSingletonField(info.getOwnerType(), info.getFieldName(), info.getFieldType(), iv);
-    }
-
-    public static void genInitSingletonField(Type fieldOwnerType, String fieldName, Type fieldAsmType, InstructionAdapter iv) {
-        iv.anew(fieldAsmType);
+    public static void genInitSingletonField(@NotNull Type classAsmType, @NotNull InstructionAdapter iv) {
+        iv.anew(classAsmType);
         iv.dup();
-        iv.invokespecial(fieldAsmType.getInternalName(), "<init>", "()V");
-        iv.putstatic(fieldOwnerType.getInternalName(), fieldName, fieldAsmType.getDescriptor());
+        iv.invokespecial(classAsmType.getInternalName(), "<init>", "()V");
+        iv.putstatic(classAsmType.getInternalName(), JvmAbi.INSTANCE_FIELD, classAsmType.getDescriptor());
     }
 
     public static int genAssignInstanceFieldFromParam(FieldInfo info, int index, InstructionAdapter iv) {
