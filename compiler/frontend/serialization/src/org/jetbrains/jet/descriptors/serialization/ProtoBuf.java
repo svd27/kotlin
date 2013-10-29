@@ -4357,10 +4357,18 @@ public final class ProtoBuf {
     // optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;
     /**
      * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+     * </pre>
      */
     boolean hasClassObject();
     /**
      * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+     * </pre>
      */
     org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject getClassObject();
 
@@ -4436,16 +4444,6 @@ public final class ProtoBuf {
      * <code>repeated int32 nested_object_name = 8;</code>
      */
     int getNestedObjectName(int index);
-
-    // optional bool class_object_present = 9 [default = false];
-    /**
-     * <code>optional bool class_object_present = 9 [default = false];</code>
-     */
-    boolean hasClassObjectPresent();
-    /**
-     * <code>optional bool class_object_present = 9 [default = false];</code>
-     */
-    boolean getClassObjectPresent();
 
     // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
     /**
@@ -4623,14 +4621,9 @@ public final class ProtoBuf {
               input.popLimit(limit);
               break;
             }
-            case 72: {
-              bitField0_ |= 0x00000010;
-              classObjectPresent_ = input.readBool();
-              break;
-            }
             case 82: {
               org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder subBuilder = null;
-              if (((bitField0_ & 0x00000020) == 0x00000020)) {
+              if (((bitField0_ & 0x00000010) == 0x00000010)) {
                 subBuilder = primaryConstructor_.toBuilder();
               }
               primaryConstructor_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry);
@@ -4638,21 +4631,21 @@ public final class ProtoBuf {
                 subBuilder.mergeFrom(primaryConstructor_);
                 primaryConstructor_ = subBuilder.buildPartial();
               }
-              bitField0_ |= 0x00000020;
+              bitField0_ |= 0x00000010;
               break;
             }
             case 90: {
-              if (!((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+              if (!((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
                 member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>();
-                mutable_bitField0_ |= 0x00000400;
+                mutable_bitField0_ |= 0x00000200;
               }
               member_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry));
               break;
             }
             case 96: {
-              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+              if (!((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
                 enumEntry_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000800;
+                mutable_bitField0_ |= 0x00000400;
               }
               enumEntry_.add(input.readInt32());
               break;
@@ -4660,9 +4653,9 @@ public final class ProtoBuf {
             case 98: {
               int length = input.readRawVarint32();
               int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000800) == 0x00000800) && input.getBytesUntilLimit() > 0) {
+              if (!((mutable_bitField0_ & 0x00000400) == 0x00000400) && input.getBytesUntilLimit() > 0) {
                 enumEntry_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000800;
+                mutable_bitField0_ |= 0x00000400;
               }
               while (input.getBytesUntilLimit() > 0) {
                 enumEntry_.add(input.readInt32());
@@ -4690,10 +4683,10 @@ public final class ProtoBuf {
         if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
           nestedObjectName_ = java.util.Collections.unmodifiableList(nestedObjectName_);
         }
-        if (((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
+        if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
           member_ = java.util.Collections.unmodifiableList(member_);
         }
-        if (((mutable_bitField0_ & 0x00000800) == 0x00000800)) {
+        if (((mutable_bitField0_ & 0x00000400) == 0x00000400)) {
           enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
         }
         makeExtensionsImmutable();
@@ -5365,12 +5358,20 @@ public final class ProtoBuf {
     private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject classObject_;
     /**
      * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+     * </pre>
      */
     public boolean hasClassObject() {
       return ((bitField0_ & 0x00000008) == 0x00000008);
     }
     /**
      * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+     * </pre>
      */
     public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject getClassObject() {
       return classObject_;
@@ -5509,22 +5510,6 @@ public final class ProtoBuf {
       return nestedObjectName_.get(index);
     }
 
-    // optional bool class_object_present = 9 [default = false];
-    public static final int CLASS_OBJECT_PRESENT_FIELD_NUMBER = 9;
-    private boolean classObjectPresent_;
-    /**
-     * <code>optional bool class_object_present = 9 [default = false];</code>
-     */
-    public boolean hasClassObjectPresent() {
-      return ((bitField0_ & 0x00000010) == 0x00000010);
-    }
-    /**
-     * <code>optional bool class_object_present = 9 [default = false];</code>
-     */
-    public boolean getClassObjectPresent() {
-      return classObjectPresent_;
-    }
-
     // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
     public static final int PRIMARY_CONSTRUCTOR_FIELD_NUMBER = 10;
     private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructor_;
@@ -5536,7 +5521,7 @@ public final class ProtoBuf {
      * </pre>
      */
     public boolean hasPrimaryConstructor() {
-      return ((bitField0_ & 0x00000020) == 0x00000020);
+      return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
      * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
@@ -5617,7 +5602,6 @@ public final class ProtoBuf {
       supertype_ = java.util.Collections.emptyList();
       nestedClassName_ = java.util.Collections.emptyList();
       nestedObjectName_ = java.util.Collections.emptyList();
-      classObjectPresent_ = false;
       primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
       member_ = java.util.Collections.emptyList();
       enumEntry_ = java.util.Collections.emptyList();
@@ -5693,9 +5677,6 @@ public final class ProtoBuf {
         output.writeInt32(8, nestedObjectName_.get(i));
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeBool(9, classObjectPresent_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         output.writeMessage(10, primaryConstructor_);
       }
       for (int i = 0; i < member_.size(); i++) {
@@ -5755,10 +5736,6 @@ public final class ProtoBuf {
         size += 1 * getNestedObjectNameList().size();
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        size += com.google.protobuf.CodedOutputStream
-          .computeBoolSize(9, classObjectPresent_);
-      }
-      if (((bitField0_ & 0x00000020) == 0x00000020)) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(10, primaryConstructor_);
       }
@@ -5882,14 +5859,12 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000040);
         nestedObjectName_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000080);
-        classObjectPresent_ = false;
-        bitField0_ = (bitField0_ & ~0x00000100);
         primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
         enumEntry_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00000400);
         return this;
       }
 
@@ -5952,19 +5927,15 @@ public final class ProtoBuf {
         if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.classObjectPresent_ = classObjectPresent_;
-        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
-          to_bitField0_ |= 0x00000020;
-        }
         result.primaryConstructor_ = primaryConstructor_;
-        if (((bitField0_ & 0x00000400) == 0x00000400)) {
+        if (((bitField0_ & 0x00000200) == 0x00000200)) {
           member_ = java.util.Collections.unmodifiableList(member_);
-          bitField0_ = (bitField0_ & ~0x00000400);
+          bitField0_ = (bitField0_ & ~0x00000200);
         }
         result.member_ = member_;
-        if (((bitField0_ & 0x00000800) == 0x00000800)) {
+        if (((bitField0_ & 0x00000400) == 0x00000400)) {
           enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
-          bitField0_ = (bitField0_ & ~0x00000800);
+          bitField0_ = (bitField0_ & ~0x00000400);
         }
         result.enumEntry_ = enumEntry_;
         result.bitField0_ = to_bitField0_;
@@ -6027,16 +5998,13 @@ public final class ProtoBuf {
           }
           
         }
-        if (other.hasClassObjectPresent()) {
-          setClassObjectPresent(other.getClassObjectPresent());
-        }
         if (other.hasPrimaryConstructor()) {
           mergePrimaryConstructor(other.getPrimaryConstructor());
         }
         if (!other.member_.isEmpty()) {
           if (member_.isEmpty()) {
             member_ = other.member_;
-            bitField0_ = (bitField0_ & ~0x00000400);
+            bitField0_ = (bitField0_ & ~0x00000200);
           } else {
             ensureMemberIsMutable();
             member_.addAll(other.member_);
@@ -6046,7 +6014,7 @@ public final class ProtoBuf {
         if (!other.enumEntry_.isEmpty()) {
           if (enumEntry_.isEmpty()) {
             enumEntry_ = other.enumEntry_;
-            bitField0_ = (bitField0_ & ~0x00000800);
+            bitField0_ = (bitField0_ & ~0x00000400);
           } else {
             ensureEnumEntryIsMutable();
             enumEntry_.addAll(other.enumEntry_);
@@ -6317,18 +6285,30 @@ public final class ProtoBuf {
       private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject classObject_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject.getDefaultInstance();
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public boolean hasClassObject() {
         return ((bitField0_ & 0x00000008) == 0x00000008);
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject getClassObject() {
         return classObject_;
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public Builder setClassObject(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject value) {
         if (value == null) {
@@ -6341,6 +6321,10 @@ public final class ProtoBuf {
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public Builder setClassObject(
           org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject.Builder builderForValue) {
@@ -6351,6 +6335,10 @@ public final class ProtoBuf {
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public Builder mergeClassObject(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject value) {
         if (((bitField0_ & 0x00000008) == 0x00000008) &&
@@ -6366,6 +6354,10 @@ public final class ProtoBuf {
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.ClassObject class_object = 4;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a class object. Its proto should be found either here or in the separate file
+       * </pre>
        */
       public Builder clearClassObject() {
         classObject_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.ClassObject.getDefaultInstance();
@@ -6791,39 +6783,6 @@ public final class ProtoBuf {
         return this;
       }
 
-      // optional bool class_object_present = 9 [default = false];
-      private boolean classObjectPresent_ ;
-      /**
-       * <code>optional bool class_object_present = 9 [default = false];</code>
-       */
-      public boolean hasClassObjectPresent() {
-        return ((bitField0_ & 0x00000100) == 0x00000100);
-      }
-      /**
-       * <code>optional bool class_object_present = 9 [default = false];</code>
-       */
-      public boolean getClassObjectPresent() {
-        return classObjectPresent_;
-      }
-      /**
-       * <code>optional bool class_object_present = 9 [default = false];</code>
-       */
-      public Builder setClassObjectPresent(boolean value) {
-        bitField0_ |= 0x00000100;
-        classObjectPresent_ = value;
-        
-        return this;
-      }
-      /**
-       * <code>optional bool class_object_present = 9 [default = false];</code>
-       */
-      public Builder clearClassObjectPresent() {
-        bitField0_ = (bitField0_ & ~0x00000100);
-        classObjectPresent_ = false;
-        
-        return this;
-      }
-
       // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
       private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
       /**
@@ -6834,7 +6793,7 @@ public final class ProtoBuf {
        * </pre>
        */
       public boolean hasPrimaryConstructor() {
-        return ((bitField0_ & 0x00000200) == 0x00000200);
+        return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
@@ -6859,7 +6818,7 @@ public final class ProtoBuf {
         }
         primaryConstructor_ = value;
 
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000100;
         return this;
       }
       /**
@@ -6873,7 +6832,7 @@ public final class ProtoBuf {
           org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder builderForValue) {
         primaryConstructor_ = builderForValue.build();
 
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000100;
         return this;
       }
       /**
@@ -6884,7 +6843,7 @@ public final class ProtoBuf {
        * </pre>
        */
       public Builder mergePrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
-        if (((bitField0_ & 0x00000200) == 0x00000200) &&
+        if (((bitField0_ & 0x00000100) == 0x00000100) &&
             primaryConstructor_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance()) {
           primaryConstructor_ =
             org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.newBuilder(primaryConstructor_).mergeFrom(value).buildPartial();
@@ -6892,7 +6851,7 @@ public final class ProtoBuf {
           primaryConstructor_ = value;
         }
 
-        bitField0_ |= 0x00000200;
+        bitField0_ |= 0x00000100;
         return this;
       }
       /**
@@ -6905,7 +6864,7 @@ public final class ProtoBuf {
       public Builder clearPrimaryConstructor() {
         primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
 
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         return this;
       }
 
@@ -6913,9 +6872,9 @@ public final class ProtoBuf {
       private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable> member_ =
         java.util.Collections.emptyList();
       private void ensureMemberIsMutable() {
-        if (!((bitField0_ & 0x00000400) == 0x00000400)) {
+        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
           member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>(member_);
-          bitField0_ |= 0x00000400;
+          bitField0_ |= 0x00000200;
          }
       }
 
@@ -7020,7 +6979,7 @@ public final class ProtoBuf {
        */
       public Builder clearMember() {
         member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
 
         return this;
       }
@@ -7037,9 +6996,9 @@ public final class ProtoBuf {
       // repeated int32 enum_entry = 12;
       private java.util.List<java.lang.Integer> enumEntry_ = java.util.Collections.emptyList();
       private void ensureEnumEntryIsMutable() {
-        if (!((bitField0_ & 0x00000800) == 0x00000800)) {
+        if (!((bitField0_ & 0x00000400) == 0x00000400)) {
           enumEntry_ = new java.util.ArrayList<java.lang.Integer>(enumEntry_);
-          bitField0_ |= 0x00000800;
+          bitField0_ |= 0x00000400;
          }
       }
       /**
@@ -7095,7 +7054,7 @@ public final class ProtoBuf {
        */
       public Builder clearEnumEntry() {
         enumEntry_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000800);
+        bitField0_ = (bitField0_ & ~0x00000400);
         
         return this;
       }

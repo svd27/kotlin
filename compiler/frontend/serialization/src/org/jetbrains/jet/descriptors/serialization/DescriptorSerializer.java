@@ -124,9 +124,6 @@ public class DescriptorSerializer {
 
         ClassDescriptor classObject = classDescriptor.getClassObjectDescriptor();
         if (classObject != null) {
-            // false is default
-            builder.setClassObjectPresent(true);
-
             builder.setClassObject(classObjectProto(classObject));
         }
 
