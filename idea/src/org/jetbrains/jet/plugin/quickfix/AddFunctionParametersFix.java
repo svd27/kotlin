@@ -123,7 +123,7 @@ public class AddFunctionParametersFix extends ChangeFunctionSignatureFix {
             }
 
             @Override
-            public boolean performSilently(Collection<? extends PsiElement> affectedFunctions) {
+            public boolean performSilently(@NotNull Collection<? extends PsiElement> affectedFunctions) {
                 if (affectedFunctions.size() != 1) {
                     return false;
                 }
