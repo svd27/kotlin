@@ -215,7 +215,13 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
     protected void generateKotlinAnnotation() {
         DescriptorSerializer serializer = new DescriptorSerializer(new JavaSerializerExtension(v.getSerializationBindings()));
 
-        ProtoBuf.Class classProto = serializer.classProto(descriptor).build();
+        // If we're generating a singleton, "descriptor" represents its synthetic class object.
+        // We serialize the actual singleton descriptor instead to make deserialization logic simpler
+        ClassDescriptor classToSerialize = isClassObjectOfSingleton(descriptor)
+                                           ? (ClassDescriptor) descriptor.getContainingDeclaration()
+                                           : descriptor;
+
+        ProtoBuf.Class classProto = serializer.classProto(classToSerialize).build();
 
         ClassData data = new ClassData(createNameResolver(serializer.getNameTable()), classProto);
 

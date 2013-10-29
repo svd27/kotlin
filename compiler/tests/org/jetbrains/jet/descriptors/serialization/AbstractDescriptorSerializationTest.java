@@ -30,11 +30,11 @@ import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.java.JavaDescriptorResolver;
 import org.jetbrains.jet.lang.resolve.lazy.KotlinTestWithEnvironment;
 import org.jetbrains.jet.lang.resolve.lazy.LazyResolveTestUtil;
-import org.jetbrains.jet.storage.LockBasedStorageManager;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.resolve.scopes.WritableScope;
+import org.jetbrains.jet.storage.LockBasedStorageManager;
 import org.jetbrains.jet.test.util.NamespaceComparator;
 
 import java.io.File;
@@ -183,8 +183,8 @@ public abstract class AbstractDescriptorSerializationTest extends KotlinTestWith
 
         @Nullable
         @Override
-        public ClassDescriptor findClass(@NotNull ClassId classId) {
-            ClassDescriptor found = super.findClass(classId);
+        public ClassDescriptor findClassImpl(@NotNull ClassId classId) {
+            ClassDescriptor found = super.findClassImpl(classId);
             return found != null ? found : javaDescriptorResolver.resolveClass(classId.asSingleFqName().toSafe(), IGNORE_KOTLIN_SOURCES);
         }
 

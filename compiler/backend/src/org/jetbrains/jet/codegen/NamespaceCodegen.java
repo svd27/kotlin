@@ -215,9 +215,7 @@ public class NamespaceCodegen extends MemberCodegen {
 
         for (JetFile file : namespaceFiles) {
             for (JetDeclaration declaration : file.getDeclarations()) {
-                if (declaration instanceof JetProperty ||
-                    declaration instanceof JetNamedFunction ||
-                    declaration instanceof JetObjectDeclaration) {
+                if (declaration instanceof JetProperty || declaration instanceof JetNamedFunction) {
                     return true;
                 }
             }

@@ -18,13 +18,12 @@ package org.jetbrains.jet.lang.resolve.kotlin;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import org.jetbrains.jet.descriptors.serialization.ClassId;
-import org.jetbrains.jet.descriptors.serialization.DescriptorFinder;
-import org.jetbrains.jet.descriptors.serialization.JavaProtoBufUtil;
+import org.jetbrains.jet.descriptors.serialization.*;
 import org.jetbrains.jet.descriptors.serialization.descriptors.DeserializedClassDescriptor;
 import org.jetbrains.jet.descriptors.serialization.descriptors.DeserializedPackageMemberScope;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.resolve.java.JvmAbi;
 import org.jetbrains.jet.lang.resolve.java.resolver.ErrorReporter;
 import org.jetbrains.jet.lang.resolve.java.resolver.JavaClassResolver;
 import org.jetbrains.jet.lang.resolve.java.resolver.JavaNamespaceResolver;
@@ -36,7 +35,9 @@ import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.storage.LockBasedStorageManager;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static org.jetbrains.jet.lang.resolve.java.DescriptorSearchRule.IGNORE_KOTLIN_SOURCES;
 import static org.jetbrains.jet.lang.resolve.java.DescriptorSearchRule.INCLUDE_KOTLIN_SOURCES;
@@ -54,11 +55,33 @@ public final class DeserializedDescriptorResolver {
     private ErrorReporter errorReporter;
 
     @NotNull
-    private final DescriptorFinder javaDescriptorFinder = new DescriptorFinder() {
+    private final DescriptorFinder javaDescriptorFinder = new DescriptorFinderBase() {
         @Nullable
         @Override
-        public ClassDescriptor findClass(@NotNull ClassId classId) {
-            return javaClassResolver.resolveClass(kotlinFqNameToJavaFqName(classId.asSingleFqName()), INCLUDE_KOTLIN_SOURCES);
+        public ClassDescriptor findClassImpl(@NotNull ClassId classId) {
+            FqName fqName = kotlinFqNameToJavaFqName(classId.asSingleFqName());
+            ClassDescriptor descriptor = javaClassResolver.resolveClass(fqName, INCLUDE_KOTLIN_SOURCES);
+            if (descriptor != null) return descriptor;
+
+            // Try to find the class by FQ name without all the "object" segments except the last one. This is needed for nested objects:
+            // "object A { object B }" is resolved to "object A -> class object -> object B -> class object" descriptor hierarchy, while
+            // physically in the bytecode B has "A.B" FQ name.
+
+            // The last "object" segment is kept in order to be able to find the class object of a nested object.
+
+            // This won't work with any complex hierarchy involving both objects nested in objects AND objects nested in class objects of
+            // classes, since "class A { class object { object B } }" is still compiled to the class with "A.object.B" FQ name
+            // TODO: KT-2802 should fix this
+            List<Name> segments = fqName.pathSegments();
+            List<String> namesWithoutClassObjects = new ArrayList<String>(segments.size());
+            for (int i = 0, size = segments.size(); i < size; i++) {
+                String segment = segments.get(i).asString();
+                if (!segment.equals(JvmAbi.CLASS_OBJECT_CLASS_NAME) || i == size - 1) {
+                    namesWithoutClassObjects.add(segment);
+                }
+            }
+
+            return javaClassResolver.resolveClass(FqName.fromSegments(namesWithoutClassObjects), INCLUDE_KOTLIN_SOURCES);
         }
 
         @Nullable
@@ -97,15 +120,22 @@ public final class DeserializedDescriptorResolver {
     @Nullable
     public ClassDescriptor resolveClass(@NotNull KotlinJvmBinaryClass kotlinClass) {
         String[] data = readData(kotlinClass);
-        return data == null ? null : new DeserializedClassDescriptor(storageManager, annotationDeserializer, javaDescriptorFinder,
-                                                                     JavaProtoBufUtil.readClassDataFrom(data));
+        if (data != null) {
+            ClassData classData = JavaProtoBufUtil.readClassDataFrom(data);
+            return new DeserializedClassDescriptor(storageManager, annotationDeserializer, javaDescriptorFinder,
+                                                   classData.getNameResolver(), classData.getClassProto());
+        }
+        return null;
     }
 
     @Nullable
     public JetScope createKotlinPackageScope(@NotNull NamespaceDescriptor descriptor, @NotNull KotlinJvmBinaryClass kotlinClass) {
         String[] data = readData(kotlinClass);
-        return data == null ? null : new DeserializedPackageMemberScope(storageManager, descriptor, annotationDeserializer,
-                                                                        javaDescriptorFinder, JavaProtoBufUtil.readPackageDataFrom(data));
+        if (data != null) {
+            return new DeserializedPackageMemberScope(storageManager, descriptor, annotationDeserializer, javaDescriptorFinder,
+                                                      JavaProtoBufUtil.readPackageDataFrom(data));
+        }
+        return null;
     }
 
     @Nullable

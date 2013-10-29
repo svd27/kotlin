@@ -110,6 +110,14 @@ message Class {
 
   required int32 fq_name = 3;
 
+  message ClassObject {
+    // If this field is present, it contains serialized data for a synthetic class object, for which there's no class file.
+    // Otherwise class object was compiled to a separate class file and serialized data can be found in the annotation on that class
+    optional Class data = 1;
+  }
+
+  optional ClassObject class_object = 4;
+
   repeated TypeParameter type_parameter = 5;
   repeated Type supertype = 6;
 
