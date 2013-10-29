@@ -69,7 +69,7 @@ public class FilteringClassLikeInfo implements JetClassLikeInfo {
 
     @Override
     @Nullable
-    public JetClassObject getClassObject() {
+    public JetObjectDeclaration getClassObject() {
         return delegate.getClassObject();
     }
 

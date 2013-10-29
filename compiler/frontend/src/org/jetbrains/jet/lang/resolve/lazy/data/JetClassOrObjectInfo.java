@@ -43,12 +43,6 @@ public abstract class JetClassOrObjectInfo<E extends JetClassOrObject> implement
         return element.getDelegationSpecifiers();
     }
 
-    //@Override
-    //@Nullable
-    //public Name getNameAsName() {
-    //    return element.getNameAsName();
-    //}
-
     @Override
     @Nullable
     public JetModifierList getModifierList() {
@@ -72,9 +66,7 @@ public abstract class JetClassOrObjectInfo<E extends JetClassOrObject> implement
     public FqName getContainingPackageFqName() {
         PsiFile file = element.getContainingFile();
         if (file instanceof JetFile) {
-            JetFile jetFile = (JetFile) file;
-            JetNamespaceHeader header = jetFile.getNamespaceHeader();
-            return header != null ? header.getFqName() : FqName.ROOT;
+            return JetPsiUtil.getFQName((JetFile) file);
         }
         throw new IllegalArgumentException("Not in a JetFile: " + element);
     }

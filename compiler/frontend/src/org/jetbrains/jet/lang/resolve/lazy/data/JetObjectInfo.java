@@ -16,30 +16,28 @@
 
 package org.jetbrains.jet.lang.resolve.lazy.data;
 
+import com.intellij.psi.PsiElement;
+import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
-import org.jetbrains.jet.lang.psi.JetClassObject;
-import org.jetbrains.jet.lang.psi.JetClassOrObject;
-import org.jetbrains.jet.lang.psi.JetParameter;
-import org.jetbrains.jet.lang.psi.JetTypeParameter;
+import org.jetbrains.jet.lang.psi.*;
+import org.jetbrains.jet.lang.resolve.name.FqName;
 
 import java.util.Collections;
 import java.util.List;
 
-public class JetObjectInfo extends JetClassOrObjectInfo<JetClassOrObject> {
+public class JetObjectInfo implements JetClassLikeInfo {
+    private final JetObjectDeclaration element;
 
-    @NotNull
-    private final ClassKind kind;
-
-    protected JetObjectInfo(@NotNull JetClassOrObject element) {
-        super(element);
-        boolean isClassObject = element.getParent() instanceof JetClassObject;
-        this.kind = isClassObject ? ClassKind.CLASS_OBJECT : ClassKind.OBJECT;
+    protected JetObjectInfo(@NotNull JetObjectDeclaration element) {
+        this.element = element;
     }
 
     @Override
-    public JetClassObject getClassObject() {
-        return null;
+    @Nullable
+    public JetObjectDeclaration getClassObject() {
+        return element;
     }
 
     @NotNull
@@ -57,6 +55,51 @@ public class JetObjectInfo extends JetClassOrObjectInfo<JetClassOrObject> {
     @NotNull
     @Override
     public ClassKind getClassKind() {
-        return kind;
+        return ClassKind.OBJECT;
+    }
+
+    @Override
+    @Nullable
+    public JetClassOrObject getCorrespondingClassOrObject() {
+        return null;
+    }
+
+    @Override
+    @NotNull
+    public List<JetDelegationSpecifier> getDelegationSpecifiers() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    @Nullable
+    public JetModifierList getModifierList() {
+        return element.getModifierList();
+    }
+
+    @Override
+    @NotNull
+    public List<JetDeclaration> getDeclarations() {
+        return Collections.emptyList();
+    }
+
+    @NotNull
+    @Override
+    public PsiElement getScopeAnchor() {
+        return element;
+    }
+
+    @NotNull
+    @Override
+    public FqName getContainingPackageFqName() {
+        PsiFile file = element.getContainingFile();
+        if (file instanceof JetFile) {
+            return JetPsiUtil.getFQName((JetFile) file);
+        }
+        throw new IllegalArgumentException("Not in a JetFile: " + element);
+    }
+
+    @Override
+    public String toString() {
+        return "info for " + element.getText();
     }
 }

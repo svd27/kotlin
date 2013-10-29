@@ -22,14 +22,19 @@ import org.jetbrains.jet.lang.psi.JetClassOrObject;
 import org.jetbrains.jet.lang.psi.JetObjectDeclaration;
 
 public class JetClassInfoUtil {
-
+    @NotNull
     public static JetClassLikeInfo createClassLikeInfo(@NotNull JetClassOrObject classOrObject) {
         if (classOrObject instanceof JetClass) {
             return new JetClassInfo((JetClass) classOrObject);
         }
         if (classOrObject instanceof JetObjectDeclaration) {
-            return new JetObjectInfo(classOrObject);
+            return new JetObjectInfo((JetObjectDeclaration) classOrObject);
         }
-        throw new IllegalArgumentException("Unknown declaration type: " + classOrObject + classOrObject.getText());
+        throw new IllegalArgumentException("Unknown declaration type " + classOrObject + ": " + classOrObject.getText());
+    }
+
+    @NotNull
+    public static JetClassLikeInfo createClassObjectInfo(@NotNull JetObjectDeclaration objectDeclaration) {
+        return new JetClassObjectInfo(objectDeclaration);
     }
 }

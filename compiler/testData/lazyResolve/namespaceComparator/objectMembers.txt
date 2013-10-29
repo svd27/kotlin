@@ -1,8 +1,10 @@
 package test
 
-internal val SomeObject: test.SomeObject
-
 internal object SomeObject {
     /*primary*/ private constructor SomeObject()
-    internal final fun test(/*0*/ a: jet.Int): jet.Int
+    
+    internal class object <class-object-for-SomeObject> {
+        /*primary*/ private constructor <class-object-for-SomeObject>()
+        internal final fun test(/*0*/ a: jet.Int): jet.Int
+    }
 }

@@ -16,43 +16,40 @@
 
 package org.jetbrains.jet.lang.resolve.lazy.data;
 
-import com.intellij.psi.PsiElement;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
-import org.jetbrains.jet.lang.psi.*;
-import org.jetbrains.jet.lang.resolve.name.FqName;
+import org.jetbrains.jet.lang.psi.JetObjectDeclaration;
+import org.jetbrains.jet.lang.psi.JetParameter;
+import org.jetbrains.jet.lang.psi.JetTypeParameter;
 
+import java.util.Collections;
 import java.util.List;
 
-public interface JetClassLikeInfo extends JetDeclarationContainer {
+public class JetClassObjectInfo extends JetClassOrObjectInfo<JetObjectDeclaration> {
+    protected JetClassObjectInfo(@NotNull JetObjectDeclaration element) {
+        super(element);
+    }
+
+    @Override
+    public JetObjectDeclaration getClassObject() {
+        return null;
+    }
 
     @NotNull
-    FqName getContainingPackageFqName();
+    @Override
+    public List<JetTypeParameter> getTypeParameters() {
+        return Collections.emptyList();
+    }
 
     @NotNull
-    List<JetDelegationSpecifier> getDelegationSpecifiers();
-
-    @Nullable
-    JetModifierList getModifierList();
-
-    @Nullable
-    JetObjectDeclaration getClassObject();
-
-    // This element is used to identify resolution scope for the class
-    @NotNull
-    PsiElement getScopeAnchor();
-
-    @Nullable
-    JetClassOrObject getCorrespondingClassOrObject();
+    @Override
+    public List<? extends JetParameter> getPrimaryConstructorParameters() {
+        return Collections.emptyList();
+    }
 
     @NotNull
-    List<JetTypeParameter> getTypeParameters();
-
-    @NotNull
-    List<? extends JetParameter> getPrimaryConstructorParameters();
-
-    @NotNull
-    ClassKind getClassKind();
-
+    @Override
+    public ClassKind getClassKind() {
+        return ClassKind.CLASS_OBJECT;
+    }
 }

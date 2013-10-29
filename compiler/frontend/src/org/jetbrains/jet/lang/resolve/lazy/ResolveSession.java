@@ -72,6 +72,7 @@ public class ResolveSession implements KotlinCodeAnalyzer {
 
     private final Function<FqName, Name> classifierAliases;
 
+    @SuppressWarnings("deprecation")
     public ResolveSession(
             @NotNull Project project,
             @NotNull LazyResolveStorageManager storageManager,
@@ -83,6 +84,7 @@ public class ResolveSession implements KotlinCodeAnalyzer {
              new BindingTraceContext());
     }
 
+    @SuppressWarnings("deprecation")
     public ResolveSession(
             @NotNull Project project,
             @NotNull LazyResolveStorageManager storageManager,
@@ -208,19 +210,21 @@ public class ResolveSession implements KotlinCodeAnalyzer {
 
         // Activate resolution and writing to trace
         parentClassDescriptor.getClassObjectDescriptor();
-        DeclarationDescriptor declaration = getBindingContext().get(BindingContext.DECLARATION_TO_DESCRIPTOR, classObject.getObjectDeclaration());
+        JetObjectDeclaration classObjectDeclaration = classObject.getObjectDeclaration();
+        DeclarationDescriptor declaration = getBindingContext().get(BindingContext.DECLARATION_TO_DESCRIPTOR, classObjectDeclaration);
 
         if (declaration == null) {
             // It's possible that there are several class objects and another class object is taking part in lazy resolve. We still want to
             // build descriptors for such class objects.
-            final JetClassLikeInfo classObjectInfo = parentClassDescriptor.getClassObjectInfo(classObject);
+            final JetClassLikeInfo classObjectInfo = parentClassDescriptor.getClassObjectInfo(classObjectDeclaration);
             if (classObjectInfo != null) {
-                final Name name = SpecialNames.getClassObjectName(parentClassDescriptor.getName());
                 return storageManager.compute(new Function0<LazyClassDescriptor>() {
                     @Override
                     public LazyClassDescriptor invoke() {
                         // Create under lock to avoid premature access to published 'this'
-                        return new LazyClassDescriptor(ResolveSession.this, parentClassDescriptor, name, classObjectInfo);
+                        return new LazyClassDescriptor(ResolveSession.this, parentClassDescriptor,
+                                                       SpecialNames.getClassObjectName(parentClassDescriptor.getName()), classObjectInfo,
+                                                       ClassKind.CLASS_OBJECT);
                     }
                 });
             }

@@ -1,7 +1,6 @@
 package test
 
-test.BadAnnotation(s = 1.toInt(): jet.Int) internal val SomeObject: test.SomeObject
-internal val some: test.SomeObject
+internal val some: test.SomeObject.<class-object-for-SomeObject>
 
 internal final annotation class BadAnnotation : jet.Annotation {
     /*primary*/ public constructor BadAnnotation(/*0*/ s: jet.String)
@@ -9,4 +8,8 @@ internal final annotation class BadAnnotation : jet.Annotation {
 
 test.BadAnnotation(s = 1.toInt(): jet.Int) internal object SomeObject {
     /*primary*/ private constructor SomeObject()
+    
+    test.BadAnnotation(s = 1.toInt(): jet.Int) internal class object <class-object-for-SomeObject> {
+        /*primary*/ private constructor <class-object-for-SomeObject>()
+    }
 }

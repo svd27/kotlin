@@ -47,8 +47,9 @@ public class JetClassInfo extends JetClassOrObjectInfo<JetClass> {
     }
 
     @Override
-    public JetClassObject getClassObject() {
-        return element.getClassObject();
+    public JetObjectDeclaration getClassObject() {
+        JetClassObject classObject = element.getClassObject();
+        return classObject != null ? classObject.getObjectDeclaration() : null;
     }
 
     @NotNull

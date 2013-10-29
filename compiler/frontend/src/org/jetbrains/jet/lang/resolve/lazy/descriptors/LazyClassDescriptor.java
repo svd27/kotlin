@@ -91,18 +91,14 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
             @NotNull ResolveSession resolveSession,
             @NotNull DeclarationDescriptor containingDeclaration,
             @NotNull Name name,
-            @NotNull JetClassLikeInfo classLikeInfo
+            @NotNull JetClassLikeInfo classLikeInfo,
+            @NotNull ClassKind kind
     ) {
         super(containingDeclaration, name);
         this.resolveSession = resolveSession;
 
-        if (classLikeInfo.getCorrespondingClassOrObject() != null) {
-            this.resolveSession.getTrace().record(BindingContext.CLASS, classLikeInfo.getCorrespondingClassOrObject(), this);
-        }
-
         this.originalClassInfo = classLikeInfo;
-        JetClassLikeInfo classLikeInfoForMembers =
-                classLikeInfo.getClassKind() != ClassKind.ENUM_CLASS ? classLikeInfo : noEnumEntries(classLikeInfo);
+        JetClassLikeInfo classLikeInfoForMembers = kind != ClassKind.ENUM_CLASS ? classLikeInfo : noEnumEntries(classLikeInfo);
         this.declarationProvider =
                 resolveSession.getDeclarationProviderFactory().getClassMemberDeclarationProvider(classLikeInfoForMembers);
 
@@ -112,7 +108,7 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
         this.typeConstructor = new LazyClassTypeConstructor();
 
         JetModifierList modifierList = classLikeInfo.getModifierList();
-        this.kind = classLikeInfo.getClassKind();
+        this.kind = kind;
         if (kind.isObject()) {
             this.modality = Modality.FINAL;
         }
@@ -160,6 +156,11 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
                 return computeScopeForPropertyInitializerResolution();
             }
         });
+
+        JetClassOrObject classOrObject = classLikeInfo.getCorrespondingClassOrObject();
+        if (classOrObject != null) {
+            this.resolveSession.getTrace().record(BindingContext.CLASS, classOrObject, this);
+        }
     }
 
     @Override
@@ -268,31 +269,25 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
 
     @Nullable
     private ClassDescriptor computeClassObjectDescriptor() {
-        JetClassObject classObject = declarationProvider.getOwnerInfo().getClassObject();
-
-        JetClassLikeInfo classObjectInfo = getClassObjectInfo(classObject);
-        if (classObjectInfo != null) {
-            return new LazyClassDescriptor(resolveSession, this, getClassObjectName(getName()), classObjectInfo);
+        if (kind != ClassKind.CLASS_OBJECT) {
+            JetClassLikeInfo classObjectInfo = getClassObjectInfo(declarationProvider.getOwnerInfo().getClassObject());
+            if (classObjectInfo != null) {
+                return new LazyClassDescriptor(resolveSession, this, getClassObjectName(name), classObjectInfo, ClassKind.CLASS_OBJECT);
+            }
         }
         return null;
     }
 
     @Nullable
-    public JetClassLikeInfo getClassObjectInfo(JetClassObject classObject) {
+    public JetClassLikeInfo getClassObjectInfo(@Nullable JetObjectDeclaration classObject) {
         if (classObject != null) {
-            if (!DescriptorUtils.inStaticContext(this)) {
-                return null;
-            }
-            JetObjectDeclaration objectDeclaration = classObject.getObjectDeclaration();
-            if (objectDeclaration != null) {
-                return JetClassInfoUtil.createClassLikeInfo(objectDeclaration);
+            if (kind == ClassKind.OBJECT || DescriptorUtils.inStaticContext(this)) {
+                return JetClassInfoUtil.createClassObjectInfo(classObject);
             }
         }
-        else {
-            if (getKind() == ClassKind.ENUM_CLASS) {
-                // Enum classes always have class objects, and enum constants are their members
-                return enumClassObjectInfo(originalClassInfo);
-            }
+        else if (kind == ClassKind.ENUM_CLASS) {
+            // Enum classes always have class objects, and enum constants are their members
+            return enumClassObjectInfo(originalClassInfo);
         }
         return null;
     }
