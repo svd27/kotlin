@@ -61,7 +61,10 @@ public class AddFunctionParametersFix extends ChangeFunctionSignatureFix {
         List<ValueParameterDescriptor> parameters = functionDescriptor.getValueParameters();
         List<? extends ValueArgument> arguments = callElement.getValueArguments();
         int newParametersCnt = arguments.size() - parameters.size();
-        assert newParametersCnt > 0;
+        if (newParametersCnt <= 0) {
+            // psi for this quickfix is no longer valid
+            return "";
+        }
         String subjectSuffix = newParametersCnt > 1 ? "s" : "";
 
         if (isConstructor()) {
