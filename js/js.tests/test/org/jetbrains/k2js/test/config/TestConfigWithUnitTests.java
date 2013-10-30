@@ -18,6 +18,7 @@ package org.jetbrains.k2js.test.config;
 
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.jet.lang.descriptors.ModuleDescriptor;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.k2js.config.EcmaVersion;
@@ -34,8 +35,8 @@ public class TestConfigWithUnitTests extends TestConfig {
         public TestConfig create(@NotNull Project project,
                 @NotNull EcmaVersion version,
                 @NotNull List<JetFile> files,
-                @NotNull BindingContext context) {
-            return new TestConfigWithUnitTests(project, version, files, context);
+                @NotNull ModuleDescriptor module) {
+            return new TestConfigWithUnitTests(project, version, files, module);
         }
     };
 
@@ -47,7 +48,7 @@ public class TestConfigWithUnitTests extends TestConfig {
     public TestConfigWithUnitTests(@NotNull Project project,
             @NotNull EcmaVersion version,
             @NotNull List<JetFile> files,
-            @NotNull BindingContext context) {
-        super(project, version, files, context, false);
+            @NotNull ModuleDescriptor module) {
+        super(project, version, files, module, false);
     }
 }

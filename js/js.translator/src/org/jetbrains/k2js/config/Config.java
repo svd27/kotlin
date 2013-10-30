@@ -20,6 +20,7 @@ import com.google.common.collect.Lists;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.jetbrains.jet.lang.descriptors.ModuleDescriptor;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.k2js.translate.test.JSTester;
@@ -191,7 +192,7 @@ public abstract class Config {
     }
 
     @Nullable
-    public BindingContext getLibraryBindingContext() {
+    public ModuleDescriptor getLibraryModule() {
         return null;
     }
 
