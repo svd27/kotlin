@@ -23,10 +23,12 @@ import com.intellij.codeInsight.template.TemplateManager;
 import com.intellij.codeInsight.template.impl.TemplateManagerImpl;
 import com.intellij.codeInsight.template.impl.TemplateState;
 import com.intellij.ide.DataManager;
+import com.intellij.ide.startup.impl.StartupManagerImpl;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.command.CommandProcessor;
 import com.intellij.openapi.editor.actionSystem.EditorActionHandler;
 import com.intellij.openapi.editor.actionSystem.EditorActionManager;
+import com.intellij.openapi.startup.StartupManager;
 import com.intellij.testFramework.LightProjectDescriptor;
 import com.intellij.testFramework.fixtures.LightCodeInsightFixtureTestCase;
 import com.intellij.util.ArrayUtil;
@@ -47,6 +49,8 @@ public class LiveTemplatesTest extends LightCodeInsightFixtureTestCase {
         myFixture.setTestDataPath(new File(PluginTestCaseBase.getTestDataPathBase(), "/templates").getPath() +
                                   File.separator);
         ((TemplateManagerImpl) TemplateManager.getInstance(getProject())).setTemplateTesting(true);
+
+        ((StartupManagerImpl) StartupManager.getInstance(getProject())).runPostStartupActivities();
     }
 
     @Override
