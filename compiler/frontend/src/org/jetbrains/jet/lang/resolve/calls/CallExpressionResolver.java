@@ -68,15 +68,16 @@ public class CallExpressionResolver {
         Name referencedName = expression.getReferencedNameAsName();
         final ClassifierDescriptor classifier = context.scope.getClassifier(referencedName);
         if (classifier != null) {
+            JetType classObjectType = classifier.getClassObjectType();
+
             if (isObject(classifier) || isEnumEntry(classifier)) {
                 ClassDescriptor classObject = ((ClassDescriptor) classifier).getClassObjectDescriptor();
                 assert classObject != null : "Object or enum entry should have a class object: " + classifier;
                 context.trace.record(REFERENCE_TARGET, expression, classObject);
                 checkClassObjectVisibility(classifier, expression, context);
-                return DataFlowUtils.checkType(classObject.getDefaultType(), expression, context);
+                return DataFlowUtils.checkType(classObjectType, expression, context);
             }
 
-            JetType classObjectType = classifier.getClassObjectType();
             if (classObjectType != null) {
                 context.trace.record(REFERENCE_TARGET, expression, classifier);
                 JetType result = getExtendedClassObjectType(classObjectType, referencedName, classifier, context);

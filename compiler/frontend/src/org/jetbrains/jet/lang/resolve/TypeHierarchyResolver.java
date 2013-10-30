@@ -504,7 +504,20 @@ public class TypeHierarchyResolver {
         public MutableClassDescriptor createClassWithClassObjectForObject(@NotNull JetClassOrObject declaration, @NotNull ClassKind kind) {
             Name name = JetPsiUtil.safeName(declaration.getName());
 
-            MutableClassDescriptor fakeClass = new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, kind, false, name);
+            MutableClassDescriptor fakeClass;
+            if (kind == ClassKind.ENUM_ENTRY) {
+                fakeClass = new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, kind, false, name) {
+                    @Override
+                    public JetType getClassObjectType() {
+                        // Enum entries should have enum type: "var e = Enum.ENTRY" should be re-assignable to another entry
+                        return ((ClassDescriptor) getContainingDeclaration()).getDefaultType();
+                    }
+                };
+            }
+            else {
+                fakeClass = new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, kind, false, name);
+            }
+
             Visibility visibility = resolveVisibilityFromModifiers(declaration);
             fakeClass.setModality(Modality.FINAL);
             fakeClass.setVisibility(visibility);
