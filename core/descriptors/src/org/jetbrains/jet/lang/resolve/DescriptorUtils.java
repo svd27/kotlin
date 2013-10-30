@@ -231,11 +231,15 @@ public class DescriptorUtils {
         return isClassObject(descriptor) && isObject(descriptor.getContainingDeclaration());
     }
 
-    public static boolean isClassObjectOfSingleton(@NotNull DeclarationDescriptor descriptor) {
-        return isClassObjectOfObject(descriptor);
+    public static boolean isClassObjectOfEnumEntry(@NotNull DeclarationDescriptor descriptor) {
+        return isClassObject(descriptor) && isEnumEntry(descriptor.getContainingDeclaration());
     }
 
-    public static boolean isClassObject(@NotNull DeclarationDescriptor descriptor) {
+    public static boolean isClassObjectOfSingleton(@NotNull DeclarationDescriptor descriptor) {
+        return isClassObjectOfObject(descriptor) || isClassObjectOfEnumEntry(descriptor);
+    }
+
+    public static boolean isClassObject(@Nullable DeclarationDescriptor descriptor) {
         return isKindOf(descriptor, ClassKind.CLASS_OBJECT);
     }
 
@@ -247,7 +251,7 @@ public class DescriptorUtils {
         return isClass(descriptor) && descriptor.getName().equals(SpecialNames.ANONYMOUS_OBJECT);
     }
 
-    public static boolean isEnumEntry(@NotNull DeclarationDescriptor descriptor) {
+    public static boolean isEnumEntry(@Nullable DeclarationDescriptor descriptor) {
         return isKindOf(descriptor, ClassKind.ENUM_ENTRY);
     }
 

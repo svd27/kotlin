@@ -180,7 +180,7 @@ public class TypeHierarchyResolver {
         for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
             JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor descriptor = entry.getValue();
-            if (classOrObject instanceof JetClass) {
+            if (classOrObject instanceof JetClass && !(classOrObject instanceof JetEnumEntry)) {
                 descriptorResolver.resolveMutableClassDescriptor((JetClass) classOrObject, descriptor, trace);
                 descriptor.createTypeConstructor();
             }
@@ -491,12 +491,20 @@ public class TypeHierarchyResolver {
                 return;
             }
 
-            String nameStr = declaration.getName();
-            assert nameStr != null : "Object declaration should have a name: " + declaration.getText();
-            Name name = Name.identifier(nameStr);
+            MutableClassDescriptor fakeClass = createClassWithClassObjectForObject(declaration, ClassKind.OBJECT);
+            trace.record(FQNAME_TO_CLASS_DESCRIPTOR, JetPsiUtil.getFQName(declaration), fakeClass);
+        }
 
-            MutableClassDescriptor fakeClass =
-                    new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, ClassKind.OBJECT, false, name);
+        @Override
+        public void visitEnumEntry(JetEnumEntry declaration) {
+            createClassWithClassObjectForObject(declaration, ClassKind.ENUM_ENTRY);
+        }
+
+        @NotNull
+        public MutableClassDescriptor createClassWithClassObjectForObject(@NotNull JetClassOrObject declaration, @NotNull ClassKind kind) {
+            Name name = JetPsiUtil.safeName(declaration.getName());
+
+            MutableClassDescriptor fakeClass = new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, kind, false, name);
             Visibility visibility = resolveVisibilityFromModifiers(declaration);
             fakeClass.setModality(Modality.FINAL);
             fakeClass.setVisibility(visibility);
@@ -504,30 +512,21 @@ public class TypeHierarchyResolver {
             fakeClass.createTypeConstructor();
             createPrimaryConstructorForObject(null, fakeClass).setReturnType(fakeClass.getDefaultType());
 
-            MutableClassDescriptor objectDescriptor =
+            MutableClassDescriptor classObject =
                     createClassDescriptorForObject(declaration, fakeClass, fakeClass.getScopeForMemberResolution(),
                                                    getClassObjectName(name), ClassKind.CLASS_OBJECT);
-            objectDescriptor.setModality(Modality.FINAL);
-            objectDescriptor.setVisibility(resolveVisibilityFromModifiers(declaration, visibility));
-            objectDescriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
-            objectDescriptor.createTypeConstructor();
+            classObject.setModality(Modality.FINAL);
+            classObject.setVisibility(resolveVisibilityFromModifiers(declaration, visibility));
+            classObject.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
+            classObject.createTypeConstructor();
 
-            NamespaceLikeBuilder.ClassObjectStatus status = fakeClass.getBuilder().setClassObjectDescriptor(objectDescriptor);
+            NamespaceLikeBuilder.ClassObjectStatus status = fakeClass.getBuilder().setClassObjectDescriptor(classObject);
             assert status == NamespaceLikeBuilder.ClassObjectStatus.OK : "Class object should be created for: " + declaration;
 
             owner.addClassifierDescriptor(fakeClass);
-            context.getClasses().put(declaration, objectDescriptor);
-            trace.record(FQNAME_TO_CLASS_DESCRIPTOR, JetPsiUtil.getFQName(declaration), fakeClass);
-        }
+            context.getClasses().put(declaration, classObject);
 
-        @Override
-        public void visitEnumEntry(JetEnumEntry enumEntry) {
-            // TODO: Bad casting
-            MutableClassDescriptorLite ownerClassDescriptor = (MutableClassDescriptorLite) owner.getOwnerForChildren();
-            MutableClassDescriptorLite classObjectDescriptor = ownerClassDescriptor.getClassObjectDescriptor();
-
-            assert classObjectDescriptor != null : enumEntry.getParent().getText();
-            createClassDescriptorForEnumEntry(enumEntry, classObjectDescriptor);
+            return fakeClass;
         }
 
         @Override
@@ -622,7 +621,7 @@ public class TypeHierarchyResolver {
 
         @NotNull
         private MutableClassDescriptor createClassDescriptorForObject(
-                @NotNull JetObjectDeclaration declaration,
+                @NotNull JetClassOrObject declaration,
                 @NotNull DeclarationDescriptor containingDeclaration,
                 @NotNull JetScope scope,
                 @NotNull Name name,
@@ -637,34 +636,14 @@ public class TypeHierarchyResolver {
             return descriptor;
         }
 
-        private MutableClassDescriptor createClassDescriptorForEnumEntry(
-                @NotNull JetEnumEntry declaration,
-                @NotNull MutableClassDescriptorLite classObjectDescriptor
-        ) {
-            NamespaceLikeBuilder owner = classObjectDescriptor.getBuilder();
-            MutableClassDescriptor mutableClassObjectDescriptor = (MutableClassDescriptor) classObjectDescriptor;
-
-            MutableClassDescriptor mutableClassDescriptor = new MutableClassDescriptor(
-                    owner.getOwnerForChildren(), mutableClassObjectDescriptor.getScopeForMemberResolution(), ClassKind.ENUM_ENTRY,
-                    false, JetPsiUtil.safeName(declaration.getName()));
-            context.getClasses().put(declaration, mutableClassDescriptor);
-
-            prepareForDeferredCall(mutableClassDescriptor.getScopeForMemberResolution(), mutableClassDescriptor, declaration);
-
-            // ??? - is enum entry object?
-            createPrimaryConstructorForObject(declaration, mutableClassDescriptor);
-            owner.addObjectDescriptor(mutableClassDescriptor);
-            trace.record(BindingContext.CLASS, declaration, mutableClassDescriptor);
-            return mutableClassDescriptor;
-        }
-
+        @NotNull
         private ConstructorDescriptorImpl createPrimaryConstructorForObject(
                 @Nullable PsiElement object,
-                MutableClassDescriptor mutableClassDescriptor
+                @NotNull MutableClassDescriptor classDescriptor
         ) {
-            ConstructorDescriptorImpl constructorDescriptor = DescriptorResolver
-                    .createAndRecordPrimaryConstructorForObject(object, mutableClassDescriptor, trace);
-            mutableClassDescriptor.setPrimaryConstructor(constructorDescriptor);
+            ConstructorDescriptorImpl constructorDescriptor =
+                    DescriptorResolver.createAndRecordPrimaryConstructorForObject(object, classDescriptor, trace);
+            classDescriptor.setPrimaryConstructor(constructorDescriptor);
             return constructorDescriptor;
         }
 

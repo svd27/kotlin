@@ -21,16 +21,14 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
-import org.jetbrains.jet.lang.descriptors.VariableDescriptorForObject;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.BindingTrace;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 
-import java.util.Collection;
-
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.getEnumEntriesScope;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfEnumEntry;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumEntry;
 
 public final class WhenChecker {
     private WhenChecker() {
@@ -54,13 +52,12 @@ public final class WhenChecker {
         if (!(declarationDescriptor instanceof ClassDescriptor)) return false;
         ClassDescriptor classDescriptor = (ClassDescriptor) declarationDescriptor;
         if (classDescriptor.getKind() != ClassKind.ENUM_CLASS || classDescriptor.getModality().isOverridable()) return false;
-        Collection<ClassDescriptor> objectDescriptors = getEnumEntriesScope(classDescriptor).getObjectDescriptors();
         boolean isExhaust = true;
         boolean notEmpty = false;
-        for (ClassDescriptor descriptor : objectDescriptors) {
-            if (descriptor.getKind() == ClassKind.ENUM_ENTRY) {
+        for (DeclarationDescriptor descriptor : classDescriptor.getUnsubstitutedInnerClassesScope().getAllDescriptors()) {
+            if (isEnumEntry(descriptor)) {
                 notEmpty = true;
-                if (!containsEnumEntryCase(expression, descriptor, trace)) {
+                if (!containsEnumEntryCase(expression, (ClassDescriptor) descriptor, trace)) {
                     isExhaust = false;
                 }
             }
@@ -97,15 +94,14 @@ public final class WhenChecker {
             @NotNull BindingTrace trace
     ) {
         JetSimpleNameExpression reference = getReference(whenExpression.getExpression());
-        if (reference == null) return false;
-
-        DeclarationDescriptor target = trace.get(BindingContext.REFERENCE_TARGET, reference);
-        if (!(target instanceof VariableDescriptorForObject)) {
-            return false;
+        if (reference != null) {
+            DeclarationDescriptor target = trace.get(BindingContext.REFERENCE_TARGET, reference);
+            if (target != null) {
+                return isClassObjectOfEnumEntry(target) && target.getContainingDeclaration() == enumEntry;
+            }
         }
 
-        ClassDescriptor classDescriptor = ((VariableDescriptorForObject) target).getObjectClass();
-        return classDescriptor == enumEntry;
+        return false;
     }
 
     @Nullable

@@ -44,8 +44,7 @@ public class InnerClassesScopeWrapper extends AbstractScopeAdapter {
     @Override
     public ClassifierDescriptor getClassifier(@NotNull Name name) {
         ClassifierDescriptor classifier = actualScope.getClassifier(name);
-        if (isClass(classifier)) return classifier;
-        return null;
+        return isClass(classifier) ? classifier : null;
     }
 
     @NotNull
@@ -83,13 +82,7 @@ public class InnerClassesScopeWrapper extends AbstractScopeAdapter {
         return "Classes from " + actualScope;
     }
 
-    private static boolean isClass(DeclarationDescriptor descriptor) {
-        if (descriptor instanceof ClassDescriptor) {
-            ClassKind kind = ((ClassDescriptor) descriptor).getKind();
-            if (kind != ClassKind.CLASS_OBJECT && kind != ClassKind.ENUM_ENTRY) {
-                return true;
-            }
-        }
-        return false;
+    private static boolean isClass(@Nullable DeclarationDescriptor descriptor) {
+        return descriptor instanceof ClassDescriptor && ((ClassDescriptor) descriptor).getKind() != ClassKind.CLASS_OBJECT;
     }
 }

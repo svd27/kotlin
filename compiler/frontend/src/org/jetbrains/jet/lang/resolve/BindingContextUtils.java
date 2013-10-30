@@ -41,6 +41,7 @@ import static org.jetbrains.jet.lang.descriptors.CallableMemberDescriptor.Kind.*
 import static org.jetbrains.jet.lang.diagnostics.Errors.AMBIGUOUS_LABEL;
 import static org.jetbrains.jet.lang.resolve.BindingContext.AMBIGUOUS_LABEL_TARGET;
 import static org.jetbrains.jet.lang.resolve.BindingContext.DECLARATION_TO_DESCRIPTOR;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumEntry;
 import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
 
 public class BindingContextUtils {
@@ -56,7 +57,7 @@ public class BindingContextUtils {
                     throw new IllegalStateException("non-declaration descriptors should be filtered out earlier: " + callable);
                 }
             }
-            if (isObject(descriptor)) {
+            if (isObject(descriptor) || isEnumEntry(descriptor)) {
                 return ((ClassDescriptor) descriptor).getClassObjectDescriptor();
             }
             return descriptor.getOriginal();

@@ -41,8 +41,7 @@ import javax.inject.Inject;
 import java.util.*;
 
 import static org.jetbrains.jet.lang.diagnostics.Errors.*;
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObject;
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.*;
 
 public class DeclarationResolver {
     @NotNull
@@ -133,7 +132,7 @@ public class DeclarationResolver {
             JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            if (classOrObject instanceof JetClass && DescriptorUtils.isAnnotationClass(classDescriptor)) {
+            if (classOrObject instanceof JetClass && isAnnotationClass(classDescriptor)) {
                 processPrimaryConstructor(classDescriptor, (JetClass) classOrObject);
             }
         }
@@ -144,7 +143,7 @@ public class DeclarationResolver {
             JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor classDescriptor = entry.getValue();
 
-            if (classOrObject instanceof JetClass && !DescriptorUtils.isAnnotationClass(classDescriptor)) {
+            if (classOrObject instanceof JetClass && !(classOrObject instanceof JetEnumEntry) && !isAnnotationClass(classDescriptor)) {
                 processPrimaryConstructor(classDescriptor, (JetClass) classOrObject);
             }
         }
@@ -245,17 +244,6 @@ public class DeclarationResolver {
                     if (setter != null) {
                         context.registerDeclaringScope(setter, scopeForPropertyAccessors);
                     }
-                }
-
-                @Override
-                public void visitEnumEntry(JetEnumEntry enumEntry) {
-                    // FIX: Bad cast
-                    MutableClassDescriptorLite classObjectDescriptor =
-                            ((MutableClassDescriptorLite)namespaceLike.getOwnerForChildren()).getClassObjectDescriptor();
-                    assert classObjectDescriptor != null;
-                    PropertyDescriptor propertyDescriptor = descriptorResolver.resolveObjectDeclarationAsPropertyDescriptor(
-                            scopeForFunctions, classObjectDescriptor, enumEntry, context.getClasses().get(enumEntry), trace);
-                    classObjectDescriptor.getBuilder().addPropertyDescriptor(propertyDescriptor);
                 }
             });
         }
@@ -393,9 +381,12 @@ public class DeclarationResolver {
     private void checkRedeclarationsInInnerClassNames() {
         Iterable<MutableClassDescriptor> classesAndObjects = Iterables.concat(context.getClasses().values(), context.getObjects().values());
         for (MutableClassDescriptor classDescriptor : classesAndObjects) {
-            if (isClassObject(classDescriptor) && !isObject(classDescriptor.getContainingDeclaration())) {
-                // Class objects of classes should be considered during analysing redeclarations in classes
-                continue;
+            if (isClassObject(classDescriptor)) {
+                DeclarationDescriptor container = classDescriptor.getContainingDeclaration();
+                if (!isObject(container) && !isEnumEntry(container)) {
+                    // Class objects of classes should be considered during analysing redeclarations in classes
+                    continue;
+                }
             }
 
             Collection<DeclarationDescriptor> allDescriptors = classDescriptor.getScopeForMemberLookup().getOwnDeclaredDescriptors();

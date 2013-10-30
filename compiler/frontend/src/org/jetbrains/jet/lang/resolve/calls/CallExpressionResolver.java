@@ -51,8 +51,7 @@ import java.util.List;
 
 import static org.jetbrains.jet.lang.diagnostics.Errors.*;
 import static org.jetbrains.jet.lang.resolve.BindingContext.*;
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.getStaticNestedClassesScope;
-import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.*;
 import static org.jetbrains.jet.lang.types.TypeUtils.NO_EXPECTED_TYPE;
 
 public class CallExpressionResolver {
@@ -69,9 +68,9 @@ public class CallExpressionResolver {
         Name referencedName = expression.getReferencedNameAsName();
         final ClassifierDescriptor classifier = context.scope.getClassifier(referencedName);
         if (classifier != null) {
-            if (isObject(classifier)) {
+            if (isObject(classifier) || isEnumEntry(classifier)) {
                 ClassDescriptor classObject = ((ClassDescriptor) classifier).getClassObjectDescriptor();
-                assert classObject != null : "Object should have a class object: " + classifier;
+                assert classObject != null : "Object or enum entry should have a class object: " + classifier;
                 context.trace.record(REFERENCE_TARGET, expression, classObject);
                 checkClassObjectVisibility(classifier, expression, context);
                 return DataFlowUtils.checkType(classObject.getDefaultType(), expression, context);
