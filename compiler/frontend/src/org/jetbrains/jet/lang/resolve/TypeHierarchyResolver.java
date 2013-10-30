@@ -21,7 +21,6 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.util.containers.ContainerUtil;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.*;
@@ -184,46 +183,37 @@ public class TypeHierarchyResolver {
                 descriptorResolver.resolveMutableClassDescriptor((JetClass) classOrObject, descriptor, trace);
                 descriptor.createTypeConstructor();
             }
-            else if (classOrObject instanceof JetObjectDeclaration && descriptor.getKind() == ClassKind.CLASS) {
-                // Anonymous object
-                descriptor.setModality(Modality.FINAL);
-                descriptor.setVisibility(Visibilities.INTERNAL);
-                descriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
-                descriptor.createTypeConstructor();
+            else if (classOrObject instanceof JetObjectDeclaration || classOrObject instanceof JetEnumEntry) {
+                // ClassKind.CLASS here means it's anonymous object
+                if (descriptor.getKind() == ClassKind.CLASS || descriptor.getKind() == ClassKind.CLASS_OBJECT) {
+                    descriptor.setModality(Modality.FINAL);
+                    descriptor.setVisibility(resolveVisibilityFromModifiers(classOrObject, getDefaultClassVisibility(descriptor)));
+                    descriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
+                    descriptor.createTypeConstructor();
+                }
             }
-        }
-        for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
-            JetObjectDeclaration objectDeclaration = entry.getKey();
-            MutableClassDescriptor descriptor = entry.getValue();
-            descriptor.setModality(Modality.FINAL);
-            descriptor.setVisibility(resolveVisibilityFromModifiers(objectDeclaration, getDefaultClassVisibility(descriptor)));
-            descriptor.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
-            descriptor.createTypeConstructor();
         }
     }
 
+    @SuppressWarnings("unchecked")
     private void resolveTypesInClassHeaders() {
         for (Map.Entry<JetClassOrObject, MutableClassDescriptor> entry : context.getClasses().entrySet()) {
             JetClassOrObject classOrObject = entry.getKey();
             MutableClassDescriptor descriptor = entry.getValue();
-            if (classOrObject instanceof JetClass) {
+            if (classOrObject instanceof JetClass && !(classOrObject instanceof JetEnumEntry)) {
                 descriptorResolver.resolveGenericBounds((JetClass) classOrObject, descriptor.getScopeForSupertypeResolution(),
                                                         (List) descriptor.getTypeConstructor().getParameters(), trace);
             }
             descriptorResolver.resolveSupertypesForMutableClassDescriptor(classOrObject, descriptor, trace);
         }
-        for (Map.Entry<JetObjectDeclaration, MutableClassDescriptor> entry : context.getObjects().entrySet()) {
-            JetClassOrObject jetClass = entry.getKey();
-            MutableClassDescriptor descriptor = entry.getValue();
-            descriptorResolver.resolveSupertypesForMutableClassDescriptor(jetClass, descriptor, trace);
-        }
     }
 
+    @SuppressWarnings("unchecked")
     private List<MutableClassDescriptorLite> topologicallySortClassesAndObjects() {
         // A topsort is needed only for better diagnostics:
         //    edges that get removed to disconnect loops are more reasonable in this case
         return DFS.topologicalOrder(
-                ContainerUtil.<MutableClassDescriptorLite>concat(context.getClasses().values(), context.getObjects().values()),
+                (Iterable) context.getClasses().values(),
                 new DFS.Neighbors<MutableClassDescriptorLite>() {
                     @NotNull
                     @Override
@@ -423,12 +413,6 @@ public class TypeHierarchyResolver {
                 checkBoundsForTypeInClassHeader(constraint.getBoundTypeReference());
             }
         }
-
-        for (JetObjectDeclaration object : context.getObjects().keySet()) {
-            for (JetDelegationSpecifier delegationSpecifier : object.getDelegationSpecifiers()) {
-                checkBoundsForTypeInClassHeader(delegationSpecifier.getTypeReference());
-            }
-        }
     }
 
     private void checkBoundsForTypeInClassHeader(@Nullable JetTypeReference typeReference) {
@@ -518,9 +502,8 @@ public class TypeHierarchyResolver {
                 fakeClass = new MutableClassDescriptor(owner.getOwnerForChildren(), outerScope, kind, false, name);
             }
 
-            Visibility visibility = resolveVisibilityFromModifiers(declaration);
             fakeClass.setModality(Modality.FINAL);
-            fakeClass.setVisibility(visibility);
+            fakeClass.setVisibility(resolveVisibilityFromModifiers(declaration));
             fakeClass.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
             fakeClass.createTypeConstructor();
             createPrimaryConstructorForObject(null, fakeClass).setReturnType(fakeClass.getDefaultType());
@@ -528,10 +511,6 @@ public class TypeHierarchyResolver {
             MutableClassDescriptor classObject =
                     createClassDescriptorForObject(declaration, fakeClass, fakeClass.getScopeForMemberResolution(),
                                                    getClassObjectName(name), ClassKind.CLASS_OBJECT);
-            classObject.setModality(Modality.FINAL);
-            classObject.setVisibility(resolveVisibilityFromModifiers(declaration, visibility));
-            classObject.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
-            classObject.createTypeConstructor();
 
             NamespaceLikeBuilder.ClassObjectStatus status = fakeClass.getBuilder().setClassObjectDescriptor(classObject);
             assert status == NamespaceLikeBuilder.ClassObjectStatus.OK : "Class object should be created for: " + declaration;
@@ -557,7 +536,7 @@ public class TypeHierarchyResolver {
                 MutableClassDescriptor classObjectDescriptor = createClassDescriptorForObject(
                         objectDeclaration, containingClass, outerScope, classObjectName, ClassKind.CLASS_OBJECT);
 
-                context.getObjects().put(objectDeclaration, classObjectDescriptor);
+                context.getClasses().put(objectDeclaration, classObjectDescriptor);
 
                 NamespaceLikeBuilder.ClassObjectStatus status;
                 if (DescriptorUtils.isClassObject(containingClass)) {
