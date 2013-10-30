@@ -235,11 +235,6 @@ public abstract class MutableClassDescriptorLite extends ClassDescriptorBase {
                 }
 
                 @Override
-                public void addObjectDescriptor(@NotNull MutableClassDescriptorLite objectDescriptor) {
-                    getScopeForMemberLookupAsWritableScope().addObjectDescriptor(objectDescriptor);
-                }
-
-                @Override
                 public void addFunctionDescriptor(@NotNull SimpleFunctionDescriptor functionDescriptor) {
                     getScopeForMemberLookupAsWritableScope().addFunctionDescriptor(functionDescriptor);
                 }

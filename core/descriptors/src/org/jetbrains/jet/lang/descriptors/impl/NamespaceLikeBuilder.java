@@ -22,13 +22,10 @@ import org.jetbrains.jet.lang.descriptors.PropertyDescriptor;
 import org.jetbrains.jet.lang.descriptors.SimpleFunctionDescriptor;
 
 public interface NamespaceLikeBuilder {
-
     @NotNull
     DeclarationDescriptor getOwnerForChildren();
 
     void addClassifierDescriptor(@NotNull MutableClassDescriptorLite classDescriptor);
-
-    void addObjectDescriptor(@NotNull MutableClassDescriptorLite objectDescriptor);
 
     void addFunctionDescriptor(@NotNull SimpleFunctionDescriptor functionDescriptor);
 
