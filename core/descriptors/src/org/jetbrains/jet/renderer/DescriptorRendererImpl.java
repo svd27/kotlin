@@ -680,11 +680,6 @@ public class DescriptorRendererImpl implements DescriptorRenderer {
         renderName(moduleOrScript, builder);
     }
 
-    private void renderNamespace(@NotNull NamespaceDescriptor namespace, @NotNull StringBuilder builder) {
-        builder.append(renderKeyword("package")).append(" ");
-        renderName(namespace, builder);
-    }
-
     private void renderPackageView(@NotNull PackageViewDescriptor packageView, @NotNull StringBuilder builder) {
         builder.append(renderKeyword("package")).append(" ");
         renderName(packageView, builder);
@@ -749,7 +744,6 @@ public class DescriptorRendererImpl implements DescriptorRenderer {
 
         @Override
         public Void visitNamespaceDescriptor(NamespaceDescriptor namespaceDescriptor, StringBuilder builder) {
-            renderNamespace(namespaceDescriptor, builder);
             return null;
         }
 

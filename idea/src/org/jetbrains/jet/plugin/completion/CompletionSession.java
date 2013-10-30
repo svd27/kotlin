@@ -143,8 +143,8 @@ public class CompletionSession {
         jetResult.addAllElements(jetCallableExtensions);
     }
 
-    public static boolean isPartOfTypeDeclaration(@NotNull DeclarationDescriptor descriptor) {
-        if (descriptor instanceof NamespaceDescriptor || descriptor instanceof TypeParameterDescriptor) {
+    private static boolean isPartOfTypeDeclaration(@NotNull DeclarationDescriptor descriptor) {
+        if (descriptor instanceof PackageViewDescriptor || descriptor instanceof TypeParameterDescriptor) {
             return true;
         }
 

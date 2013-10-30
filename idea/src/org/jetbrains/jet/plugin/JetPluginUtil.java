@@ -33,9 +33,9 @@ import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
 import org.jetbrains.jet.lang.descriptors.ModuleDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageFragmentDescriptor;
+import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.java.JavaDescriptorResolver;
-import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.DeferredType;
 import org.jetbrains.jet.lang.types.ErrorUtils;
 import org.jetbrains.jet.lang.types.JetType;
@@ -45,48 +45,6 @@ import org.jetbrains.jet.plugin.configuration.ModuleTypeCacheManager;
 import java.util.LinkedList;
 
 public class JetPluginUtil {
-    @NotNull
-    private static LinkedList<String> computeTypeFullNameList(JetType type) {
-        if (type instanceof DeferredType) {
-            type = ((DeferredType)type).getActualType();
-        }
-        DeclarationDescriptor declarationDescriptor = type.getConstructor().getDeclarationDescriptor();
-
-        LinkedList<String> fullName = Lists.newLinkedList();
-        while (declarationDescriptor != null && !(declarationDescriptor instanceof ModuleDescriptor)) {
-            fullName.addFirst(declarationDescriptor.getName().asString());
-            declarationDescriptor = declarationDescriptor.getContainingDeclaration();
-        }
-        assert fullName.size() > 0;
-        if (JavaDescriptorResolver.JAVA_ROOT.asString().equals(fullName.getFirst())) {
-            fullName.removeFirst();
-        }
-        return fullName;
-    }
-
-    public static boolean checkTypeIsStandard(JetType type, Project project) {
-        if (KotlinBuiltIns.getInstance().isAny(type) || KotlinBuiltIns.getInstance().isNothingOrNullableNothing(type) || KotlinBuiltIns.getInstance().isUnit(type) ||
-             KotlinBuiltIns.getInstance().isFunctionOrExtensionFunctionType(type)) {
-            return true;
-        }
-
-        LinkedList<String> fullName = computeTypeFullNameList(type);
-        if (fullName.size() == 3 && fullName.getFirst().equals("java") && fullName.get(1).equals("lang")) {
-            return true;
-        }
-
-        JetScope libraryScope = KotlinBuiltIns.getInstance().getBuiltInsScope();
-
-        DeclarationDescriptor declaration = type.getMemberScope().getContainingDeclaration();
-        if (ErrorUtils.isError(declaration)) {
-            return false;
-        }
-        while (!(declaration instanceof NamespaceDescriptor)) {
-            declaration = declaration.getContainingDeclaration();
-            assert declaration != null;
-        }
-        return libraryScope == ((NamespaceDescriptor) declaration).getMemberScope();
-    }
 
     public static boolean isInSource(@NotNull PsiElement element) {
         return isInSource(element, true);

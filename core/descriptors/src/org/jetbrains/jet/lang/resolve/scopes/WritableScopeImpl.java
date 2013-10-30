@@ -49,7 +49,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     private SetMultimap<Name, FunctionDescriptor> functionGroups;
 
     @Nullable
-    private Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors;
+    private Map<Name, DeclarationDescriptor> variableOrClassDescriptors;
     
     @Nullable
     private SetMultimap<Name, VariableDescriptor> propertyGroups;
@@ -191,11 +191,11 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     }
 
     @NotNull
-    private Map<Name, DeclarationDescriptor> getVariableClassOrNamespaceDescriptors() {
-        if (variableClassOrNamespaceDescriptors == null) {
-            variableClassOrNamespaceDescriptors = Maps.newHashMap();
+    private Map<Name, DeclarationDescriptor> getVariableOrClassDescriptors() {
+        if (variableOrClassDescriptors == null) {
+            variableOrClassDescriptors = Maps.newHashMap();
         }
-        return variableClassOrNamespaceDescriptors;
+        return variableOrClassDescriptors;
     }
 
     @NotNull
@@ -227,7 +227,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
         if (variableDescriptor.getReceiverParameter() == null) {
             checkForRedeclaration(name, variableDescriptor);
             // TODO : Should this always happen?
-            getVariableClassOrNamespaceDescriptors().put(name, variableDescriptor);
+            getVariableOrClassDescriptors().put(name, variableDescriptor);
         }
         allDescriptors.add(variableDescriptor);
         addToDeclared(variableDescriptor);
@@ -251,7 +251,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     public VariableDescriptor getLocalVariable(@NotNull Name name) {
         checkMayRead();
 
-        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableClassOrNamespaceDescriptors();
+        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableOrClassDescriptors();
         DeclarationDescriptor descriptor = variableClassOrNamespaceDescriptors.get(name);
         if (descriptor instanceof VariableDescriptor && !getPropertyGroups().get(name).contains(descriptor)) {
             return (VariableDescriptor) descriptor;
@@ -337,7 +337,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
         checkMayWrite();
 
         checkForRedeclaration(name, classifierDescriptor);
-        getVariableClassOrNamespaceDescriptors().put(name, classifierDescriptor);
+        getVariableOrClassDescriptors().put(name, classifierDescriptor);
         allDescriptors.add(classifierDescriptor);
         addToDeclared(classifierDescriptor);
     }
@@ -366,7 +366,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
         checkMayWrite();
         
         checkForRedeclaration(name, variableDescriptor);
-        getVariableClassOrNamespaceDescriptors().put(name, variableDescriptor);
+        getVariableOrClassDescriptors().put(name, variableDescriptor);
         allDescriptors.add(variableDescriptor);
         addToDeclared(variableDescriptor);
     }
@@ -384,7 +384,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     }
 
     private void checkForRedeclaration(@NotNull Name name, DeclarationDescriptor classifierDescriptor) {
-        DeclarationDescriptor originalDescriptor = getVariableClassOrNamespaceDescriptors().get(name);
+        DeclarationDescriptor originalDescriptor = getVariableOrClassDescriptors().get(name);
         if (originalDescriptor != null) {
             redeclarationHandler.handleRedeclaration(originalDescriptor, classifierDescriptor);
         }
@@ -394,7 +394,7 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     public ClassifierDescriptor getClassifier(@NotNull Name name) {
         checkMayRead();
 
-        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableClassOrNamespaceDescriptors();
+        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableOrClassDescriptors();
         DeclarationDescriptor descriptor = variableClassOrNamespaceDescriptors.get(name);
         if (descriptor instanceof ClassifierDescriptor) return (ClassifierDescriptor) descriptor;
 
@@ -429,35 +429,8 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     }
 
     @Override
-    public void addNamespace(@NotNull NamespaceDescriptor namespaceDescriptor) {
-        checkMayWrite();
-
-        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableClassOrNamespaceDescriptors();
-        DeclarationDescriptor oldValue = variableClassOrNamespaceDescriptors.put(namespaceDescriptor.getName(), namespaceDescriptor);
-        if (oldValue != null) {
-            redeclarationHandler.handleRedeclaration(oldValue, namespaceDescriptor);
-        }
-        allDescriptors.add(namespaceDescriptor);
-        addToDeclared(namespaceDescriptor);
-    }
-
-    @Override
-    public NamespaceDescriptor getDeclaredNamespace(@NotNull Name name) {
-        checkMayRead();
-
-        Map<Name, DeclarationDescriptor> variableClassOrNamespaceDescriptors = getVariableClassOrNamespaceDescriptors();
-        DeclarationDescriptor namespaceDescriptor = variableClassOrNamespaceDescriptors.get(name);
-        if (namespaceDescriptor instanceof NamespaceDescriptor) return (NamespaceDescriptor) namespaceDescriptor;
-        return null;
-    }
-
-    @Override
     public PackageViewDescriptor getPackage(@NotNull Name name) {
         checkMayRead();
-
-        // TODO 1
-        //NamespaceDescriptor declaredNamespace = getDeclaredNamespace(name);
-        //if (declaredNamespace != null) return declaredNamespace;
 
         PackageViewDescriptor aliased = getPackageAliases().get(name);
         if (aliased != null) return aliased;

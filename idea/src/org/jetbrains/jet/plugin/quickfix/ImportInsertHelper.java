@@ -49,26 +49,6 @@ public class ImportInsertHelper {
     }
 
     /**
-     * Add import directive corresponding to a type to file when it is needed.
-     *
-     * @param type type to import
-     * @param file file where import directive should be added
-     */
-    public static void addImportDirectivesIfNeeded(@NotNull JetType type, @NotNull JetFile file) {
-        if (JetPluginUtil.checkTypeIsStandard(type, file.getProject()) || type.isError()) {
-            return;
-        }
-        BindingContext bindingContext = AnalyzerFacadeWithCache.analyzeFileWithCache(file).getBindingContext();
-        PsiElement element = BindingContextUtils.descriptorToDeclaration(bindingContext, type.getMemberScope().getContainingDeclaration());
-        if (element != null && element.getContainingFile() == file) { //declaration is in the same file, so no import is needed
-            return;
-        }
-        for (ClassDescriptor clazz : TypeUtils.getAllClassDescriptors(type)) {
-            addImportDirectiveIfNeeded(DescriptorUtils.getFQName(getTopLevelClass(clazz)).toSafe(), file);
-        }
-    }
-
-    /**
      * Add import directive into the PSI tree for the given namespace.
      *
      * @param importFqn full name of the import
