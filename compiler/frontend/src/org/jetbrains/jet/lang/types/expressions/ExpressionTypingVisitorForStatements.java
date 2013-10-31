@@ -44,6 +44,7 @@ import java.util.Collection;
 import static org.jetbrains.jet.lang.diagnostics.Errors.*;
 import static org.jetbrains.jet.lang.resolve.BindingContext.AMBIGUOUS_REFERENCE_TARGET;
 import static org.jetbrains.jet.lang.resolve.BindingContext.VARIABLE_REASSIGNMENT;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfObject;
 import static org.jetbrains.jet.lang.resolve.calls.context.ContextDependency.INDEPENDENT;
 import static org.jetbrains.jet.lang.types.TypeUtils.NO_EXPECTED_TYPE;
 import static org.jetbrains.jet.lang.types.TypeUtils.noExpectedType;
@@ -86,11 +87,10 @@ public class ExpressionTypingVisitorForStatements extends ExpressionTypingVisito
     public JetTypeInfo visitObjectDeclaration(@NotNull JetObjectDeclaration declaration, ExpressionTypingContext context) {
         TopDownAnalyzer.processClassOrObject(
                 context.replaceScope(scope).replaceContextDependency(INDEPENDENT), scope.getContainingDeclaration(), declaration);
-        ClassDescriptor classDescriptor = context.trace.getBindingContext().get(BindingContext.CLASS, declaration);
-        if (classDescriptor != null) {
-            VariableDescriptor variableDescriptor = context.expressionTypingServices.getDescriptorResolver()
-                    .resolveObjectDeclaration(scope, scope.getContainingDeclaration(), declaration, classDescriptor, context.trace);
-            scope.addVariableDescriptor(variableDescriptor);
+        ClassDescriptor descriptor = context.trace.getBindingContext().get(BindingContext.CLASS, declaration);
+        if (descriptor != null) {
+            assert isClassObjectOfObject(descriptor) : "Object should be resolved to its synthetic class object: " + descriptor;
+            scope.addClassifierDescriptor((ClassifierDescriptor) descriptor.getContainingDeclaration());
         }
         return DataFlowUtils.checkStatementType(declaration, context, context.dataFlowInfo);
     }

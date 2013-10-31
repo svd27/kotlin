@@ -23,6 +23,8 @@ import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.plugin.project.AnalyzerFacadeWithCache;
 
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfObject;
+
 public class SafeDeleteImportDirectiveUsageInfo extends SafeDeleteReferenceSimpleDeleteUsageInfo {
     public SafeDeleteImportDirectiveUsageInfo(@NotNull JetImportDirective importDirective, @NotNull JetDeclaration declaration) {
         super(importDirective, declaration, isSafeToDelete(declaration, importDirective));
@@ -47,10 +49,11 @@ public class SafeDeleteImportDirectiveUsageInfo extends SafeDeleteReferenceSimpl
                 AnalyzerFacadeWithCache.analyzeFileWithCache((JetFile) declaration.getContainingFile()).getBindingContext();
 
         DeclarationDescriptor referenceDescriptor = bindingContext.get(BindingContext.REFERENCE_TARGET, importReference);
+        DeclarationDescriptor declarationDescriptor = bindingContext.get(BindingContext.DECLARATION_TO_DESCRIPTOR, declaration);
 
-        DeclarationDescriptor declarationDescriptor = declaration instanceof JetObjectDeclaration
-                ? bindingContext.get(BindingContext.OBJECT_DECLARATION, ((JetObjectDeclaration) declaration).getNameAsDeclaration())
-                : bindingContext.get(BindingContext.DECLARATION_TO_DESCRIPTOR, declaration);
+        if (declarationDescriptor != null && isClassObjectOfObject(declarationDescriptor)) {
+            return declarationDescriptor.getContainingDeclaration() == referenceDescriptor;
+        }
 
         return referenceDescriptor == declarationDescriptor;
     }
