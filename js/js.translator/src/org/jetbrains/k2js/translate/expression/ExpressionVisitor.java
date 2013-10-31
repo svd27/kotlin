@@ -51,7 +51,6 @@ import static org.jetbrains.k2js.translate.reference.ReferenceTranslator.transla
 import static org.jetbrains.k2js.translate.utils.BindingUtils.*;
 import static org.jetbrains.k2js.translate.utils.ErrorReportingUtils.message;
 import static org.jetbrains.k2js.translate.utils.JsAstUtils.*;
-import static org.jetbrains.k2js.translate.utils.PsiUtils.getObjectDeclarationName;
 import static org.jetbrains.k2js.translate.utils.TranslationUtils.translateInitializerForProperty;
 import static org.jetbrains.k2js.translate.utils.mutator.LastExpressionMutator.mutateLastExpression;
 
@@ -471,12 +470,12 @@ public final class ExpressionVisitor extends TranslatorVisitor<JsNode> {
 
     @Override
     @NotNull
-    public JsNode visitObjectDeclaration(@NotNull JetObjectDeclaration expression,
-            @NotNull TranslationContext context) {
-        JetObjectDeclarationName objectDeclarationName = getObjectDeclarationName(expression);
-        DeclarationDescriptor descriptor = getDescriptorForElement(context.bindingContext(), objectDeclarationName);
-        JsName propertyName = context.getNameForDescriptor(descriptor);
+    public JsNode visitObjectDeclaration(@NotNull JetObjectDeclaration expression, @NotNull TranslationContext context) {
+        DeclarationDescriptor descriptor = getDescriptorForElement(context.bindingContext(), expression);
+        DeclarationDescriptor container = descriptor.getContainingDeclaration();
+        assert container != null : "Object declaration should be resolved to synthetic class object: " + descriptor;
+        JsName objectName = context.getNameForDescriptor(container);
         JsExpression value = ClassTranslator.generateClassCreation(expression, context);
-        return newVar(propertyName, value).source(expression);
+        return newVar(objectName, value).source(expression);
     }
 }
