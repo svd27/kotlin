@@ -28,15 +28,15 @@ import java.util.Collections;
 import java.util.List;
 
 public class JetObjectInfo implements JetClassLikeInfo {
-    private final JetObjectDeclaration element;
+    private final JetClassOrObject element;
 
-    protected JetObjectInfo(@NotNull JetObjectDeclaration element) {
+    protected JetObjectInfo(@NotNull JetClassOrObject element) {
         this.element = element;
     }
 
     @Override
     @Nullable
-    public JetObjectDeclaration getClassObject() {
+    public JetClassOrObject getClassObject() {
         return element;
     }
 
@@ -55,7 +55,7 @@ public class JetObjectInfo implements JetClassLikeInfo {
     @NotNull
     @Override
     public ClassKind getClassKind() {
-        return ClassKind.OBJECT;
+        return element instanceof JetObjectDeclaration ? ClassKind.OBJECT : ClassKind.ENUM_ENTRY;
     }
 
     @Override

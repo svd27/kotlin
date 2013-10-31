@@ -16,101 +16,89 @@
 
 package org.jetbrains.jet.lang.resolve.lazy.data;
 
-import com.google.common.base.Predicate;
-import com.google.common.collect.Collections2;
-import com.google.common.collect.Lists;
 import com.intellij.psi.PsiElement;
-import jet.Function0;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
 import org.jetbrains.jet.lang.psi.*;
 import org.jetbrains.jet.lang.resolve.name.FqName;
-import org.jetbrains.jet.storage.NotNullLazyValue;
-import org.jetbrains.jet.storage.StorageManager;
 
+import java.util.Collections;
 import java.util.List;
 
-public class FilteringClassLikeInfo implements JetClassLikeInfo {
-    private final JetClassLikeInfo delegate;
-    private final NotNullLazyValue<List<JetDeclaration>> filteredDeclarations;
+public class EmptyClassLikeInfo implements JetClassLikeInfo {
+    private final ClassKind kind;
+    private final FqName containingPackageFqName;
+    private final PsiElement scopeAnchor;
 
-    public FilteringClassLikeInfo(
-            @NotNull StorageManager storageManager,
-            @NotNull final JetClassLikeInfo delegate,
-            @NotNull final Predicate<? super JetDeclaration> declarationFilter
-    ) {
-        this.delegate = delegate;
-        this.filteredDeclarations = storageManager.createLazyValue(new Function0<List<JetDeclaration>>() {
-            @Override
-            public List<JetDeclaration> invoke() {
-                return Lists.newArrayList(Collections2.filter(delegate.getDeclarations(), declarationFilter));
-            }
-        });
+    public EmptyClassLikeInfo(@NotNull ClassKind kind, @NotNull FqName containingPackageFqName, @NotNull PsiElement scopeAnchor) {
+        this.kind = kind;
+        this.containingPackageFqName = containingPackageFqName;
+        this.scopeAnchor = scopeAnchor;
     }
 
     @NotNull
     @Override
     public FqName getContainingPackageFqName() {
-        return delegate.getContainingPackageFqName();
+        return containingPackageFqName;
     }
 
     @Override
     @NotNull
     public List<JetDelegationSpecifier> getDelegationSpecifiers() {
-        return delegate.getDelegationSpecifiers();
+        return Collections.emptyList();
     }
 
     @Override
     @Nullable
     public JetModifierList getModifierList() {
-        return delegate.getModifierList();
+        return null;
     }
 
     @Override
     @Nullable
-    public JetObjectDeclaration getClassObject() {
-        return delegate.getClassObject();
+    public JetClassOrObject getClassObject() {
+        return null;
     }
 
     @Override
     @NotNull
     public PsiElement getScopeAnchor() {
-        return delegate.getScopeAnchor();
+        return scopeAnchor;
     }
 
     @Override
     @Nullable
     public JetClassOrObject getCorrespondingClassOrObject() {
-        return delegate.getCorrespondingClassOrObject();
+        return null;
     }
 
     @Override
     @NotNull
     public List<JetTypeParameter> getTypeParameters() {
-        return delegate.getTypeParameters();
+        return Collections.emptyList();
     }
 
     @Override
     @NotNull
     public List<? extends JetParameter> getPrimaryConstructorParameters() {
-        return delegate.getPrimaryConstructorParameters();
+        return Collections.emptyList();
     }
 
     @Override
     @NotNull
     public ClassKind getClassKind() {
-        return delegate.getClassKind();
+        return kind;
     }
 
     @Override
     @NotNull
     public List<JetDeclaration> getDeclarations() {
-        return filteredDeclarations.invoke();
+        return Collections.emptyList();
     }
 
     @Override
     public String toString() {
-        return "filtering " + delegate.toString();
+        return "empty info for " + kind + " in " + containingPackageFqName;
     }
 }

@@ -18,20 +18,20 @@ package org.jetbrains.jet.lang.resolve.lazy.data;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
-import org.jetbrains.jet.lang.psi.JetObjectDeclaration;
+import org.jetbrains.jet.lang.psi.JetClassOrObject;
 import org.jetbrains.jet.lang.psi.JetParameter;
 import org.jetbrains.jet.lang.psi.JetTypeParameter;
 
 import java.util.Collections;
 import java.util.List;
 
-public class JetClassObjectInfo extends JetClassOrObjectInfo<JetObjectDeclaration> {
-    protected JetClassObjectInfo(@NotNull JetObjectDeclaration element) {
+public class JetClassObjectInfo extends JetClassOrObjectInfo<JetClassOrObject> {
+    protected JetClassObjectInfo(@NotNull JetClassOrObject element) {
         super(element);
     }
 
     @Override
-    public JetObjectDeclaration getClassObject() {
+    public JetClassOrObject getClassObject() {
         return null;
     }
 

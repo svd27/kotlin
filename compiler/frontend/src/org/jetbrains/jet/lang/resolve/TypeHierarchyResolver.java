@@ -503,7 +503,7 @@ public class TypeHierarchyResolver {
             }
 
             fakeClass.setModality(Modality.FINAL);
-            fakeClass.setVisibility(resolveVisibilityFromModifiers(declaration));
+            fakeClass.setVisibility(resolveVisibilityFromModifiers(declaration, getDefaultClassVisibility(fakeClass)));
             fakeClass.setTypeParameterDescriptors(Collections.<TypeParameterDescriptor>emptyList());
             fakeClass.createTypeConstructor();
             createPrimaryConstructorForObject(null, fakeClass).setReturnType(fakeClass.getDefaultType());

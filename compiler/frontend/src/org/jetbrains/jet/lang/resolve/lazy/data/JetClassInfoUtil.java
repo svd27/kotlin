@@ -19,22 +19,23 @@ package org.jetbrains.jet.lang.resolve.lazy.data;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.psi.JetClass;
 import org.jetbrains.jet.lang.psi.JetClassOrObject;
+import org.jetbrains.jet.lang.psi.JetEnumEntry;
 import org.jetbrains.jet.lang.psi.JetObjectDeclaration;
 
 public class JetClassInfoUtil {
     @NotNull
     public static JetClassLikeInfo createClassLikeInfo(@NotNull JetClassOrObject classOrObject) {
+        if (classOrObject instanceof JetObjectDeclaration || classOrObject instanceof JetEnumEntry) {
+            return new JetObjectInfo(classOrObject);
+        }
         if (classOrObject instanceof JetClass) {
             return new JetClassInfo((JetClass) classOrObject);
-        }
-        if (classOrObject instanceof JetObjectDeclaration) {
-            return new JetObjectInfo((JetObjectDeclaration) classOrObject);
         }
         throw new IllegalArgumentException("Unknown declaration type " + classOrObject + ": " + classOrObject.getText());
     }
 
     @NotNull
-    public static JetClassLikeInfo createClassObjectInfo(@NotNull JetObjectDeclaration objectDeclaration) {
-        return new JetClassObjectInfo(objectDeclaration);
+    public static JetClassLikeInfo createClassObjectInfo(@NotNull JetClassOrObject classOrObject) {
+        return new JetClassObjectInfo(classOrObject);
     }
 }

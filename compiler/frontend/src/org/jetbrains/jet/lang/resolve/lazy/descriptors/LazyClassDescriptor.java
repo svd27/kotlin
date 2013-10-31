@@ -17,7 +17,6 @@
 package org.jetbrains.jet.lang.resolve.lazy.descriptors;
 
 import com.google.common.base.Predicate;
-import com.google.common.base.Predicates;
 import com.google.common.collect.Collections2;
 import com.google.common.collect.Lists;
 import com.intellij.psi.PsiElement;
@@ -29,7 +28,9 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorBase;
-import org.jetbrains.jet.lang.psi.*;
+import org.jetbrains.jet.lang.psi.JetClassOrObject;
+import org.jetbrains.jet.lang.psi.JetModifierList;
+import org.jetbrains.jet.lang.psi.JetTypeParameter;
 import org.jetbrains.jet.lang.resolve.AnnotationResolver;
 import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.DescriptorFactory;
@@ -38,7 +39,7 @@ import org.jetbrains.jet.lang.resolve.lazy.ForceResolveUtil;
 import org.jetbrains.jet.lang.resolve.lazy.LazyDescriptor;
 import org.jetbrains.jet.lang.resolve.lazy.ResolveSession;
 import org.jetbrains.jet.lang.resolve.lazy.ScopeProvider;
-import org.jetbrains.jet.lang.resolve.lazy.data.FilteringClassLikeInfo;
+import org.jetbrains.jet.lang.resolve.lazy.data.EmptyClassLikeInfo;
 import org.jetbrains.jet.lang.resolve.lazy.data.JetClassInfoUtil;
 import org.jetbrains.jet.lang.resolve.lazy.data.JetClassLikeInfo;
 import org.jetbrains.jet.lang.resolve.lazy.declarations.ClassMemberDeclarationProvider;
@@ -58,7 +59,6 @@ import static org.jetbrains.jet.lang.resolve.name.SpecialNames.getClassObjectNam
 
 public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDescriptor, ClassDescriptor {
 
-    private static final Predicate<Object> ONLY_ENUM_ENTRIES = Predicates.instanceOf(JetEnumEntry.class);
     private static final Predicate<JetType> VALID_SUPERTYPE = new Predicate<JetType>() {
         @Override
         public boolean apply(JetType type) {
@@ -98,9 +98,7 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
         this.resolveSession = resolveSession;
 
         this.originalClassInfo = classLikeInfo;
-        JetClassLikeInfo classLikeInfoForMembers = kind != ClassKind.ENUM_CLASS ? classLikeInfo : noEnumEntries(classLikeInfo);
-        this.declarationProvider =
-                resolveSession.getDeclarationProviderFactory().getClassMemberDeclarationProvider(classLikeInfoForMembers);
+        this.declarationProvider = resolveSession.getDeclarationProviderFactory().getClassMemberDeclarationProvider(classLikeInfo);
 
         this.unsubstitutedMemberScope = new LazyClassMemberScope(resolveSession, declarationProvider, this);
         this.unsubstitutedInnerClassesScope = new InnerClassesScopeWrapper(unsubstitutedMemberScope);
@@ -279,15 +277,16 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
     }
 
     @Nullable
-    public JetClassLikeInfo getClassObjectInfo(@Nullable JetObjectDeclaration classObject) {
+    public JetClassLikeInfo getClassObjectInfo(@Nullable JetClassOrObject classObject) {
         if (classObject != null) {
-            if (kind == ClassKind.OBJECT || DescriptorUtils.inStaticContext(this)) {
+            if (kind == ClassKind.OBJECT || kind == ClassKind.ENUM_ENTRY || DescriptorUtils.inStaticContext(this)) {
                 return JetClassInfoUtil.createClassObjectInfo(classObject);
             }
         }
         else if (kind == ClassKind.ENUM_CLASS) {
-            // Enum classes always have class objects, and enum constants are their members
-            return enumClassObjectInfo(originalClassInfo);
+            // Enum classes always have class objects for values() and valueOf() methods
+            return new EmptyClassLikeInfo(ClassKind.CLASS_OBJECT, originalClassInfo.getContainingPackageFqName(),
+                                          originalClassInfo.getScopeAnchor());
         }
         return null;
     }
@@ -486,37 +485,6 @@ public class LazyClassDescriptor extends ClassDescriptorBase implements LazyDesc
             getSupertypes();
             getParameters();
         }
-    }
-
-    private JetClassLikeInfo noEnumEntries(JetClassLikeInfo classLikeInfo) {
-        return new FilteringClassLikeInfo(resolveSession.getStorageManager(), classLikeInfo, Predicates.not(ONLY_ENUM_ENTRIES));
-    }
-
-    private JetClassLikeInfo enumClassObjectInfo(JetClassLikeInfo classLikeInfo) {
-        return new FilteringClassLikeInfo(resolveSession.getStorageManager(), classLikeInfo, ONLY_ENUM_ENTRIES) {
-            @Override
-            public JetClassOrObject getCorrespondingClassOrObject() {
-                return null;
-            }
-
-            @NotNull
-            @Override
-            public ClassKind getClassKind() {
-                return ClassKind.CLASS_OBJECT;
-            }
-
-            @NotNull
-            @Override
-            public List<? extends JetParameter> getPrimaryConstructorParameters() {
-                return Collections.emptyList();
-            }
-
-            @NotNull
-            @Override
-            public List<JetTypeParameter> getTypeParameters() {
-                return Collections.emptyList();
-            }
-        };
     }
 
     private ScopeProvider getScopeProvider() {
