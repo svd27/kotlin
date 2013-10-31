@@ -310,7 +310,7 @@ public class CodegenBinding {
     @NotNull
     public static Type getAsmType(@NotNull BindingTrace bindingTrace, @NotNull DeclarationDescriptor descriptor) {
         descriptor = descriptor.getOriginal();
-        if (isObject(descriptor)) {
+        if (isObject(descriptor) || isEnumEntry(descriptor)) {
             ClassDescriptor classObject = ((ClassDescriptor) descriptor).getClassObjectDescriptor();
             assert classObject != null : "Object should have a class object: " + descriptor;
             descriptor = classObject;

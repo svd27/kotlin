@@ -252,9 +252,7 @@ public class AsmUtil {
             return NO_FLAG_PACKAGE_PRIVATE;
         }
         if (memberDescriptor instanceof ConstructorDescriptor) {
-            if (isClassObjectOfSingleton(containingDeclaration) ||
-                isAnonymous(containingDeclaration) ||
-                isEnumEntry(containingDeclaration)) {
+            if (isClassObjectOfSingleton(containingDeclaration) || isAnonymous(containingDeclaration)) {
                 return NO_FLAG_PACKAGE_PRIVATE;
             }
 

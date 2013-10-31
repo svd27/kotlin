@@ -21,28 +21,25 @@ import org.jetbrains.asm4.Type;
 import org.jetbrains.jet.codegen.state.JetTypeMapper;
 import org.jetbrains.jet.lang.descriptors.ClassDescriptor;
 import org.jetbrains.jet.lang.descriptors.ClassKind;
-import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.java.JvmAbi;
 
 public class FieldInfo {
     @NotNull
     public static FieldInfo createForSingleton(@NotNull ClassDescriptor fieldClassDescriptor, @NotNull JetTypeMapper typeMapper) {
         ClassKind kind = fieldClassDescriptor.getKind();
-        if (kind != ClassKind.CLASS_OBJECT && kind != ClassKind.ENUM_ENTRY) {
-            throw new IllegalStateException("Only class objects and enum entries are allowed here: " + fieldClassDescriptor);
+        if (kind != ClassKind.CLASS_OBJECT) {
+            throw new IllegalStateException("Only class objects are allowed here: " + fieldClassDescriptor);
         }
 
-        Type fieldType = typeMapper.mapType(fieldClassDescriptor.getDefaultType());
+        ClassDescriptor container = (ClassDescriptor) fieldClassDescriptor.getContainingDeclaration();
 
-        ClassDescriptor ownerDescriptor = DescriptorUtils.getParentOfType(fieldClassDescriptor, ClassDescriptor.class);
-        assert ownerDescriptor != null;
-        Type ownerType = typeMapper.mapType(ownerDescriptor.getDefaultType());
+        if (container.getKind() == ClassKind.ENUM_ENTRY) {
+            ClassDescriptor enumClass = (ClassDescriptor) container.getContainingDeclaration();
+            Type enumType = typeMapper.mapType(enumClass);
+            return new FieldInfo(enumType, enumType, container.getName().asString(), true);
+        }
 
-        String fieldName = kind == ClassKind.ENUM_ENTRY
-                           ? fieldClassDescriptor.getName().asString()
-                           : JvmAbi.CLASS_OBJECT_FIELD;
-
-        return new FieldInfo(ownerType, fieldType, fieldName, true);
+        return new FieldInfo(typeMapper.mapType(container), typeMapper.mapType(fieldClassDescriptor), JvmAbi.CLASS_OBJECT_FIELD, true);
     }
 
     @NotNull

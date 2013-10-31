@@ -418,11 +418,11 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         }
 
         if (superClassType == null) {
-            if (descriptor.getKind() == ClassKind.ENUM_CLASS) {
+            if (isEnumClass(descriptor)) {
                 superClassType = KotlinBuiltIns.getInstance().getEnumType(descriptor.getDefaultType());
                 superClassAsmType = typeMapper.mapType(superClassType);
             }
-            if (descriptor.getKind() == ClassKind.ENUM_ENTRY) {
+            if (isClassObjectOfEnumEntry(descriptor)) {
                 superClassType = descriptor.getTypeConstructor().getSupertypes().iterator().next();
                 superClassAsmType = typeMapper.mapType(superClassType);
             }
@@ -1259,7 +1259,7 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
 
     private void genSimpleSuperCall(InstructionAdapter iv) {
         iv.load(0, superClassAsmType);
-        if (descriptor.getKind() == ClassKind.ENUM_CLASS || descriptor.getKind() == ClassKind.ENUM_ENTRY) {
+        if (isEnumClass(descriptor) || isClassObjectOfEnumEntry(descriptor)) {
             iv.load(1, JAVA_STRING_TYPE);
             iv.load(2, Type.INT_TYPE);
             iv.invokespecial(superClassAsmType.getInternalName(), "<init>", "(Ljava/lang/String;I)V");
@@ -1536,11 +1536,11 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
             InstructionAdapter iv, ExpressionCodegen codegen,
             ConstructorDescriptor constructorDescriptor
     ) {
-        ClassDescriptor classDecl = constructorDescriptor.getContainingDeclaration();
+        ClassDescriptor classDescriptor = constructorDescriptor.getContainingDeclaration();
 
         iv.load(0, OBJECT_TYPE);
 
-        if (classDecl.getKind() == ClassKind.ENUM_CLASS || classDecl.getKind() == ClassKind.ENUM_ENTRY) {
+        if (isEnumClass(classDescriptor) || isClassObjectOfEnumEntry(classDescriptor)) {
             iv.load(1, OBJECT_TYPE);
             iv.load(2, Type.INT_TYPE);
         }
@@ -1552,7 +1552,6 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         assert resolvedCall != null;
         ConstructorDescriptor superConstructor = (ConstructorDescriptor) resolvedCall.getResultingDescriptor();
 
-        //noinspection SuspiciousMethodCalls
         CalculatedClosure closureForSuper = bindingContext.get(CLOSURE, superConstructor.getContainingDeclaration());
         CallableMethod superCallable = typeMapper.mapToCallableMethod(superConstructor, closureForSuper);
 
@@ -1631,9 +1630,10 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         iv.dup();
         iv.iconst(ordinal);
 
-        ClassDescriptor classDescriptor = bindingContext.get(BindingContext.CLASS, enumConstant);
-        assert classDescriptor != null;
-        Type implClass = typeMapper.mapClass(classDescriptor);
+        ClassDescriptor enumEntryClassObject = BindingContextUtils.getNotNull(bindingContext, BindingContext.CLASS, enumConstant);
+        ClassDescriptor enumEntryDescriptor = (ClassDescriptor) enumEntryClassObject.getContainingDeclaration();
+        assert enumEntryDescriptor.getKind() == ClassKind.ENUM_ENTRY : "Enum entry was resolved incorrectly: " + enumEntryDescriptor;
+        Type implClass = typeMapper.mapClass(enumEntryDescriptor);
 
         List<JetDelegationSpecifier> delegationSpecifiers = enumConstant.getDelegationSpecifiers();
         if (delegationSpecifiers.size() > 1) {

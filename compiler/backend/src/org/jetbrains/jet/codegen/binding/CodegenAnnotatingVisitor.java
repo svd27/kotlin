@@ -54,6 +54,7 @@ import static org.jetbrains.jet.codegen.FunctionTypesUtil.getSuperTypeForClosure
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.*;
 import static org.jetbrains.jet.lang.resolve.BindingContext.*;
 import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfObject;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumEntry;
 import static org.jetbrains.jet.lexer.JetTokens.*;
 
 class CodegenAnnotatingVisitor extends JetVisitorVoid {
@@ -152,7 +153,17 @@ class CodegenAnnotatingVisitor extends JetVisitorVoid {
         boolean trivial = enumEntry.getDeclarations().isEmpty();
         if (!trivial) {
             bindingTrace.record(ENUM_ENTRY_CLASS_NEED_SUBCLASS, descriptor);
-            super.visitEnumEntry(enumEntry);
+
+            DeclarationDescriptor container = descriptor.getContainingDeclaration();
+            assert isEnumEntry(container) : "Enum entry should be resolved to a synthetic class object: " + descriptor;
+            String name = getName((ClassDescriptor) container);
+            recordClosure(enumEntry, descriptor, name);
+
+            classStack.push(descriptor);
+            nameStack.push(name);
+            super.visitClass(enumEntry);
+            nameStack.pop();
+            classStack.pop();
         }
         else {
             Type asmType = bindingTrace.get(ASM_TYPE, peekFromStack(classStack));

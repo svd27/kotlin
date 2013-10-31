@@ -55,6 +55,8 @@ import static org.jetbrains.jet.codegen.AsmUtil.getTraitImplThisParameterType;
 import static org.jetbrains.jet.codegen.CodegenUtil.*;
 import static org.jetbrains.jet.codegen.FunctionTypesUtil.getFunctionTraitClassName;
 import static org.jetbrains.jet.codegen.binding.CodegenBinding.*;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfEnumEntry;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumClass;
 
 public class JetTypeMapper extends BindingTraceAware {
 
@@ -804,7 +806,6 @@ public class JetTypeMapper extends BindingTraceAware {
 
         signatureWriter.writeParametersStart();
 
-        ClassDescriptor containingDeclaration = descriptor.getContainingDeclaration();
         ClassDescriptor captureThis = getExpectedThisObjectForConstructorCall(descriptor, closure);
         if (captureThis != null) {
             signatureWriter.writeParameterType(JvmMethodParameterKind.OUTER);
@@ -819,7 +820,8 @@ public class JetTypeMapper extends BindingTraceAware {
             signatureWriter.writeParameterTypeEnd();
         }
 
-        if (containingDeclaration.getKind() == ClassKind.ENUM_CLASS || containingDeclaration.getKind() == ClassKind.ENUM_ENTRY) {
+        ClassDescriptor classDescriptor = descriptor.getContainingDeclaration();
+        if (isEnumClass(classDescriptor) || isClassObjectOfEnumEntry(classDescriptor)) {
             signatureWriter.writeParameterType(JvmMethodParameterKind.ENUM_NAME);
             mapType(KotlinBuiltIns.getInstance().getStringType(), signatureWriter, JetTypeMapperMode.VALUE);
             signatureWriter.writeParameterTypeEnd();
