@@ -42,6 +42,7 @@ import java.util.List;
 import static com.google.dart.compiler.backend.js.ast.JsVars.JsVar;
 import static org.jetbrains.jet.lang.resolve.DescriptorUtils.getClassDescriptorForType;
 import static org.jetbrains.k2js.translate.utils.BindingUtils.getClassDescriptor;
+import static org.jetbrains.k2js.translate.utils.JsDescriptorUtils.getSupertypesWithoutFakes;
 
 /**
  * Generates a big block where are all the classes(objects representing them) are created.
@@ -148,7 +149,7 @@ public final class ClassDeclarationTranslator extends AbstractTranslator {
                     public Iterable<OpenClassInfo> getNeighbors(OpenClassInfo current) {
                         LinkedList<OpenClassInfo> parents = new LinkedList<OpenClassInfo>();
                         ClassDescriptor classDescriptor = getClassDescriptor(context().bindingContext(), current.declaration);
-                        Collection<JetType> superTypes = classDescriptor.getTypeConstructor().getSupertypes();
+                        Collection<JetType> superTypes = getSupertypesWithoutFakes(classDescriptor);
 
                         for (JetType type : superTypes) {
                             ClassDescriptor descriptor = getClassDescriptorForType(type);
