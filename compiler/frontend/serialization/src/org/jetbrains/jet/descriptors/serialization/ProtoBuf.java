@@ -4431,20 +4431,6 @@ public final class ProtoBuf {
      */
     int getNestedClassName(int index);
 
-    // repeated int32 nested_object_name = 8;
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    java.util.List<java.lang.Integer> getNestedObjectNameList();
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    int getNestedObjectNameCount();
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    int getNestedObjectName(int index);
-
     // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
     /**
      * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
@@ -4601,39 +4587,18 @@ public final class ProtoBuf {
               input.popLimit(limit);
               break;
             }
-            case 64: {
-              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
-                nestedObjectName_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000080;
-              }
-              nestedObjectName_.add(input.readInt32());
-              break;
-            }
-            case 66: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080) && input.getBytesUntilLimit() > 0) {
-                nestedObjectName_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000080;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                nestedObjectName_.add(input.readInt32());
-              }
-              input.popLimit(limit);
-              break;
-            }
             case 74: {
-              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
+              if (!((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
                 enumEntry_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry>();
-                mutable_bitField0_ |= 0x00000100;
+                mutable_bitField0_ |= 0x00000080;
               }
               enumEntry_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.PARSER, extensionRegistry));
               break;
             }
             case 90: {
-              if (!((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
+              if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
                 member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>();
-                mutable_bitField0_ |= 0x00000200;
+                mutable_bitField0_ |= 0x00000100;
               }
               member_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry));
               break;
@@ -4669,12 +4634,9 @@ public final class ProtoBuf {
           nestedClassName_ = java.util.Collections.unmodifiableList(nestedClassName_);
         }
         if (((mutable_bitField0_ & 0x00000080) == 0x00000080)) {
-          nestedObjectName_ = java.util.Collections.unmodifiableList(nestedObjectName_);
-        }
-        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
           enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
         }
-        if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
+        if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
           member_ = java.util.Collections.unmodifiableList(member_);
         }
         makeExtensionsImmutable();
@@ -6426,29 +6388,6 @@ public final class ProtoBuf {
       return nestedClassName_.get(index);
     }
 
-    // repeated int32 nested_object_name = 8;
-    public static final int NESTED_OBJECT_NAME_FIELD_NUMBER = 8;
-    private java.util.List<java.lang.Integer> nestedObjectName_;
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    public java.util.List<java.lang.Integer>
-        getNestedObjectNameList() {
-      return nestedObjectName_;
-    }
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    public int getNestedObjectNameCount() {
-      return nestedObjectName_.size();
-    }
-    /**
-     * <code>repeated int32 nested_object_name = 8;</code>
-     */
-    public int getNestedObjectName(int index) {
-      return nestedObjectName_.get(index);
-    }
-
     // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
     public static final int ENUM_ENTRY_FIELD_NUMBER = 9;
     private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> enumEntry_;
@@ -6553,7 +6492,6 @@ public final class ProtoBuf {
       typeParameter_ = java.util.Collections.emptyList();
       supertype_ = java.util.Collections.emptyList();
       nestedClassName_ = java.util.Collections.emptyList();
-      nestedObjectName_ = java.util.Collections.emptyList();
       enumEntry_ = java.util.Collections.emptyList();
       member_ = java.util.Collections.emptyList();
       primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
@@ -6631,9 +6569,6 @@ public final class ProtoBuf {
       for (int i = 0; i < nestedClassName_.size(); i++) {
         output.writeInt32(7, nestedClassName_.get(i));
       }
-      for (int i = 0; i < nestedObjectName_.size(); i++) {
-        output.writeInt32(8, nestedObjectName_.get(i));
-      }
       for (int i = 0; i < enumEntry_.size(); i++) {
         output.writeMessage(9, enumEntry_.get(i));
       }
@@ -6683,15 +6618,6 @@ public final class ProtoBuf {
         }
         size += dataSize;
         size += 1 * getNestedClassNameList().size();
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < nestedObjectName_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(nestedObjectName_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getNestedObjectNameList().size();
       }
       for (int i = 0; i < enumEntry_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -6810,14 +6736,12 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000020);
         nestedClassName_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000040);
-        nestedObjectName_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000080);
         enumEntry_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000080);
         member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
         primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
@@ -6873,21 +6797,16 @@ public final class ProtoBuf {
         }
         result.nestedClassName_ = nestedClassName_;
         if (((bitField0_ & 0x00000080) == 0x00000080)) {
-          nestedObjectName_ = java.util.Collections.unmodifiableList(nestedObjectName_);
+          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
           bitField0_ = (bitField0_ & ~0x00000080);
         }
-        result.nestedObjectName_ = nestedObjectName_;
+        result.enumEntry_ = enumEntry_;
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
-          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
+          member_ = java.util.Collections.unmodifiableList(member_);
           bitField0_ = (bitField0_ & ~0x00000100);
         }
-        result.enumEntry_ = enumEntry_;
-        if (((bitField0_ & 0x00000200) == 0x00000200)) {
-          member_ = java.util.Collections.unmodifiableList(member_);
-          bitField0_ = (bitField0_ & ~0x00000200);
-        }
         result.member_ = member_;
-        if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
+        if (((from_bitField0_ & 0x00000200) == 0x00000200)) {
           to_bitField0_ |= 0x00000010;
         }
         result.primaryConstructor_ = primaryConstructor_;
@@ -6941,20 +6860,10 @@ public final class ProtoBuf {
           }
           
         }
-        if (!other.nestedObjectName_.isEmpty()) {
-          if (nestedObjectName_.isEmpty()) {
-            nestedObjectName_ = other.nestedObjectName_;
-            bitField0_ = (bitField0_ & ~0x00000080);
-          } else {
-            ensureNestedObjectNameIsMutable();
-            nestedObjectName_.addAll(other.nestedObjectName_);
-          }
-          
-        }
         if (!other.enumEntry_.isEmpty()) {
           if (enumEntry_.isEmpty()) {
             enumEntry_ = other.enumEntry_;
-            bitField0_ = (bitField0_ & ~0x00000100);
+            bitField0_ = (bitField0_ & ~0x00000080);
           } else {
             ensureEnumEntryIsMutable();
             enumEntry_.addAll(other.enumEntry_);
@@ -6964,7 +6873,7 @@ public final class ProtoBuf {
         if (!other.member_.isEmpty()) {
           if (member_.isEmpty()) {
             member_ = other.member_;
-            bitField0_ = (bitField0_ & ~0x00000200);
+            bitField0_ = (bitField0_ & ~0x00000100);
           } else {
             ensureMemberIsMutable();
             member_.addAll(other.member_);
@@ -7676,79 +7585,13 @@ public final class ProtoBuf {
         return this;
       }
 
-      // repeated int32 nested_object_name = 8;
-      private java.util.List<java.lang.Integer> nestedObjectName_ = java.util.Collections.emptyList();
-      private void ensureNestedObjectNameIsMutable() {
-        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
-          nestedObjectName_ = new java.util.ArrayList<java.lang.Integer>(nestedObjectName_);
-          bitField0_ |= 0x00000080;
-         }
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public java.util.List<java.lang.Integer>
-          getNestedObjectNameList() {
-        return java.util.Collections.unmodifiableList(nestedObjectName_);
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public int getNestedObjectNameCount() {
-        return nestedObjectName_.size();
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public int getNestedObjectName(int index) {
-        return nestedObjectName_.get(index);
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public Builder setNestedObjectName(
-          int index, int value) {
-        ensureNestedObjectNameIsMutable();
-        nestedObjectName_.set(index, value);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public Builder addNestedObjectName(int value) {
-        ensureNestedObjectNameIsMutable();
-        nestedObjectName_.add(value);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public Builder addAllNestedObjectName(
-          java.lang.Iterable<? extends java.lang.Integer> values) {
-        ensureNestedObjectNameIsMutable();
-        super.addAll(values, nestedObjectName_);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 nested_object_name = 8;</code>
-       */
-      public Builder clearNestedObjectName() {
-        nestedObjectName_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000080);
-        
-        return this;
-      }
-
       // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
       private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> enumEntry_ =
         java.util.Collections.emptyList();
       private void ensureEnumEntryIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (!((bitField0_ & 0x00000080) == 0x00000080)) {
           enumEntry_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry>(enumEntry_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000080;
          }
       }
 
@@ -7853,7 +7696,7 @@ public final class ProtoBuf {
        */
       public Builder clearEnumEntry() {
         enumEntry_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000080);
 
         return this;
       }
@@ -7871,9 +7714,9 @@ public final class ProtoBuf {
       private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable> member_ =
         java.util.Collections.emptyList();
       private void ensureMemberIsMutable() {
-        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
           member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>(member_);
-          bitField0_ |= 0x00000200;
+          bitField0_ |= 0x00000100;
          }
       }
 
@@ -7978,7 +7821,7 @@ public final class ProtoBuf {
        */
       public Builder clearMember() {
         member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000200);
+        bitField0_ = (bitField0_ & ~0x00000100);
 
         return this;
       }
@@ -8002,7 +7845,7 @@ public final class ProtoBuf {
        * </pre>
        */
       public boolean hasPrimaryConstructor() {
-        return ((bitField0_ & 0x00000400) == 0x00000400);
+        return ((bitField0_ & 0x00000200) == 0x00000200);
       }
       /**
        * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
@@ -8027,7 +7870,7 @@ public final class ProtoBuf {
         }
         primaryConstructor_ = value;
 
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         return this;
       }
       /**
@@ -8041,7 +7884,7 @@ public final class ProtoBuf {
           org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.Builder builderForValue) {
         primaryConstructor_ = builderForValue.build();
 
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         return this;
       }
       /**
@@ -8052,7 +7895,7 @@ public final class ProtoBuf {
        * </pre>
        */
       public Builder mergePrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor value) {
-        if (((bitField0_ & 0x00000400) == 0x00000400) &&
+        if (((bitField0_ & 0x00000200) == 0x00000200) &&
             primaryConstructor_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance()) {
           primaryConstructor_ =
             org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.newBuilder(primaryConstructor_).mergeFrom(value).buildPartial();
@@ -8060,7 +7903,7 @@ public final class ProtoBuf {
           primaryConstructor_ = value;
         }
 
-        bitField0_ |= 0x00000400;
+        bitField0_ |= 0x00000200;
         return this;
       }
       /**
@@ -8073,7 +7916,7 @@ public final class ProtoBuf {
       public Builder clearPrimaryConstructor() {
         primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
 
-        bitField0_ = (bitField0_ & ~0x00000400);
+        bitField0_ = (bitField0_ & ~0x00000200);
         return this;
       }
 
