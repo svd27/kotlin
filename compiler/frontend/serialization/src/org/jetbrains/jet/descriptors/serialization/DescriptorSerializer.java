@@ -99,10 +99,6 @@ public class DescriptorSerializer {
 
         ConstructorDescriptor primaryConstructor = classDescriptor.getUnsubstitutedPrimaryConstructor();
         if (primaryConstructor != null) {
-            builder.setPrimaryConstructorDEPRECATED(local.callableProto(primaryConstructor));
-        }
-
-        if (primaryConstructor != null) {
             if (DescriptorFactory.isDefaultPrimaryConstructor(primaryConstructor)) {
                 builder.setPrimaryConstructor(ProtoBuf.Class.PrimaryConstructor.getDefaultInstance());
             }

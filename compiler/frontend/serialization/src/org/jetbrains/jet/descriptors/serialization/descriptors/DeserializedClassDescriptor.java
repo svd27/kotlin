@@ -217,10 +217,16 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
 
     @Nullable
     private ConstructorDescriptor computePrimaryConstructor() {
-        if (!classProto.hasPrimaryConstructorDEPRECATED()) return null;
+        if (!classProto.hasPrimaryConstructor()) return null;
 
-        ProtoBuf.Callable constructorProto = classProto.getPrimaryConstructorDEPRECATED();
-        return (ConstructorDescriptor) deserializer.loadCallable(constructorProto);
+        ProtoBuf.Class.PrimaryConstructor constructorProto = classProto.getPrimaryConstructor();
+        if (!constructorProto.hasData()) {
+            ConstructorDescriptorImpl descriptor = DescriptorFactory.createPrimaryConstructorForObject(this);
+            descriptor.setReturnType(getDefaultType());
+            return descriptor;
+        }
+
+        return (ConstructorDescriptor) deserializer.loadCallable(constructorProto.getData());
     }
 
     @Nullable
