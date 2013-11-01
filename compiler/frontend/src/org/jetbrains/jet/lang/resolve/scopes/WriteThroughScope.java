@@ -40,7 +40,7 @@ public class WriteThroughScope extends WritableScopeWithImports {
 
     @Override
     @NotNull
-    public Collection<DeclarationDescriptor> getDeclarationsByLabel(LabelName labelName) {
+    public Collection<DeclarationDescriptor> getDeclarationsByLabel(@NotNull LabelName labelName) {
         checkMayRead();
 
         return writableWorker.getDeclarationsByLabel(labelName);
@@ -125,31 +125,6 @@ public class WriteThroughScope extends WritableScopeWithImports {
     }
 
     @Override
-    public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-        checkMayRead();
-
-        ClassDescriptor objectDescriptor = writableWorker.getObjectDescriptor(name);
-        if (objectDescriptor != null) return objectDescriptor;
-
-        objectDescriptor = getWorkerScope().getObjectDescriptor(name);
-        if (objectDescriptor != null) return objectDescriptor;
-
-        return super.getObjectDescriptor(name); // Imports
-    }
-
-    @NotNull
-    @Override
-    public Set<ClassDescriptor> getObjectDescriptors() {
-        checkMayRead();
-        Set<ClassDescriptor> objectDescriptors = Sets.newHashSet();
-
-        objectDescriptors.addAll(super.getObjectDescriptors());
-        objectDescriptors.addAll(getWorkerScope().getObjectDescriptors());
-        objectDescriptors.addAll(writableWorker.getObjectDescriptors());
-        return objectDescriptors;
-    }
-
-    @Override
     public void addLabeledDeclaration(@NotNull DeclarationDescriptor descriptor) {
         checkMayWrite();
 
@@ -189,13 +164,6 @@ public class WriteThroughScope extends WritableScopeWithImports {
         checkMayWrite();
 
         writableWorker.addClassifierDescriptor(classDescriptor);
-    }
-
-    @Override
-    public void addObjectDescriptor(@NotNull ClassDescriptor objectDescriptor) {
-        checkMayWrite();
-
-        writableWorker.addObjectDescriptor(objectDescriptor);
     }
 
     @Override
@@ -276,12 +244,5 @@ public class WriteThroughScope extends WritableScopeWithImports {
             }
         }
         return allDescriptors;
-    }
-
-    @NotNull
-    public JetScope getOuterScope() {
-        checkMayRead();
-
-        return getWorkerScope();
     }
 }

@@ -31,6 +31,7 @@ import org.jetbrains.jet.lang.resolve.BindingContext;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
+import org.jetbrains.jet.lang.resolve.name.SpecialNames;
 import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.TypeProjection;
 import org.jetbrains.jet.renderer.DescriptorRenderer;
@@ -40,6 +41,8 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfObject;
 
 public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     private static final String PATH = "compiler/testData/resolveAnnotations/testFile.kt";
@@ -162,7 +165,7 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
         checkDescriptor(expectedAnnotation, topProp.getGetter());
         checkDescriptor(expectedAnnotation, topProp.getSetter());
 
-        checkDescriptor(expectedAnnotation, getObjectDescriptor(test, "MyObject"));
+        checkDescriptor(expectedAnnotation, getClassDescriptor(test, "MyObject"));
 
         checkDescriptor(expectedAnnotation, getConstructorParameterDescriptor(myClass, "consProp"));
         checkDescriptor(expectedAnnotation, getConstructorParameterDescriptor(myClass, "param"));
@@ -214,14 +217,6 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     @NotNull
-    private static ClassDescriptor getObjectDescriptor(@NotNull NamespaceDescriptor namespaceDescriptor, @NotNull String name) {
-        Name className = Name.identifier(name);
-        ClassDescriptor aClass = namespaceDescriptor.getMemberScope().getObjectDescriptor(className);
-        assertNotNull("Failed to find class: " + namespaceDescriptor.getName() + "." + className, aClass);
-        return aClass;
-    }
-
-    @NotNull
     private static ClassDescriptor getClassObjectDescriptor(@NotNull ClassDescriptor classDescriptor) {
         ClassDescriptor objectDescriptor = classDescriptor.getClassObjectDescriptor();
         assert objectDescriptor != null : "Cannot find class object for class " + classDescriptor.getName();
@@ -254,8 +249,8 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
 
     @NotNull
     private ClassDescriptor getLocalObjectDescriptor(@NotNull String name) {
-        ClassDescriptor localClassDescriptor = getLocalClassDescriptor(name);
-        if (localClassDescriptor.getKind() == ClassKind.OBJECT) {
+        ClassDescriptor localClassDescriptor = getLocalClassDescriptor(SpecialNames.getClassObjectName(Name.identifier(name)).asString());
+        if (isClassObjectOfObject(localClassDescriptor)) {
             return localClassDescriptor;
         }
 
@@ -347,9 +342,7 @@ public class AnnotationDescriptorResolveTest extends JetLiteFixture {
     }
 
     private static String getContent(@NotNull String annotationText) throws IOException {
-        File file = new File(PATH);
-        String content = JetTestUtils.doLoadFile(file).replaceAll("ANNOTATION", annotationText);
-        return content;
+        return JetTestUtils.doLoadFile(new File(PATH)).replaceAll("ANNOTATION", annotationText);
     }
 
     private static void checkDescriptor(String expectedAnnotation, DeclarationDescriptor member) {

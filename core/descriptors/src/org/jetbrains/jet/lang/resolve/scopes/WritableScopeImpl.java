@@ -33,8 +33,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     private final Multimap<Name, DeclarationDescriptor> declaredDescriptorsAccessibleBySimpleName = HashMultimap.create();
     private boolean allDescriptorsDone = false;
 
-    private Set<ClassDescriptor> allObjectDescriptors = null;
-
     @NotNull
     private final DeclarationDescriptor ownerDeclarationDescriptor;
 
@@ -52,9 +50,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
 
     @Nullable
     private Map<LabelName, List<DeclarationDescriptor>> labelsToDescriptors;
-    
-    @Nullable
-    private Map<Name, ClassDescriptor> objectDescriptors;
 
     @Nullable
     private ReceiverParameterDescriptor implicitReceiver;
@@ -142,14 +137,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
             labelsToDescriptors = new HashMap<LabelName, List<DeclarationDescriptor>>();
         }
         return labelsToDescriptors;
-    }
-
-    @NotNull
-    private Map<Name, ClassDescriptor> getObjectDescriptorsMap() {
-        if (objectDescriptors == null) {
-            objectDescriptors = Maps.newHashMap();
-        }
-        return objectDescriptors;
     }
 
     @NotNull
@@ -311,17 +298,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
     }
 
     @Override
-    public void addObjectDescriptor(@NotNull ClassDescriptor objectDescriptor) {
-        checkMayWrite();
-
-        if (!objectDescriptor.getKind().isObject()) {
-            throw new IllegalStateException("must be object: " + objectDescriptor);
-        }
-        
-        getObjectDescriptorsMap().put(objectDescriptor.getName(), objectDescriptor);
-    }
-
-    @Override
     public void addClassifierAlias(@NotNull Name name, @NotNull ClassifierDescriptor classifierDescriptor) {
         checkMayWrite();
 
@@ -391,30 +367,6 @@ public class WritableScopeImpl extends WritableScopeWithImports {
         if (classifierDescriptor != null) return classifierDescriptor;
 
         return super.getClassifier(name);
-    }
-
-    @Override
-    public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-        ClassDescriptor descriptor = getObjectDescriptorsMap().get(name);
-        if (descriptor != null) return descriptor;
-
-        ClassDescriptor fromWorker = getWorkerScope().getObjectDescriptor(name);
-        if (fromWorker != null) return fromWorker;
-
-        return super.getObjectDescriptor(name);
-    }
-
-    @NotNull
-    @Override
-    public Set<ClassDescriptor> getObjectDescriptors() {
-        if (allObjectDescriptors == null) {
-            allObjectDescriptors = Sets.newHashSet(getObjectDescriptorsMap().values());
-            allObjectDescriptors.addAll(getWorkerScope().getObjectDescriptors());
-            for (JetScope imported : getImports()) {
-                allObjectDescriptors.addAll(imported.getObjectDescriptors());
-            }
-        }
-        return allObjectDescriptors;
     }
 
     @Override

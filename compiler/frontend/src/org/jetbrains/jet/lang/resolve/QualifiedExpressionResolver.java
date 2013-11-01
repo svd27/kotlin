@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Set;
 
 import static org.jetbrains.jet.lang.diagnostics.Errors.*;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isClassObjectOfSingleton;
 
 public class QualifiedExpressionResolver {
     public enum LookupMode {
@@ -256,16 +257,13 @@ public class QualifiedExpressionResolver {
 
         ClassifierDescriptor classifierDescriptor = outerScope.getClassifier(referencedName);
         if (classifierDescriptor != null) {
-            descriptors.add(classifierDescriptor);
-        }
-
-        if (lookupMode == LookupMode.ONLY_CLASSES) {
-            ClassDescriptor objectDescriptor = outerScope.getObjectDescriptor(referencedName);
-            if (objectDescriptor != null) {
-                descriptors.add(objectDescriptor);
+            // TODO: test this check
+            if (lookupMode == LookupMode.ONLY_CLASSES || !isClassObjectOfSingleton(classifierDescriptor)) {
+                descriptors.add(classifierDescriptor);
             }
         }
-        else {
+
+        if (lookupMode == LookupMode.EVERYTHING) {
             descriptors.addAll(outerScope.getFunctions(referencedName));
             descriptors.addAll(outerScope.getProperties(referencedName));
 
@@ -274,6 +272,7 @@ public class QualifiedExpressionResolver {
                 descriptors.add(localVariable);
             }
         }
+
         return new SuccessfulLookupResult(descriptors, outerScope, namespaceLevel);
     }
 

@@ -49,7 +49,7 @@ public class InnerClassesScopeWrapper extends AbstractScopeAdapter {
 
     @NotNull
     @Override
-    public Collection<DeclarationDescriptor> getDeclarationsByLabel(LabelName labelName) {
+    public Collection<DeclarationDescriptor> getDeclarationsByLabel(@NotNull LabelName labelName) {
         Collection<DeclarationDescriptor> declarationsByLabel = actualScope.getDeclarationsByLabel(labelName);
         return Collections2.filter(declarationsByLabel, new Predicate<DeclarationDescriptor>() {
             @Override

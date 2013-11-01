@@ -110,11 +110,6 @@ public abstract class AbstractLazyMemberScope<D extends DeclarationDescriptor, D
         return first(classDescriptors.invoke(name));
     }
 
-    @Override
-    public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-        return null;
-    }
-
     private static <T> T first(@NotNull List<T> list) {
         if (list.isEmpty()) return null;
         return list.get(0);
@@ -184,12 +179,6 @@ public abstract class AbstractLazyMemberScope<D extends DeclarationDescriptor, D
     }
 
     protected abstract void getNonDeclaredProperties(@NotNull Name name, @NotNull Set<VariableDescriptor> result);
-
-    @NotNull
-    @Override
-    public Collection<ClassDescriptor> getObjectDescriptors() {
-        return Collections.emptySet();
-    }
 
     @Override
     public VariableDescriptor getLocalVariable(@NotNull Name name) {

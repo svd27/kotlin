@@ -43,8 +43,6 @@ public interface WritableScope extends JetScope {
 
     void addClassifierDescriptor(@NotNull ClassifierDescriptor classDescriptor);
 
-    void addObjectDescriptor(@NotNull ClassDescriptor objectDescriptor);
-
     void addClassifierAlias(@NotNull Name name, @NotNull ClassifierDescriptor classifierDescriptor);
 
     void addNamespaceAlias(@NotNull Name name, @NotNull NamespaceDescriptor namespaceDescriptor);
@@ -58,7 +56,8 @@ public interface WritableScope extends JetScope {
     @Nullable
     NamespaceDescriptor getDeclaredNamespace(@NotNull Name name);
 
-    @NotNull Multimap<Name, DeclarationDescriptor> getDeclaredDescriptorsAccessibleBySimpleName();
+    @NotNull
+    Multimap<Name, DeclarationDescriptor> getDeclaredDescriptorsAccessibleBySimpleName();
 
     void importScope(@NotNull JetScope imported);
 

@@ -5,12 +5,11 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.descriptors.serialization.*;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
-import org.jetbrains.jet.storage.StorageManager;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.FqNameUnsafe;
 import org.jetbrains.jet.lang.resolve.name.Name;
+import org.jetbrains.jet.storage.StorageManager;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 public class DeserializedPackageMemberScope extends DeserializedMemberScope {
@@ -47,45 +46,22 @@ public class DeserializedPackageMemberScope extends DeserializedMemberScope {
     @Nullable
     @Override
     protected ClassifierDescriptor getClassDescriptor(@NotNull Name name) {
-        return findClassDescriptor(name, false);
+        return findClassDescriptor(name);
     }
 
     @Nullable
-    @Override
-    public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-        return findClassDescriptor(name, true);
-    }
-
-    @Nullable
-    private ClassDescriptor findClassDescriptor(Name name, boolean object) {
-        ClassDescriptor classDescriptor = descriptorFinder.findClass(new ClassId(packageFqName, FqNameUnsafe.topLevel(name)));
-        if (classDescriptor == null) {
-            return null;
-        }
-        return classDescriptor.getKind().isObject() == object ? classDescriptor : null;
+    private ClassDescriptor findClassDescriptor(@NotNull Name name) {
+        return descriptorFinder.findClass(new ClassId(packageFqName, FqNameUnsafe.topLevel(name)));
     }
 
     @Override
     protected void addAllClassDescriptors(@NotNull Collection<DeclarationDescriptor> result) {
-        findClassifiers(result, false);
-    }
-
-    @NotNull
-    @Override
-    protected Collection<ClassDescriptor> computeAllObjectDescriptors() {
-        return findClassifiers(new ArrayList<ClassDescriptor>(), true);
-    }
-
-    private <T extends Collection<? super ClassDescriptor>> T findClassifiers(T result, boolean object) {
         for (Name className : descriptorFinder.getClassNames(packageFqName)) {
-            ClassDescriptor classDescriptor = findClassDescriptor(className, object);
-
+            ClassDescriptor classDescriptor = findClassDescriptor(className);
             if (classDescriptor != null) {
-                assert classDescriptor.getKind().isObject() == object;
                 result.add(classDescriptor);
             }
         }
-        return result;
     }
 
     @Override

@@ -32,7 +32,6 @@ import org.jetbrains.jet.lang.resolve.lazy.KotlinTestWithEnvironment;
 import org.jetbrains.jet.lang.resolve.lazy.LazyResolveTestUtil;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
-import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.resolve.scopes.WritableScope;
 import org.jetbrains.jet.storage.LockBasedStorageManager;
 import org.jetbrains.jet.test.util.NamespaceComparator;
@@ -41,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.*;
 
+import static kotlin.KotlinPackage.filterIsInstance;
+import static kotlin.KotlinPackage.toCollection;
 import static org.jetbrains.jet.descriptors.serialization.ClassSerializationUtil.getClassId;
 import static org.jetbrains.jet.descriptors.serialization.NameSerializationUtil.createNameResolver;
 import static org.jetbrains.jet.descriptors.serialization.descriptors.AnnotationDeserializer.UNSUPPORTED;
@@ -77,9 +78,11 @@ public abstract class AbstractDescriptorSerializationTest extends KotlinTestWith
             @NotNull JavaDescriptorResolver javaDescriptorResolver,
             @NotNull NamespaceDescriptor testPackage
     ) {
-        List<ClassDescriptor> classesAndObjects = getAllClassesAndObjects(testPackage.getMemberScope());
+        List<ClassDescriptor> classes =
+                toCollection(filterIsInstance(testPackage.getMemberScope().getAllDescriptors().iterator(), ClassDescriptor.class),
+                             new ArrayList<ClassDescriptor>());
 
-        Map<ClassDescriptor, byte[]> serializedClasses = serializeClasses(classesAndObjects);
+        Map<ClassDescriptor, byte[]> serializedClasses = serializeClasses(classes);
         byte[] serializedPackage = serializePackage(testPackage);
 
         Map<String, ClassData> classDataMap = new HashMap<String, ClassData>();
@@ -94,16 +97,11 @@ public abstract class AbstractDescriptorSerializationTest extends KotlinTestWith
 
         DescriptorFinder descriptorFinder = new DescriptorFinderFromClassDataOrJava(javaDescriptorResolver, namespace, classDataMap);
 
-        for (ClassDescriptor classDescriptor : classesAndObjects) {
+        for (ClassDescriptor classDescriptor : classes) {
             ClassId classId = getClassId(classDescriptor);
             ClassDescriptor descriptor = descriptorFinder.findClass(classId);
             assert descriptor != null : "Class not loaded: " + classId;
-            if (descriptor.getKind().isObject()) {
-                namespace.getMemberScope().addObjectDescriptor(descriptor);
-            }
-            else {
-                namespace.getMemberScope().addClassifierDescriptor(descriptor);
-            }
+            namespace.getMemberScope().addClassifierDescriptor(descriptor);
         }
 
         PackageData data = PackageData.read(serializedPackage, JavaProtoBufUtil.getExtensionRegistry());
@@ -125,20 +123,6 @@ public abstract class AbstractDescriptorSerializationTest extends KotlinTestWith
         namespace.getMemberScope().changeLockLevel(WritableScope.LockLevel.READING);
 
         return namespace;
-    }
-
-    @NotNull
-    private static List<ClassDescriptor> getAllClassesAndObjects(@NotNull JetScope scope) {
-        List<ClassDescriptor> classes = new ArrayList<ClassDescriptor>();
-        for (DeclarationDescriptor descriptor : scope.getAllDescriptors()) {
-            if (descriptor instanceof ClassDescriptor) {
-                classes.add((ClassDescriptor) descriptor);
-            }
-        }
-        for (ClassDescriptor descriptor : scope.getObjectDescriptors()) {
-            classes.add(descriptor);
-        }
-        return classes;
     }
 
     @NotNull

@@ -46,19 +46,7 @@ public class ResolveSessionUtils {
     }
 
     @NotNull
-    public static Collection<ClassDescriptor> getClassDescriptorsByFqName(
-                @NotNull KotlinCodeAnalyzer analyzer,
-                @NotNull FqName fqName
-    ) {
-        return getClassOrObjectDescriptorsByFqName(analyzer, fqName, false);
-    }
-
-    @NotNull
-    public static Collection<ClassDescriptor> getClassOrObjectDescriptorsByFqName(
-            @NotNull KotlinCodeAnalyzer analyzer,
-            @NotNull FqName fqName,
-            boolean includeObjectDeclarations
-    ) {
+    public static Collection<ClassDescriptor> getClassDescriptorsByFqName(@NotNull KotlinCodeAnalyzer analyzer, @NotNull FqName fqName) {
         if (fqName.isRoot()) {
             return Collections.emptyList();
         }
@@ -70,26 +58,24 @@ public class ResolveSessionUtils {
             NamespaceDescriptor packageDescriptor = analyzer.getPackageDescriptorByFqName(packageFqName);
             if (packageDescriptor != null) {
                 FqName classInPackagePath = new FqName(QualifiedNamesUtil.tail(packageFqName, fqName));
-                Collection<ClassDescriptor> descriptors = getClassOrObjectDescriptorsByFqName(packageDescriptor, classInPackagePath,
-                                                                                              includeObjectDeclarations);
+                Collection<ClassDescriptor> descriptors = getClassDescriptorsByFqName(packageDescriptor, classInPackagePath);
                 classDescriptors.addAll(descriptors);
             }
 
             if (packageFqName.isRoot()) {
                 break;
             }
-            else {
-                packageFqName = packageFqName.parent();
-            }
+
+            packageFqName = packageFqName.parent();
         }
 
         return classDescriptors;
     }
 
-    private static Collection<ClassDescriptor> getClassOrObjectDescriptorsByFqName(
-            NamespaceDescriptor packageDescriptor,
-            FqName path,
-            boolean includeObjectDeclarations
+    @NotNull
+    private static Collection<ClassDescriptor> getClassDescriptorsByFqName(
+            @NotNull NamespaceDescriptor packageDescriptor,
+            @NotNull FqName path
     ) {
         if (path.isRoot()) {
             return Collections.emptyList();
@@ -113,21 +99,15 @@ public class ResolveSessionUtils {
         }
 
         Name shortName = path.shortName();
-        Collection<ClassDescriptor> resultClassifierDescriptors = Lists.newArrayList();
+        Collection<ClassDescriptor> result = Lists.newArrayList();
         for (JetScope scope : scopes) {
             ClassifierDescriptor classifier = scope.getClassifier(shortName);
             if (classifier instanceof ClassDescriptor) {
-                resultClassifierDescriptors.add((ClassDescriptor) classifier);
-            }
-            if (includeObjectDeclarations) {
-                ClassDescriptor objectDescriptor = scope.getObjectDescriptor(shortName);
-                if (objectDescriptor != null) {
-                    resultClassifierDescriptors.add(objectDescriptor);
-                }
+                result.add((ClassDescriptor) classifier);
             }
         }
 
-        return resultClassifierDescriptors;
+        return result;
     }
 
     @NotNull

@@ -88,17 +88,6 @@ public class ErrorUtils {
             return ERROR_CLASS;
         }
 
-        @Override
-        public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-            return ERROR_CLASS;
-        }
-
-        @NotNull
-        @Override
-        public Set<ClassDescriptor> getObjectDescriptors() {
-            return Collections.emptySet();
-        }
-
         @NotNull
         @Override
         public Set<VariableDescriptor> getProperties(@NotNull Name name) {
@@ -167,18 +156,6 @@ public class ErrorUtils {
         @Nullable
         @Override
         public ClassifierDescriptor getClassifier(@NotNull Name name) {
-            throw new IllegalStateException();
-        }
-
-        @Nullable
-        @Override
-        public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-            throw new IllegalStateException();
-        }
-
-        @NotNull
-        @Override
-        public Collection<ClassDescriptor> getObjectDescriptors() {
             throw new IllegalStateException();
         }
 
