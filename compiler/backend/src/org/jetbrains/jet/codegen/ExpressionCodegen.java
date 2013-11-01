@@ -53,6 +53,7 @@ import org.jetbrains.jet.lang.resolve.constants.CompileTimeConstant;
 import org.jetbrains.jet.lang.resolve.java.AsmTypeConstants;
 import org.jetbrains.jet.lang.resolve.java.JvmAbi;
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaClassDescriptor;
+import org.jetbrains.jet.lang.resolve.java.descriptor.JavaEnumEntryDescriptor;
 import org.jetbrains.jet.lang.resolve.java.descriptor.SamConstructorDescriptor;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.jet.lang.resolve.scopes.receivers.*;
@@ -1642,10 +1643,8 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
             }
         }
 
-        if (descriptor instanceof VariableDescriptorForObject) {
-            VariableDescriptorForObject variableDescriptor = (VariableDescriptorForObject) descriptor;
-            ClassDescriptor objectClassDescriptor = variableDescriptor.getObjectClass();
-            return genObjectClassInstance(variableDescriptor, objectClassDescriptor);
+        if (descriptor instanceof JavaEnumEntryDescriptor) {
+            return genObjectClassInstance((JavaEnumEntryDescriptor) descriptor);
         }
 
         int index = lookupLocalIndex(descriptor);
@@ -1727,17 +1726,12 @@ public class ExpressionCodegen extends JetVisitor<StackValue, StackValue> implem
         throw new UnsupportedOperationException("don't know how to generate reference " + descriptor);
     }
 
-    private StackValue genObjectClassInstance(VariableDescriptor variableDescriptor, ClassDescriptor objectClassDescriptor) {
-        boolean isEnumEntry = DescriptorUtils.isEnumClassObject(variableDescriptor.getContainingDeclaration());
-        if (isEnumEntry) {
-            ClassDescriptor containing = (ClassDescriptor) variableDescriptor.getContainingDeclaration().getContainingDeclaration();
-            assert containing != null;
-            Type type = typeMapper.mapType(containing);
-            return StackValue.field(type, type, variableDescriptor.getName().asString(), true);
-        }
-        else {
-            return StackValue.singleton(objectClassDescriptor, typeMapper);
-        }
+    @NotNull
+    private StackValue genObjectClassInstance(@NotNull JavaEnumEntryDescriptor enumEntry) {
+        ClassDescriptor enumClass = (ClassDescriptor) enumEntry.getContainingDeclaration().getContainingDeclaration();
+        assert enumClass != null : "Enum entry should be declared in enum class object: " + enumEntry;
+        Type type = typeMapper.mapType(enumClass);
+        return StackValue.field(type, type, enumEntry.getName().asString(), true);
     }
 
     private StackValue stackValueForLocal(DeclarationDescriptor descriptor, int index) {

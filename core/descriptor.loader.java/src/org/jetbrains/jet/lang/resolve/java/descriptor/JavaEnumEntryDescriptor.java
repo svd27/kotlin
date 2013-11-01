@@ -17,31 +17,23 @@
 package org.jetbrains.jet.lang.resolve.java.descriptor;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.jet.lang.descriptors.*;
+import org.jetbrains.jet.lang.descriptors.ClassOrNamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.Modality;
+import org.jetbrains.jet.lang.descriptors.VariableDescriptorForObject;
+import org.jetbrains.jet.lang.descriptors.Visibility;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.PropertyDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.name.Name;
 
 import java.util.List;
 
-public class JavaEnumEntryDescriptor extends PropertyDescriptorImpl
-        implements JavaCallableMemberDescriptor, VariableDescriptorForObject {
-    private final ClassDescriptor objectClass;
-
+public class JavaEnumEntryDescriptor extends PropertyDescriptorImpl implements JavaCallableMemberDescriptor, VariableDescriptorForObject {
     public JavaEnumEntryDescriptor(
             @NotNull ClassOrNamespaceDescriptor containingDeclaration,
             @NotNull List<AnnotationDescriptor> annotations,
             @NotNull Visibility visibility,
-            @NotNull Name name,
-            @NotNull ClassDescriptor objectClass
+            @NotNull Name name
     ) {
         super(containingDeclaration, annotations, Modality.FINAL, visibility, false, name, Kind.DECLARATION);
-        this.objectClass = objectClass;
-    }
-
-    @NotNull
-    @Override
-    public ClassDescriptor getObjectClass() {
-        return objectClass;
     }
 }

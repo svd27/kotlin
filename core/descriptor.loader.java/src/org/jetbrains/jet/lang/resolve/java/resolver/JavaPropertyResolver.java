@@ -19,7 +19,6 @@ package org.jetbrains.jet.lang.resolve.java.resolver;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
-import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorImpl;
 import org.jetbrains.jet.lang.descriptors.impl.PropertyDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaEnumEntryDescriptor;
@@ -27,7 +26,6 @@ import org.jetbrains.jet.lang.resolve.java.descriptor.JavaPropertyDescriptor;
 import org.jetbrains.jet.lang.resolve.java.scope.NamedMembers;
 import org.jetbrains.jet.lang.resolve.java.structure.JavaField;
 import org.jetbrains.jet.lang.resolve.name.Name;
-import org.jetbrains.jet.lang.resolve.scopes.JetScope;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.TypeUtils;
 
@@ -140,19 +138,9 @@ public final class JavaPropertyResolver {
         Visibility visibility = field.getVisibility();
 
         if (field.isEnumEntry()) {
-            assert !isVar : "Enum entries should be immutable.";
+            assert !isVar : "Enum entries should be immutable: " + propertyName + " " + owner;
             assert DescriptorUtils.isEnumClassObject(owner) : "Enum entries should be put into class object of enum only: " + owner;
-            //TODO: this is a hack to indicate that this enum entry is an object
-            // class descriptor for enum entries is not used by backends so for now this should be safe to use
-            ClassDescriptorImpl dummyClassDescriptorForEnumEntryObject =
-                    new ClassDescriptorImpl(owner, Collections.<AnnotationDescriptor>emptyList(), Modality.FINAL, propertyName);
-            dummyClassDescriptorForEnumEntryObject.initialize(
-                    true,
-                    Collections.<TypeParameterDescriptor>emptyList(),
-                    Collections.<JetType>emptyList(), JetScope.EMPTY,
-                    Collections.<ConstructorDescriptor>emptySet(), null,
-                    false);
-            return new JavaEnumEntryDescriptor(owner, annotations, visibility, propertyName, dummyClassDescriptorForEnumEntryObject);
+            return new JavaEnumEntryDescriptor(owner, annotations, visibility, propertyName);
         }
 
         return new JavaPropertyDescriptor(owner, annotations, visibility, isVar, propertyName);

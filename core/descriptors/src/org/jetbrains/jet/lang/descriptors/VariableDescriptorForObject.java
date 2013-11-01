@@ -16,9 +16,5 @@
 
 package org.jetbrains.jet.lang.descriptors;
 
-import org.jetbrains.annotations.NotNull;
-
 public interface VariableDescriptorForObject extends VariableDescriptor {
-    @NotNull
-    ClassDescriptor getObjectClass();
 }
