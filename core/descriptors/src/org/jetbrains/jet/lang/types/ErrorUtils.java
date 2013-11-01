@@ -362,13 +362,6 @@ public class ErrorUtils {
         return candidate instanceof ErrorClassDescriptor;
     }
 
-    @NotNull
-    public static ErrorClassDescriptor createErrorClass(@NotNull String debugMessage) {
-        ErrorClassDescriptor result = new ErrorClassDescriptor(debugMessage);
-        result.initializeErrorClass();
-        return result;
-    }
-
     private static class ErrorTypeImpl implements JetType {
         private final TypeConstructor constructor;
         private final JetScope memberScope;

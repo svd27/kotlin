@@ -14,21 +14,22 @@
  * limitations under the License.
  */
 
-package org.jetbrains.jet.lang.descriptors.impl;
+package org.jetbrains.jet.lang.resolve.java.descriptor;
 
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
+import org.jetbrains.jet.lang.descriptors.impl.PropertyDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.name.Name;
 
 import java.util.List;
 
-public class PropertyDescriptorForObjectImpl extends PropertyDescriptorImpl implements VariableDescriptorForObject {
-
+public class JavaEnumEntryDescriptor extends PropertyDescriptorImpl
+        implements JavaCallableMemberDescriptor, VariableDescriptorForObject {
     private final ClassDescriptor objectClass;
 
-    public PropertyDescriptorForObjectImpl(
-            @NotNull DeclarationDescriptor containingDeclaration,
+    public JavaEnumEntryDescriptor(
+            @NotNull ClassOrNamespaceDescriptor containingDeclaration,
             @NotNull List<AnnotationDescriptor> annotations,
             @NotNull Visibility visibility,
             @NotNull Name name,

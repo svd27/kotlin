@@ -22,8 +22,8 @@ import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
 import org.jetbrains.jet.lang.descriptors.impl.ClassDescriptorImpl;
 import org.jetbrains.jet.lang.descriptors.impl.PropertyDescriptorImpl;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
+import org.jetbrains.jet.lang.resolve.java.descriptor.JavaEnumEntryDescriptor;
 import org.jetbrains.jet.lang.resolve.java.descriptor.JavaPropertyDescriptor;
-import org.jetbrains.jet.lang.resolve.java.descriptor.JavaPropertyDescriptorForObject;
 import org.jetbrains.jet.lang.resolve.java.scope.NamedMembers;
 import org.jetbrains.jet.lang.resolve.java.structure.JavaField;
 import org.jetbrains.jet.lang.resolve.name.Name;
@@ -152,7 +152,7 @@ public final class JavaPropertyResolver {
                     Collections.<JetType>emptyList(), JetScope.EMPTY,
                     Collections.<ConstructorDescriptor>emptySet(), null,
                     false);
-            return new JavaPropertyDescriptorForObject(owner, annotations, visibility, propertyName, dummyClassDescriptorForEnumEntryObject);
+            return new JavaEnumEntryDescriptor(owner, annotations, visibility, propertyName, dummyClassDescriptorForEnumEntryObject);
         }
 
         return new JavaPropertyDescriptor(owner, annotations, visibility, isVar, propertyName);
