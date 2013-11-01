@@ -21,7 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.CallableMemberDescriptor;
 import org.jetbrains.jet.lang.descriptors.DeclarationDescriptor;
 import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
-import org.jetbrains.jet.lang.descriptors.NamespaceDescriptor;
+import org.jetbrains.jet.lang.descriptors.PackageViewDescriptor;
 import org.jetbrains.jet.lang.resolve.DescriptorUtils;
 import org.jetbrains.jet.lang.resolve.name.Name;
 import org.jetbrains.k2js.translate.context.Namer;
@@ -133,7 +133,7 @@ public final class PatternBuilder {
     }
 
     private static boolean isRootNamespace(DeclarationDescriptor declarationDescriptor) {
-        return declarationDescriptor instanceof NamespaceDescriptor && DescriptorUtils.isRootNamespace((NamespaceDescriptor) declarationDescriptor);
+        return declarationDescriptor instanceof PackageViewDescriptor && ((PackageViewDescriptor) declarationDescriptor).getFqName().isRoot();
     }
 
     public static class DescriptorPredicateImpl implements DescriptorPredicate {

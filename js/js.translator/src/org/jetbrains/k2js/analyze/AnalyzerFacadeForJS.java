@@ -36,7 +36,6 @@ import org.jetbrains.jet.lang.resolve.lazy.declarations.FileBasedDeclarationProv
 import org.jetbrains.jet.lang.resolve.lazy.storage.LockBasedLazyResolveStorageManager;
 import org.jetbrains.jet.lang.resolve.name.FqName;
 import org.jetbrains.jet.lang.resolve.name.Name;
-import org.jetbrains.jet.lang.types.lang.KotlinBuiltIns;
 import org.jetbrains.k2js.config.Config;
 
 import java.util.Collection;
@@ -96,7 +95,8 @@ public final class AnalyzerFacadeForJS {
             owner.addFragmentProvider(libraryModule.getPackageFragmentProvider()); // "import" analyzed library module
         }
 
-        BindingTrace trace = new BindingTraceContext();
+        BindingContext libraryContext = config.getLibraryContext();
+        BindingTrace trace = libraryContext == null ? new BindingTraceContext() : new DelegatingBindingTrace(libraryContext, "");
         InjectorForTopDownAnalyzerForJs injector = new InjectorForTopDownAnalyzerForJs(project, topDownAnalysisParameters, trace, owner);
         try {
             Collection<JetFile> allFiles = libraryModule != null ?
