@@ -36,6 +36,8 @@ import org.jetbrains.jet.renderer.DescriptorRendererBuilder;
 
 import java.util.*;
 
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isEnumEntry;
+import static org.jetbrains.jet.lang.resolve.DescriptorUtils.isObject;
 import static org.jetbrains.jet.lang.resolve.java.DescriptorSearchRule.INCLUDE_KOTLIN_SOURCES;
 import static org.jetbrains.jet.plugin.libraries.JetDecompiledData.descriptorToKey;
 
@@ -86,8 +88,7 @@ public final class DecompiledDataFactory {
             NamespaceDescriptor nd = javaDescriptorResolver.resolveNamespace(packageFqName, INCLUDE_KOTLIN_SOURCES);
             if (nd != null) {
                 for (DeclarationDescriptor member : sortDeclarations(nd.getMemberScope().getAllDescriptors())) {
-                    if (member instanceof ClassDescriptor || member instanceof NamespaceDescriptor
-                        || isNamedObjectProperty(member)) {
+                    if (member instanceof ClassDescriptor || member instanceof NamespaceDescriptor) {
                         continue;
                     }
                     appendDescriptor(member, "");
@@ -125,11 +126,18 @@ public final class DecompiledDataFactory {
     }
 
     private void appendDescriptor(@NotNull DeclarationDescriptor descriptor, String indent) {
-        // Don't render property for object declaration
         int startOffset = builder.length();
-        String renderedDescriptor = DESCRIPTOR_RENDERER.render(descriptor);
-        renderedDescriptor = renderedDescriptor.replace("= ...", "= " + DECOMPILED_COMMENT);
-        builder.append(renderedDescriptor);
+
+        builder.append(DESCRIPTOR_RENDERER.render(descriptor).replace("= ...", "= " + DECOMPILED_COMMENT));
+
+        String key = descriptorToKey(descriptor);
+
+        if (isObject(descriptor) || isEnumEntry(descriptor)) {
+            ClassDescriptor classObject = ((ClassDescriptor) descriptor).getClassObjectDescriptor();
+            assert classObject != null : "Class object should exist for object or enum entry: " + descriptor;
+            descriptor = classObject;
+        }
+
         int endOffset = builder.length();
 
         if (descriptor instanceof FunctionDescriptor || descriptor instanceof PropertyDescriptor) {
@@ -139,9 +147,7 @@ public final class DecompiledDataFactory {
                     endOffset = builder.length();
                 }
                 else { // descriptor instanceof PropertyDescriptor
-                    if (((PropertyDescriptor) descriptor).getModality() != Modality.ABSTRACT) {
-                        builder.append(" ").append(DECOMPILED_COMMENT);
-                    }
+                    builder.append(" ").append(DECOMPILED_COMMENT);
                 }
             }
         }
@@ -163,9 +169,6 @@ public final class DecompiledDataFactory {
                 if (member instanceof CallableMemberDescriptor && ((CallableMemberDescriptor) member).getKind() != CallableMemberDescriptor.Kind.DECLARATION) {
                     continue;
                 }
-                if (isNamedObjectProperty(member)) {
-                    continue;
-                }
 
                 if (firstPassed) {
                     builder.append("\n");
@@ -181,27 +184,18 @@ public final class DecompiledDataFactory {
         }
 
         builder.append("\n");
-        saveDescriptorToRange(descriptor, startOffset, endOffset);
+
+        saveDescriptorToRange(key, startOffset, endOffset);
 
         if (descriptor instanceof ClassDescriptor) {
             ConstructorDescriptor primaryConstructor = ((ClassDescriptor) descriptor).getUnsubstitutedPrimaryConstructor();
             if (primaryConstructor != null) {
-                saveDescriptorToRange(primaryConstructor, startOffset, endOffset);
+                saveDescriptorToRange(descriptorToKey(primaryConstructor), startOffset, endOffset);
             }
         }
     }
 
-    private void saveDescriptorToRange(DeclarationDescriptor descriptor, int startOffset, int endOffset) {
-        renderedDescriptorsToRange.put(descriptorToKey(descriptor), new TextRange(startOffset, endOffset));
-    }
-
-    private static boolean isNamedObjectProperty(@NotNull DeclarationDescriptor descriptor) {
-        if (descriptor instanceof PropertyDescriptor && descriptor instanceof VariableDescriptorForObject) {
-            ClassDescriptor objectClass = ((VariableDescriptorForObject) descriptor).getObjectClass();
-            if (objectClass.getKind() == ClassKind.OBJECT) {
-                return true;
-            }
-        }
-        return false;
+    private void saveDescriptorToRange(@NotNull String key, int startOffset, int endOffset) {
+        renderedDescriptorsToRange.put(key, new TextRange(startOffset, endOffset));
     }
 }
