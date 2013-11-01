@@ -27,7 +27,8 @@ import org.jetbrains.jet.test.util.NamespaceComparator;
 import java.io.File;
 
 import static org.jetbrains.jet.jvm.compiler.LoadDescriptorUtil.*;
-import static org.jetbrains.jet.test.util.NamespaceComparator.*;
+import static org.jetbrains.jet.test.util.NamespaceComparator.DONT_INCLUDE_METHODS_OF_OBJECT;
+import static org.jetbrains.jet.test.util.NamespaceComparator.validateAndCompareNamespaceWithFile;
 
 /*
  *  This test should be implemented via AbstractLoadCompiledKotlinTest.
@@ -52,8 +53,7 @@ public final class LoadKotlinCustomTest extends TestCaseWithTmpdir {
         NamespaceDescriptor namespaceFromSource = exhaust.getBindingContext().get(BindingContext.FQNAME_TO_NAMESPACE_DESCRIPTOR,
                                                                                   TEST_PACKAGE_FQNAME);
         assert namespaceFromSource != null;
-        validateAndCompareNamespaceWithFile(namespaceFromSource, NamespaceComparator.DONT_INCLUDE_METHODS_OF_OBJECT.checkPrimaryConstructors(true),
-                                 expectedFile);
+        validateAndCompareNamespaceWithFile(namespaceFromSource, NamespaceComparator.DONT_INCLUDE_METHODS_OF_OBJECT, expectedFile);
     }
 
     private void doTest(
@@ -85,6 +85,10 @@ public final class LoadKotlinCustomTest extends TestCaseWithTmpdir {
     }
 
     public void testInnerEnumExistingClassObject() throws Exception {
+        doTest(ENUM_DIR);
+    }
+
+    public void testEnumEntrySubclass() throws Exception {
         doTest(ENUM_DIR);
     }
 }

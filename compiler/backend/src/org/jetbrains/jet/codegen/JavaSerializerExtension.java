@@ -62,6 +62,11 @@ public class JavaSerializerExtension extends SerializerExtension {
         }
     }
 
+    @Override
+    public boolean isNonTrivialEnumEntry(@NotNull ClassDescriptor enumEntry) {
+        return bindings.get(NON_TRIVIAL_ENUM_ENTRY, enumEntry);
+    }
+
     private void saveSignature(
             @NotNull CallableMemberDescriptor callable,
             @NotNull ProtoBuf.Callable.Builder proto,

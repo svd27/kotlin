@@ -1,0 +1,34 @@
+package test
+
+internal final enum class E : jet.Enum<test.E> {
+    private constructor E()
+    public final override /*1*/ /*fake_override*/ fun name(): jet.String
+    public final override /*1*/ /*fake_override*/ fun ordinal(): jet.Int
+    
+    internal class object <class-object-for-E> {
+        private constructor <class-object-for-E>()
+        public final fun valueOf(/*0*/ value: jet.String): test.E
+        public final fun values(): jet.Array<test.E>
+    }
+    
+    public enum entry SIMPLE {
+        private constructor SIMPLE()
+        
+        public class object <class-object-for-SIMPLE> : test.E {
+            private constructor <class-object-for-SIMPLE>()
+            invisible_fake abstract override /*1*/ /*fake_override*/ fun name(): jet.String
+            invisible_fake abstract override /*1*/ /*fake_override*/ fun ordinal(): jet.Int
+        }
+    }
+    
+    public enum entry SUBCLASS {
+        private constructor SUBCLASS()
+        
+        public class object <class-object-for-SUBCLASS> : test.E {
+            private constructor <class-object-for-SUBCLASS>()
+            internal final fun foo(): jet.Int
+            public final override /*1*/ /*fake_override*/ fun name(): jet.String
+            public final override /*1*/ /*fake_override*/ fun ordinal(): jet.Int
+        }
+    }
+}

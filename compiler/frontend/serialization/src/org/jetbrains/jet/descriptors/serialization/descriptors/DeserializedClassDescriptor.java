@@ -23,7 +23,10 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.descriptors.serialization.*;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.AnnotationDescriptor;
-import org.jetbrains.jet.lang.descriptors.impl.*;
+import org.jetbrains.jet.lang.descriptors.impl.AbstractClassDescriptor;
+import org.jetbrains.jet.lang.descriptors.impl.AbstractReceiverParameterDescriptor;
+import org.jetbrains.jet.lang.descriptors.impl.ConstructorDescriptorImpl;
+import org.jetbrains.jet.lang.descriptors.impl.MutableClassDescriptor;
 import org.jetbrains.jet.lang.resolve.DescriptorFactory;
 import org.jetbrains.jet.lang.resolve.OverridingUtil;
 import org.jetbrains.jet.lang.resolve.name.Name;
@@ -43,7 +46,6 @@ import org.jetbrains.jet.storage.StorageManager;
 import java.util.*;
 
 import static org.jetbrains.jet.descriptors.serialization.TypeDeserializer.TypeParameterResolver.NONE;
-import static org.jetbrains.jet.lang.descriptors.ReceiverParameterDescriptor.NO_RECEIVER_PARAMETER;
 import static org.jetbrains.jet.lang.resolve.name.SpecialNames.getClassObjectName;
 
 public class DeserializedClassDescriptor extends AbstractClassDescriptor implements ClassDescriptor {
@@ -64,7 +66,6 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
     private final NullableLazyValue<ClassDescriptor> classObjectDescriptor;
 
     private final NestedClassDescriptors nestedClasses;
-    private final NestedClassDescriptors nestedObjects;
 
     private final NotNullLazyValue<DeclarationDescriptor> containingDeclaration;
     private final DeserializedClassTypeConstructor typeConstructor;
@@ -135,17 +136,8 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
                 return computeClassObjectDescriptor();
             }
         });
-        this.nestedClasses = new NestedClassDescriptors(storageManager, names(classProto.getNestedClassNameList(), nameResolver));
-        this.nestedObjects = new NestedClassDescriptors(storageManager, names(classProto.getNestedObjectNameList(), nameResolver));
-    }
 
-    @NotNull
-    private static Set<Name> names(@NotNull List<Integer> nameIndices, @NotNull NameResolver nameResolver) {
-        Set<Name> result = new HashSet<Name>(nameIndices.size());
-        for (Integer index : nameIndices) {
-            result.add(nameResolver.getName(index));
-        }
-        return result;
+        this.nestedClasses = new NestedClassDescriptors();
     }
 
     @NotNull
@@ -260,19 +252,13 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
         }
 
         if (getKind() == ClassKind.ENUM_CLASS) {
-            MutableClassDescriptor classObject = createEnumClassObject();
-
-            for (int enumEntry : classProto.getEnumEntryList()) {
-                createEnumEntry(classObject, deserializer.getNameResolver().getName(enumEntry));
-            }
-
-            return classObject;
+            return createEnumClassObject();
         }
 
-        if (getKind() == ClassKind.OBJECT) {
+        if (getKind() == ClassKind.OBJECT || getKind() == ClassKind.ENUM_ENTRY) {
             ProtoBuf.Class.ClassObject classObjectProto = classProto.getClassObject();
             if (!classObjectProto.hasData()) {
-                throw new IllegalStateException("Object should have a serialized class object: " + classId);
+                throw new IllegalStateException("Object or enum entry should have a serialized class object: " + classId);
             }
 
             return new DeserializedClassDescriptor(storageManager, annotationDeserializer, descriptorFinder, deserializer.getNameResolver(),
@@ -303,20 +289,6 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
                 DescriptorFactory.createEnumClassObjectValueOfMethod(classObject, defaultType));
 
         return classObject;
-    }
-
-    private void createEnumEntry(@NotNull MutableClassDescriptor enumClassObject, @NotNull Name name) {
-        PropertyDescriptorImpl property = new PropertyDescriptorForObjectImpl(enumClassObject,
-                                                                              Collections.<AnnotationDescriptor>emptyList(),
-                                                                              Visibilities.PUBLIC, name, this);
-        property.setType(getDefaultType(), Collections.<TypeParameterDescriptor>emptyList(),
-                         enumClassObject.getThisAsReceiverParameter(), NO_RECEIVER_PARAMETER);
-
-        PropertyGetterDescriptorImpl getter = DescriptorFactory.createDefaultGetter(property);
-        getter.initialize(property.getReturnType());
-        property.initialize(getter, null);
-
-        enumClassObject.getBuilder().addPropertyDescriptor(property);
     }
 
     @Nullable
@@ -490,37 +462,93 @@ public class DeserializedClassDescriptor extends AbstractClassDescriptor impleme
         @Nullable
         @Override
         public ClassDescriptor getObjectDescriptor(@NotNull Name name) {
-            return classDescriptor.nestedObjects.findClass.invoke(name);
+            return null;
         }
 
         @NotNull
         @Override
         protected Collection<ClassDescriptor> computeAllObjectDescriptors() {
-            return classDescriptor.nestedObjects.getAllDescriptors();
+            return Collections.emptySet();
         }
     }
 
     private class NestedClassDescriptors {
-        private final Set<Name> declaredNames;
+        private final Set<Name> nestedClassNames;
+        private final Map<Name, NotNullLazyValue<ClassDescriptor>> enumEntries;
         private final MemoizedFunctionToNullable<Name, ClassDescriptor> findClass;
 
-        public NestedClassDescriptors(@NotNull StorageManager storageManager, @NotNull Set<Name> declaredNames) {
-            this.declaredNames = declaredNames;
+        public NestedClassDescriptors() {
+            this.nestedClassNames = new HashSet<Name>();
+            for (Integer index : classProto.getNestedClassNameList()) {
+                this.nestedClassNames.add(deserializer.getNameResolver().getName(index));
+            }
+
+            this.enumEntries = computeEnumEntries();
+
             this.findClass = storageManager.createMemoizedFunctionWithNullableValues(new Function1<Name, ClassDescriptor>() {
                 @Override
                 public ClassDescriptor invoke(Name name) {
-                    return NestedClassDescriptors.this.declaredNames.contains(name) ?
-                           descriptorFinder.findClass(classId.createNestedClassId(name)) :
-                           null;
+                    if (nestedClassNames.contains(name)) {
+                        return descriptorFinder.findClass(classId.createNestedClassId(name));
+                    }
+                    NotNullLazyValue<ClassDescriptor> enumEntry = enumEntries.get(name);
+                    if (enumEntry != null) {
+                        return enumEntry.invoke();
+                    }
+                    return null;
                 }
             });
         }
 
         @NotNull
+        private Map<Name, NotNullLazyValue<ClassDescriptor>> computeEnumEntries() {
+            if (classProto.getEnumEntryCount() == 0) {
+                return Collections.emptyMap();
+            }
+
+            Map<Name, NotNullLazyValue<ClassDescriptor>> enumEntries = new LinkedHashMap<Name, NotNullLazyValue<ClassDescriptor>>();
+            for (ProtoBuf.Class.EnumEntry enumEntryProto : classProto.getEnumEntryList()) {
+                final Name entryName = deserializer.getNameResolver().getName(enumEntryProto.getName());
+
+                NotNullLazyValue<ClassDescriptor> lazyValue;
+                if (enumEntryProto.hasData()) {
+                    // This is a trivial enum entry and its serialized data is right here
+                    final ProtoBuf.Class enumEntryData = enumEntryProto.getData();
+                    lazyValue = storageManager.createLazyValue(new Function0<ClassDescriptor>() {
+                        @Override
+                        public ClassDescriptor invoke() {
+                            return new DeserializedClassDescriptor(storageManager, annotationDeserializer, descriptorFinder,
+                                                                   deserializer.getNameResolver(), enumEntryData);
+                        }
+                    });
+                }
+                else {
+                    // This is a non-trivial enum entry and its data is in a separate class, searchable via DescriptorFinder
+                    lazyValue = storageManager.createLazyValue(new Function0<ClassDescriptor>() {
+                        @Override
+                        public ClassDescriptor invoke() {
+                            return descriptorFinder.findClass(classId.createNestedClassId(entryName));
+                        }
+                    });
+                }
+
+                enumEntries.put(entryName, lazyValue);
+            }
+
+            return enumEntries;
+        }
+
+        @NotNull
         public Collection<ClassDescriptor> getAllDescriptors() {
-            Collection<ClassDescriptor> result = new ArrayList<ClassDescriptor>(declaredNames.size());
-            for (Name name : declaredNames) {
+            Collection<ClassDescriptor> result = new ArrayList<ClassDescriptor>(nestedClassNames.size() + enumEntries.size());
+            for (Name name : nestedClassNames) {
                 ClassDescriptor descriptor = findClass.invoke(name);
+                if (descriptor != null) {
+                    result.add(descriptor);
+                }
+            }
+            for (Name enumEntry : enumEntries.keySet()) {
+                ClassDescriptor descriptor = findClass.invoke(enumEntry);
                 if (descriptor != null) {
                     result.add(descriptor);
                 }

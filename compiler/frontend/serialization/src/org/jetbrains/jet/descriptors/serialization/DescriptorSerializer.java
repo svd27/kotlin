@@ -121,9 +121,11 @@ public class DescriptorSerializer {
 
         Collection<DeclarationDescriptor> nestedClasses = classDescriptor.getUnsubstitutedInnerClassesScope().getAllDescriptors();
         for (DeclarationDescriptor descriptor : sort(nestedClasses)) {
-            ClassDescriptor nestedClass = (ClassDescriptor) descriptor;
-            int nameIndex = nameTable.getSimpleNameIndex(nestedClass.getName());
-            builder.addNestedClassName(nameIndex);
+            if (!isEnumEntry(descriptor)) {
+                ClassDescriptor nestedClass = (ClassDescriptor) descriptor;
+                int nameIndex = nameTable.getSimpleNameIndex(nestedClass.getName());
+                builder.addNestedClassName(nameIndex);
+            }
         }
 
         for (ClassDescriptor descriptor : sort(classDescriptor.getUnsubstitutedInnerClassesScope().getObjectDescriptors())) {
@@ -137,9 +139,17 @@ public class DescriptorSerializer {
         }
 
         if (classDescriptor.getKind() == ClassKind.ENUM_CLASS) {
-            for (ClassDescriptor descriptor : getEnumEntriesScope(classDescriptor).getObjectDescriptors()) {
-                if (descriptor.getKind() == ClassKind.ENUM_ENTRY) {
-                    builder.addEnumEntry(nameTable.getSimpleNameIndex(descriptor.getName()));
+            for (DeclarationDescriptor nestedClass : nestedClasses) {
+                if (isEnumEntry(nestedClass)) {
+                    ClassDescriptor enumEntry = (ClassDescriptor) nestedClass;
+
+                    ProtoBuf.Class.EnumEntry.Builder entryBuilder = ProtoBuf.Class.EnumEntry.newBuilder();
+                    entryBuilder.setName(nameTable.getSimpleNameIndex(enumEntry.getName()));
+                    if (!extension.isNonTrivialEnumEntry(enumEntry)) {
+                        entryBuilder.setData(classProto(enumEntry));
+                    }
+
+                    builder.addEnumEntry(entryBuilder);
                 }
             }
         }

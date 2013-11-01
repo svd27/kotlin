@@ -127,9 +127,16 @@ message Class {
   repeated int32 nested_class_name = 7;
   repeated int32 nested_object_name = 8;
 
-  repeated Callable member = 11;
+  message EnumEntry {
+    required int32 name = 1;
+    // If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+    // Otherwise the corresponding data should be found in that separate class file
+    optional Class data = 2;
+  }
 
-  repeated int32 enum_entry = 12;
+  repeated EnumEntry enum_entry = 9;
+
+  repeated Callable member = 11;
 
   message PrimaryConstructor {
     // If this field is present, it contains serialized data for the primary constructor.

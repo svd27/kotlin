@@ -28,6 +28,10 @@ public abstract class SerializerExtension {
         return true;
     }
 
+    public boolean isNonTrivialEnumEntry(@NotNull ClassDescriptor enumEntry) {
+        return false;
+    }
+
     public void serializeCallable(
             @NotNull CallableMemberDescriptor callable,
             @NotNull ProtoBuf.Callable.Builder proto,

@@ -21,10 +21,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.jetbrains.asm4.Type;
 import org.jetbrains.asm4.commons.Method;
-import org.jetbrains.jet.lang.descriptors.CallableMemberDescriptor;
-import org.jetbrains.jet.lang.descriptors.FunctionDescriptor;
-import org.jetbrains.jet.lang.descriptors.PropertyDescriptor;
-import org.jetbrains.jet.lang.descriptors.ValueParameterDescriptor;
+import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.util.slicedmap.*;
 
 import java.util.Collection;
@@ -43,6 +40,8 @@ public final class JvmSerializationBindings {
             SerializationMappingSetSlice.create();
     public static final SerializationMappingSlice<ValueParameterDescriptor, Integer> INDEX_FOR_VALUE_PARAMETER =
             SerializationMappingSlice.create();
+    public static final SerializationMappingSetSlice<ClassDescriptor> NON_TRIVIAL_ENUM_ENTRY =
+            SerializationMappingSetSlice.create();
 
     private static final class SerializationMappingSlice<K, V> extends BasicWritableSlice<K, V> {
         public SerializationMappingSlice() {

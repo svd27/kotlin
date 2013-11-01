@@ -213,6 +213,8 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
 
     @Override
     protected void generateKotlinAnnotation() {
+        saveNonTrivialEnumEntriesToBindings();
+
         DescriptorSerializer serializer = new DescriptorSerializer(new JavaSerializerExtension(v.getSerializationBindings()));
 
         // If we're generating a singleton, "descriptor" represents its synthetic class object.
@@ -233,6 +235,20 @@ public class ImplementationBodyCodegen extends ClassBodyCodegen {
         }
         array.visitEnd();
         av.visitEnd();
+    }
+
+    private void saveNonTrivialEnumEntriesToBindings() {
+        if (!isEnumClass(descriptor)) return;
+
+        JvmSerializationBindings bindings = v.getSerializationBindings();
+        for (DeclarationDescriptor nestedClass : descriptor.getUnsubstitutedInnerClassesScope().getAllDescriptors()) {
+            if (isEnumEntry(nestedClass)) {
+                ClassDescriptor enumEntry = (ClassDescriptor) nestedClass;
+                if (CodegenBinding.enumEntryNeedSubclass(bindingContext, enumEntry)) {
+                    bindings.put(JvmSerializationBindings.NON_TRIVIAL_ENUM_ENTRY, enumEntry);
+                }
+            }
+        }
     }
 
     private void writeEnclosingMethod() {

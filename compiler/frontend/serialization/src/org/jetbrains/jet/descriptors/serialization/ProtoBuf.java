@@ -4445,6 +4445,21 @@ public final class ProtoBuf {
      */
     int getNestedObjectName(int index);
 
+    // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> 
+        getEnumEntryList();
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry getEnumEntry(int index);
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    int getEnumEntryCount();
+
     // repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;
     /**
      * <code>repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;</code>
@@ -4459,20 +4474,6 @@ public final class ProtoBuf {
      * <code>repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;</code>
      */
     int getMemberCount();
-
-    // repeated int32 enum_entry = 12;
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    java.util.List<java.lang.Integer> getEnumEntryList();
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    int getEnumEntryCount();
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    int getEnumEntry(int index);
 
     // optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;
     /**
@@ -4621,33 +4622,20 @@ public final class ProtoBuf {
               input.popLimit(limit);
               break;
             }
-            case 90: {
+            case 74: {
               if (!((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
-                member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>();
+                enumEntry_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry>();
                 mutable_bitField0_ |= 0x00000100;
               }
-              member_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry));
+              enumEntry_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.PARSER, extensionRegistry));
               break;
             }
-            case 96: {
+            case 90: {
               if (!((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
-                enumEntry_ = new java.util.ArrayList<java.lang.Integer>();
+                member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>();
                 mutable_bitField0_ |= 0x00000200;
               }
-              enumEntry_.add(input.readInt32());
-              break;
-            }
-            case 98: {
-              int length = input.readRawVarint32();
-              int limit = input.pushLimit(length);
-              if (!((mutable_bitField0_ & 0x00000200) == 0x00000200) && input.getBytesUntilLimit() > 0) {
-                enumEntry_ = new java.util.ArrayList<java.lang.Integer>();
-                mutable_bitField0_ |= 0x00000200;
-              }
-              while (input.getBytesUntilLimit() > 0) {
-                enumEntry_.add(input.readInt32());
-              }
-              input.popLimit(limit);
+              member_.add(input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry));
               break;
             }
             case 106: {
@@ -4684,10 +4672,10 @@ public final class ProtoBuf {
           nestedObjectName_ = java.util.Collections.unmodifiableList(nestedObjectName_);
         }
         if (((mutable_bitField0_ & 0x00000100) == 0x00000100)) {
-          member_ = java.util.Collections.unmodifiableList(member_);
+          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
         }
         if (((mutable_bitField0_ & 0x00000200) == 0x00000200)) {
-          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
+          member_ = java.util.Collections.unmodifiableList(member_);
         }
         makeExtensionsImmutable();
       }
@@ -5245,6 +5233,526 @@ public final class ProtoBuf {
       }
 
       // @@protoc_insertion_point(class_scope:org.jetbrains.jet.descriptors.serialization.Class.ClassObject)
+    }
+
+    public interface EnumEntryOrBuilder
+        extends com.google.protobuf.MessageLiteOrBuilder {
+
+      // required int32 name = 1;
+      /**
+       * <code>required int32 name = 1;</code>
+       */
+      boolean hasName();
+      /**
+       * <code>required int32 name = 1;</code>
+       */
+      int getName();
+
+      // optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+       * Otherwise the corresponding data should be found in that separate class file
+       * </pre>
+       */
+      boolean hasData();
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+       * Otherwise the corresponding data should be found in that separate class file
+       * </pre>
+       */
+      org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class getData();
+    }
+    /**
+     * Protobuf type {@code org.jetbrains.jet.descriptors.serialization.Class.EnumEntry}
+     */
+    public static final class EnumEntry extends
+        com.google.protobuf.GeneratedMessageLite
+        implements EnumEntryOrBuilder {
+      // Use EnumEntry.newBuilder() to construct.
+      private EnumEntry(com.google.protobuf.GeneratedMessageLite.Builder builder) {
+        super(builder);
+
+      }
+      private EnumEntry(boolean noInit) {}
+
+      private static final EnumEntry defaultInstance;
+      public static EnumEntry getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public EnumEntry getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private EnumEntry(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 8: {
+                bitField0_ |= 0x00000001;
+                name_ = input.readInt32();
+                break;
+              }
+              case 18: {
+                org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000002) == 0x00000002)) {
+                  subBuilder = data_.toBuilder();
+                }
+                data_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(data_);
+                  data_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000002;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          makeExtensionsImmutable();
+        }
+      }
+      public static com.google.protobuf.Parser<EnumEntry> PARSER =
+          new com.google.protobuf.AbstractParser<EnumEntry>() {
+        public EnumEntry parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new EnumEntry(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<EnumEntry> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // required int32 name = 1;
+      public static final int NAME_FIELD_NUMBER = 1;
+      private int name_;
+      /**
+       * <code>required int32 name = 1;</code>
+       */
+      public boolean hasName() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>required int32 name = 1;</code>
+       */
+      public int getName() {
+        return name_;
+      }
+
+      // optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;
+      public static final int DATA_FIELD_NUMBER = 2;
+      private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class data_;
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+       * Otherwise the corresponding data should be found in that separate class file
+       * </pre>
+       */
+      public boolean hasData() {
+        return ((bitField0_ & 0x00000002) == 0x00000002);
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+       * Otherwise the corresponding data should be found in that separate class file
+       * </pre>
+       */
+      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class getData() {
+        return data_;
+      }
+
+      private void initFields() {
+        name_ = 0;
+        data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.getDefaultInstance();
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (!hasName()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+        if (hasData()) {
+          if (!getData().isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeInt32(1, name_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          output.writeMessage(2, data_);
+        }
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeInt32Size(1, name_);
+        }
+        if (((bitField0_ & 0x00000002) == 0x00000002)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(2, data_);
+        }
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      /**
+       * Protobuf type {@code org.jetbrains.jet.descriptors.serialization.Class.EnumEntry}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageLite.Builder<
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry, Builder>
+          implements org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntryOrBuilder {
+        // Construct using org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private void maybeForceBuilderInitialization() {
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          name_ = 0;
+          bitField0_ = (bitField0_ & ~0x00000001);
+          data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.getDefaultInstance();
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry getDefaultInstanceForType() {
+          return org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.getDefaultInstance();
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry build() {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry buildPartial() {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry result = new org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.name_ = name_;
+          if (((from_bitField0_ & 0x00000002) == 0x00000002)) {
+            to_bitField0_ |= 0x00000002;
+          }
+          result.data_ = data_;
+          result.bitField0_ = to_bitField0_;
+          return result;
+        }
+
+        public Builder mergeFrom(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry other) {
+          if (other == org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.getDefaultInstance()) return this;
+          if (other.hasName()) {
+            setName(other.getName());
+          }
+          if (other.hasData()) {
+            mergeData(other.getData());
+          }
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (!hasName()) {
+            
+            return false;
+          }
+          if (hasData()) {
+            if (!getData().isInitialized()) {
+              
+              return false;
+            }
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // required int32 name = 1;
+        private int name_ ;
+        /**
+         * <code>required int32 name = 1;</code>
+         */
+        public boolean hasName() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>required int32 name = 1;</code>
+         */
+        public int getName() {
+          return name_;
+        }
+        /**
+         * <code>required int32 name = 1;</code>
+         */
+        public Builder setName(int value) {
+          bitField0_ |= 0x00000001;
+          name_ = value;
+          
+          return this;
+        }
+        /**
+         * <code>required int32 name = 1;</code>
+         */
+        public Builder clearName() {
+          bitField0_ = (bitField0_ & ~0x00000001);
+          name_ = 0;
+          
+          return this;
+        }
+
+        // optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;
+        private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.getDefaultInstance();
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public boolean hasData() {
+          return ((bitField0_ & 0x00000002) == 0x00000002);
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class getData() {
+          return data_;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public Builder setData(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          data_ = value;
+
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public Builder setData(
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.Builder builderForValue) {
+          data_ = builderForValue.build();
+
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public Builder mergeData(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class value) {
+          if (((bitField0_ & 0x00000002) == 0x00000002) &&
+              data_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.getDefaultInstance()) {
+            data_ =
+              org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.newBuilder(data_).mergeFrom(value).buildPartial();
+          } else {
+            data_ = value;
+          }
+
+          bitField0_ |= 0x00000002;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Class data = 2;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for a trivial enum entry, for which there's no class file.
+         * Otherwise the corresponding data should be found in that separate class file
+         * </pre>
+         */
+        public Builder clearData() {
+          data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.getDefaultInstance();
+
+          bitField0_ = (bitField0_ & ~0x00000002);
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:org.jetbrains.jet.descriptors.serialization.Class.EnumEntry)
+      }
+
+      static {
+        defaultInstance = new EnumEntry(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:org.jetbrains.jet.descriptors.serialization.Class.EnumEntry)
     }
 
     public interface PrimaryConstructorOrBuilder
@@ -5941,6 +6449,42 @@ public final class ProtoBuf {
       return nestedObjectName_.get(index);
     }
 
+    // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
+    public static final int ENUM_ENTRY_FIELD_NUMBER = 9;
+    private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> enumEntry_;
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    public java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> getEnumEntryList() {
+      return enumEntry_;
+    }
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    public java.util.List<? extends org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntryOrBuilder> 
+        getEnumEntryOrBuilderList() {
+      return enumEntry_;
+    }
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    public int getEnumEntryCount() {
+      return enumEntry_.size();
+    }
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry getEnumEntry(int index) {
+      return enumEntry_.get(index);
+    }
+    /**
+     * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+     */
+    public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntryOrBuilder getEnumEntryOrBuilder(
+        int index) {
+      return enumEntry_.get(index);
+    }
+
     // repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;
     public static final int MEMBER_FIELD_NUMBER = 11;
     private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable> member_;
@@ -5977,29 +6521,6 @@ public final class ProtoBuf {
       return member_.get(index);
     }
 
-    // repeated int32 enum_entry = 12;
-    public static final int ENUM_ENTRY_FIELD_NUMBER = 12;
-    private java.util.List<java.lang.Integer> enumEntry_;
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    public java.util.List<java.lang.Integer>
-        getEnumEntryList() {
-      return enumEntry_;
-    }
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    public int getEnumEntryCount() {
-      return enumEntry_.size();
-    }
-    /**
-     * <code>repeated int32 enum_entry = 12;</code>
-     */
-    public int getEnumEntry(int index) {
-      return enumEntry_.get(index);
-    }
-
     // optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;
     public static final int PRIMARY_CONSTRUCTOR_FIELD_NUMBER = 13;
     private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor primaryConstructor_;
@@ -6033,8 +6554,8 @@ public final class ProtoBuf {
       supertype_ = java.util.Collections.emptyList();
       nestedClassName_ = java.util.Collections.emptyList();
       nestedObjectName_ = java.util.Collections.emptyList();
-      member_ = java.util.Collections.emptyList();
       enumEntry_ = java.util.Collections.emptyList();
+      member_ = java.util.Collections.emptyList();
       primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
@@ -6060,6 +6581,12 @@ public final class ProtoBuf {
       }
       for (int i = 0; i < getSupertypeCount(); i++) {
         if (!getSupertype(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      for (int i = 0; i < getEnumEntryCount(); i++) {
+        if (!getEnumEntry(i).isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -6107,11 +6634,11 @@ public final class ProtoBuf {
       for (int i = 0; i < nestedObjectName_.size(); i++) {
         output.writeInt32(8, nestedObjectName_.get(i));
       }
+      for (int i = 0; i < enumEntry_.size(); i++) {
+        output.writeMessage(9, enumEntry_.get(i));
+      }
       for (int i = 0; i < member_.size(); i++) {
         output.writeMessage(11, member_.get(i));
-      }
-      for (int i = 0; i < enumEntry_.size(); i++) {
-        output.writeInt32(12, enumEntry_.get(i));
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         output.writeMessage(13, primaryConstructor_);
@@ -6166,18 +6693,13 @@ public final class ProtoBuf {
         size += dataSize;
         size += 1 * getNestedObjectNameList().size();
       }
+      for (int i = 0; i < enumEntry_.size(); i++) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(9, enumEntry_.get(i));
+      }
       for (int i = 0; i < member_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
           .computeMessageSize(11, member_.get(i));
-      }
-      {
-        int dataSize = 0;
-        for (int i = 0; i < enumEntry_.size(); i++) {
-          dataSize += com.google.protobuf.CodedOutputStream
-            .computeInt32SizeNoTag(enumEntry_.get(i));
-        }
-        size += dataSize;
-        size += 1 * getEnumEntryList().size();
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
@@ -6290,9 +6812,9 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000040);
         nestedObjectName_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000080);
-        member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
         enumEntry_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000100);
+        member_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000200);
         primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
         bitField0_ = (bitField0_ & ~0x00000400);
@@ -6356,15 +6878,15 @@ public final class ProtoBuf {
         }
         result.nestedObjectName_ = nestedObjectName_;
         if (((bitField0_ & 0x00000100) == 0x00000100)) {
-          member_ = java.util.Collections.unmodifiableList(member_);
+          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
           bitField0_ = (bitField0_ & ~0x00000100);
         }
-        result.member_ = member_;
+        result.enumEntry_ = enumEntry_;
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
-          enumEntry_ = java.util.Collections.unmodifiableList(enumEntry_);
+          member_ = java.util.Collections.unmodifiableList(member_);
           bitField0_ = (bitField0_ & ~0x00000200);
         }
-        result.enumEntry_ = enumEntry_;
+        result.member_ = member_;
         if (((from_bitField0_ & 0x00000400) == 0x00000400)) {
           to_bitField0_ |= 0x00000010;
         }
@@ -6429,23 +6951,23 @@ public final class ProtoBuf {
           }
           
         }
-        if (!other.member_.isEmpty()) {
-          if (member_.isEmpty()) {
-            member_ = other.member_;
-            bitField0_ = (bitField0_ & ~0x00000100);
-          } else {
-            ensureMemberIsMutable();
-            member_.addAll(other.member_);
-          }
-          
-        }
         if (!other.enumEntry_.isEmpty()) {
           if (enumEntry_.isEmpty()) {
             enumEntry_ = other.enumEntry_;
-            bitField0_ = (bitField0_ & ~0x00000200);
+            bitField0_ = (bitField0_ & ~0x00000100);
           } else {
             ensureEnumEntryIsMutable();
             enumEntry_.addAll(other.enumEntry_);
+          }
+          
+        }
+        if (!other.member_.isEmpty()) {
+          if (member_.isEmpty()) {
+            member_ = other.member_;
+            bitField0_ = (bitField0_ & ~0x00000200);
+          } else {
+            ensureMemberIsMutable();
+            member_.addAll(other.member_);
           }
           
         }
@@ -6474,6 +6996,12 @@ public final class ProtoBuf {
         }
         for (int i = 0; i < getSupertypeCount(); i++) {
           if (!getSupertype(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        for (int i = 0; i < getEnumEntryCount(); i++) {
+          if (!getEnumEntry(i).isInitialized()) {
             
             return false;
           }
@@ -7214,13 +7742,138 @@ public final class ProtoBuf {
         return this;
       }
 
+      // repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;
+      private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> enumEntry_ =
+        java.util.Collections.emptyList();
+      private void ensureEnumEntryIsMutable() {
+        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+          enumEntry_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry>(enumEntry_);
+          bitField0_ |= 0x00000100;
+         }
+      }
+
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> getEnumEntryList() {
+        return java.util.Collections.unmodifiableList(enumEntry_);
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public int getEnumEntryCount() {
+        return enumEntry_.size();
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry getEnumEntry(int index) {
+        return enumEntry_.get(index);
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder setEnumEntry(
+          int index, org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEnumEntryIsMutable();
+        enumEntry_.set(index, value);
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder setEnumEntry(
+          int index, org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.Builder builderForValue) {
+        ensureEnumEntryIsMutable();
+        enumEntry_.set(index, builderForValue.build());
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder addEnumEntry(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEnumEntryIsMutable();
+        enumEntry_.add(value);
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder addEnumEntry(
+          int index, org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        ensureEnumEntryIsMutable();
+        enumEntry_.add(index, value);
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder addEnumEntry(
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.Builder builderForValue) {
+        ensureEnumEntryIsMutable();
+        enumEntry_.add(builderForValue.build());
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder addEnumEntry(
+          int index, org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry.Builder builderForValue) {
+        ensureEnumEntryIsMutable();
+        enumEntry_.add(index, builderForValue.build());
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder addAllEnumEntry(
+          java.lang.Iterable<? extends org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.EnumEntry> values) {
+        ensureEnumEntryIsMutable();
+        super.addAll(values, enumEntry_);
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder clearEnumEntry() {
+        enumEntry_ = java.util.Collections.emptyList();
+        bitField0_ = (bitField0_ & ~0x00000100);
+
+        return this;
+      }
+      /**
+       * <code>repeated .org.jetbrains.jet.descriptors.serialization.Class.EnumEntry enum_entry = 9;</code>
+       */
+      public Builder removeEnumEntry(int index) {
+        ensureEnumEntryIsMutable();
+        enumEntry_.remove(index);
+
+        return this;
+      }
+
       // repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;
       private java.util.List<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable> member_ =
         java.util.Collections.emptyList();
       private void ensureMemberIsMutable() {
-        if (!((bitField0_ & 0x00000100) == 0x00000100)) {
+        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
           member_ = new java.util.ArrayList<org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable>(member_);
-          bitField0_ |= 0x00000100;
+          bitField0_ |= 0x00000200;
          }
       }
 
@@ -7325,7 +7978,7 @@ public final class ProtoBuf {
        */
       public Builder clearMember() {
         member_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000100);
+        bitField0_ = (bitField0_ & ~0x00000200);
 
         return this;
       }
@@ -7336,72 +7989,6 @@ public final class ProtoBuf {
         ensureMemberIsMutable();
         member_.remove(index);
 
-        return this;
-      }
-
-      // repeated int32 enum_entry = 12;
-      private java.util.List<java.lang.Integer> enumEntry_ = java.util.Collections.emptyList();
-      private void ensureEnumEntryIsMutable() {
-        if (!((bitField0_ & 0x00000200) == 0x00000200)) {
-          enumEntry_ = new java.util.ArrayList<java.lang.Integer>(enumEntry_);
-          bitField0_ |= 0x00000200;
-         }
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public java.util.List<java.lang.Integer>
-          getEnumEntryList() {
-        return java.util.Collections.unmodifiableList(enumEntry_);
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public int getEnumEntryCount() {
-        return enumEntry_.size();
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public int getEnumEntry(int index) {
-        return enumEntry_.get(index);
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public Builder setEnumEntry(
-          int index, int value) {
-        ensureEnumEntryIsMutable();
-        enumEntry_.set(index, value);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public Builder addEnumEntry(int value) {
-        ensureEnumEntryIsMutable();
-        enumEntry_.add(value);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public Builder addAllEnumEntry(
-          java.lang.Iterable<? extends java.lang.Integer> values) {
-        ensureEnumEntryIsMutable();
-        super.addAll(values, enumEntry_);
-        
-        return this;
-      }
-      /**
-       * <code>repeated int32 enum_entry = 12;</code>
-       */
-      public Builder clearEnumEntry() {
-        enumEntry_ = java.util.Collections.emptyList();
-        bitField0_ = (bitField0_ & ~0x00000200);
-        
         return this;
       }
 
