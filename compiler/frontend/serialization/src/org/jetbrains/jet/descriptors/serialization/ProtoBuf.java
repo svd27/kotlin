@@ -4445,23 +4445,23 @@ public final class ProtoBuf {
      */
     int getNestedObjectName(int index);
 
-    // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
+    // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;
     /**
-     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
      *
      * <pre>
      * todo: other constructors?
      * </pre>
      */
-    boolean hasPrimaryConstructor();
+    boolean hasPrimaryConstructorDEPRECATED();
     /**
-     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
      *
      * <pre>
      * todo: other constructors?
      * </pre>
      */
-    org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructor();
+    org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructorDEPRECATED();
 
     // repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;
     /**
@@ -4491,6 +4491,24 @@ public final class ProtoBuf {
      * <code>repeated int32 enum_entry = 12;</code>
      */
     int getEnumEntry(int index);
+
+    // optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;
+    /**
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a primary constructor
+     * </pre>
+     */
+    boolean hasPrimaryConstructor();
+    /**
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a primary constructor
+     * </pre>
+     */
+    org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor getPrimaryConstructor();
   }
   /**
    * Protobuf type {@code org.jetbrains.jet.descriptors.serialization.Class}
@@ -4624,12 +4642,12 @@ public final class ProtoBuf {
             case 82: {
               org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder subBuilder = null;
               if (((bitField0_ & 0x00000010) == 0x00000010)) {
-                subBuilder = primaryConstructor_.toBuilder();
+                subBuilder = primaryConstructorDEPRECATED_.toBuilder();
               }
-              primaryConstructor_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry);
+              primaryConstructorDEPRECATED_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry);
               if (subBuilder != null) {
-                subBuilder.mergeFrom(primaryConstructor_);
-                primaryConstructor_ = subBuilder.buildPartial();
+                subBuilder.mergeFrom(primaryConstructorDEPRECATED_);
+                primaryConstructorDEPRECATED_ = subBuilder.buildPartial();
               }
               bitField0_ |= 0x00000010;
               break;
@@ -4661,6 +4679,19 @@ public final class ProtoBuf {
                 enumEntry_.add(input.readInt32());
               }
               input.popLimit(limit);
+              break;
+            }
+            case 106: {
+              org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.Builder subBuilder = null;
+              if (((bitField0_ & 0x00000020) == 0x00000020)) {
+                subBuilder = primaryConstructor_.toBuilder();
+              }
+              primaryConstructor_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.PARSER, extensionRegistry);
+              if (subBuilder != null) {
+                subBuilder.mergeFrom(primaryConstructor_);
+                primaryConstructor_ = subBuilder.buildPartial();
+              }
+              bitField0_ |= 0x00000020;
               break;
             }
           }
@@ -5247,6 +5278,437 @@ public final class ProtoBuf {
       // @@protoc_insertion_point(class_scope:org.jetbrains.jet.descriptors.serialization.Class.ClassObject)
     }
 
+    public interface PrimaryConstructorOrBuilder
+        extends com.google.protobuf.MessageLiteOrBuilder {
+
+      // optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for the primary constructor.
+       * Otherwise it's default and can be created manually upon deserialization
+       * </pre>
+       */
+      boolean hasData();
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for the primary constructor.
+       * Otherwise it's default and can be created manually upon deserialization
+       * </pre>
+       */
+      org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getData();
+    }
+    /**
+     * Protobuf type {@code org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor}
+     */
+    public static final class PrimaryConstructor extends
+        com.google.protobuf.GeneratedMessageLite
+        implements PrimaryConstructorOrBuilder {
+      // Use PrimaryConstructor.newBuilder() to construct.
+      private PrimaryConstructor(com.google.protobuf.GeneratedMessageLite.Builder builder) {
+        super(builder);
+
+      }
+      private PrimaryConstructor(boolean noInit) {}
+
+      private static final PrimaryConstructor defaultInstance;
+      public static PrimaryConstructor getDefaultInstance() {
+        return defaultInstance;
+      }
+
+      public PrimaryConstructor getDefaultInstanceForType() {
+        return defaultInstance;
+      }
+
+      private PrimaryConstructor(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        initFields();
+        int mutable_bitField0_ = 0;
+        try {
+          boolean done = false;
+          while (!done) {
+            int tag = input.readTag();
+            switch (tag) {
+              case 0:
+                done = true;
+                break;
+              default: {
+                if (!parseUnknownField(input,
+                                       extensionRegistry, tag)) {
+                  done = true;
+                }
+                break;
+              }
+              case 10: {
+                org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder subBuilder = null;
+                if (((bitField0_ & 0x00000001) == 0x00000001)) {
+                  subBuilder = data_.toBuilder();
+                }
+                data_ = input.readMessage(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.PARSER, extensionRegistry);
+                if (subBuilder != null) {
+                  subBuilder.mergeFrom(data_);
+                  data_ = subBuilder.buildPartial();
+                }
+                bitField0_ |= 0x00000001;
+                break;
+              }
+            }
+          }
+        } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+          throw e.setUnfinishedMessage(this);
+        } catch (java.io.IOException e) {
+          throw new com.google.protobuf.InvalidProtocolBufferException(
+              e.getMessage()).setUnfinishedMessage(this);
+        } finally {
+          makeExtensionsImmutable();
+        }
+      }
+      public static com.google.protobuf.Parser<PrimaryConstructor> PARSER =
+          new com.google.protobuf.AbstractParser<PrimaryConstructor>() {
+        public PrimaryConstructor parsePartialFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws com.google.protobuf.InvalidProtocolBufferException {
+          return new PrimaryConstructor(input, extensionRegistry);
+        }
+      };
+
+      @java.lang.Override
+      public com.google.protobuf.Parser<PrimaryConstructor> getParserForType() {
+        return PARSER;
+      }
+
+      private int bitField0_;
+      // optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;
+      public static final int DATA_FIELD_NUMBER = 1;
+      private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable data_;
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for the primary constructor.
+       * Otherwise it's default and can be created manually upon deserialization
+       * </pre>
+       */
+      public boolean hasData() {
+        return ((bitField0_ & 0x00000001) == 0x00000001);
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+       *
+       * <pre>
+       * If this field is present, it contains serialized data for the primary constructor.
+       * Otherwise it's default and can be created manually upon deserialization
+       * </pre>
+       */
+      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getData() {
+        return data_;
+      }
+
+      private void initFields() {
+        data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+      }
+      private byte memoizedIsInitialized = -1;
+      public final boolean isInitialized() {
+        byte isInitialized = memoizedIsInitialized;
+        if (isInitialized != -1) return isInitialized == 1;
+
+        if (hasData()) {
+          if (!getData().isInitialized()) {
+            memoizedIsInitialized = 0;
+            return false;
+          }
+        }
+        memoizedIsInitialized = 1;
+        return true;
+      }
+
+      public void writeTo(com.google.protobuf.CodedOutputStream output)
+                          throws java.io.IOException {
+        getSerializedSize();
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          output.writeMessage(1, data_);
+        }
+      }
+
+      private int memoizedSerializedSize = -1;
+      public int getSerializedSize() {
+        int size = memoizedSerializedSize;
+        if (size != -1) return size;
+
+        size = 0;
+        if (((bitField0_ & 0x00000001) == 0x00000001)) {
+          size += com.google.protobuf.CodedOutputStream
+            .computeMessageSize(1, data_);
+        }
+        memoizedSerializedSize = size;
+        return size;
+      }
+
+      private static final long serialVersionUID = 0L;
+      @java.lang.Override
+      protected java.lang.Object writeReplace()
+          throws java.io.ObjectStreamException {
+        return super.writeReplace();
+      }
+
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          com.google.protobuf.ByteString data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          com.google.protobuf.ByteString data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(byte[] data)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          byte[] data,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws com.google.protobuf.InvalidProtocolBufferException {
+        return PARSER.parseFrom(data, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseDelimitedFrom(java.io.InputStream input)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseDelimitedFrom(
+          java.io.InputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseDelimitedFrom(input, extensionRegistry);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          com.google.protobuf.CodedInputStream input)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input);
+      }
+      public static org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parseFrom(
+          com.google.protobuf.CodedInputStream input,
+          com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+          throws java.io.IOException {
+        return PARSER.parseFrom(input, extensionRegistry);
+      }
+
+      public static Builder newBuilder() { return Builder.create(); }
+      public Builder newBuilderForType() { return newBuilder(); }
+      public static Builder newBuilder(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor prototype) {
+        return newBuilder().mergeFrom(prototype);
+      }
+      public Builder toBuilder() { return newBuilder(this); }
+
+      /**
+       * Protobuf type {@code org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor}
+       */
+      public static final class Builder extends
+          com.google.protobuf.GeneratedMessageLite.Builder<
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor, Builder>
+          implements org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructorOrBuilder {
+        // Construct using org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.newBuilder()
+        private Builder() {
+          maybeForceBuilderInitialization();
+        }
+
+        private void maybeForceBuilderInitialization() {
+        }
+        private static Builder create() {
+          return new Builder();
+        }
+
+        public Builder clear() {
+          super.clear();
+          data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+
+        public Builder clone() {
+          return create().mergeFrom(buildPartial());
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor getDefaultInstanceForType() {
+          return org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor build() {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor result = buildPartial();
+          if (!result.isInitialized()) {
+            throw newUninitializedMessageException(result);
+          }
+          return result;
+        }
+
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor buildPartial() {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor result = new org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor(this);
+          int from_bitField0_ = bitField0_;
+          int to_bitField0_ = 0;
+          if (((from_bitField0_ & 0x00000001) == 0x00000001)) {
+            to_bitField0_ |= 0x00000001;
+          }
+          result.data_ = data_;
+          result.bitField0_ = to_bitField0_;
+          return result;
+        }
+
+        public Builder mergeFrom(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor other) {
+          if (other == org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance()) return this;
+          if (other.hasData()) {
+            mergeData(other.getData());
+          }
+          return this;
+        }
+
+        public final boolean isInitialized() {
+          if (hasData()) {
+            if (!getData().isInitialized()) {
+              
+              return false;
+            }
+          }
+          return true;
+        }
+
+        public Builder mergeFrom(
+            com.google.protobuf.CodedInputStream input,
+            com.google.protobuf.ExtensionRegistryLite extensionRegistry)
+            throws java.io.IOException {
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor parsedMessage = null;
+          try {
+            parsedMessage = PARSER.parsePartialFrom(input, extensionRegistry);
+          } catch (com.google.protobuf.InvalidProtocolBufferException e) {
+            parsedMessage = (org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor) e.getUnfinishedMessage();
+            throw e;
+          } finally {
+            if (parsedMessage != null) {
+              mergeFrom(parsedMessage);
+            }
+          }
+          return this;
+        }
+        private int bitField0_;
+
+        // optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;
+        private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public boolean hasData() {
+          return ((bitField0_ & 0x00000001) == 0x00000001);
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getData() {
+          return data_;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public Builder setData(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
+          if (value == null) {
+            throw new NullPointerException();
+          }
+          data_ = value;
+
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public Builder setData(
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder builderForValue) {
+          data_ = builderForValue.build();
+
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public Builder mergeData(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
+          if (((bitField0_ & 0x00000001) == 0x00000001) &&
+              data_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance()) {
+            data_ =
+              org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.newBuilder(data_).mergeFrom(value).buildPartial();
+          } else {
+            data_ = value;
+          }
+
+          bitField0_ |= 0x00000001;
+          return this;
+        }
+        /**
+         * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable data = 1;</code>
+         *
+         * <pre>
+         * If this field is present, it contains serialized data for the primary constructor.
+         * Otherwise it's default and can be created manually upon deserialization
+         * </pre>
+         */
+        public Builder clearData() {
+          data_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+
+          bitField0_ = (bitField0_ & ~0x00000001);
+          return this;
+        }
+
+        // @@protoc_insertion_point(builder_scope:org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor)
+      }
+
+      static {
+        defaultInstance = new PrimaryConstructor(true);
+        defaultInstance.initFields();
+      }
+
+      // @@protoc_insertion_point(class_scope:org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor)
+    }
+
     private int bitField0_;
     // optional int32 flags = 1 [default = 0];
     public static final int FLAGS_FIELD_NUMBER = 1;
@@ -5510,28 +5972,28 @@ public final class ProtoBuf {
       return nestedObjectName_.get(index);
     }
 
-    // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
-    public static final int PRIMARY_CONSTRUCTOR_FIELD_NUMBER = 10;
-    private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructor_;
+    // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;
+    public static final int PRIMARY_CONSTRUCTOR_DEPRECATED_FIELD_NUMBER = 10;
+    private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructorDEPRECATED_;
     /**
-     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
      *
      * <pre>
      * todo: other constructors?
      * </pre>
      */
-    public boolean hasPrimaryConstructor() {
+    public boolean hasPrimaryConstructorDEPRECATED() {
       return ((bitField0_ & 0x00000010) == 0x00000010);
     }
     /**
-     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
      *
      * <pre>
      * todo: other constructors?
      * </pre>
      */
-    public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructor() {
-      return primaryConstructor_;
+    public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructorDEPRECATED() {
+      return primaryConstructorDEPRECATED_;
     }
 
     // repeated .org.jetbrains.jet.descriptors.serialization.Callable member = 11;
@@ -5593,6 +6055,30 @@ public final class ProtoBuf {
       return enumEntry_.get(index);
     }
 
+    // optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;
+    public static final int PRIMARY_CONSTRUCTOR_FIELD_NUMBER = 13;
+    private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor primaryConstructor_;
+    /**
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a primary constructor
+     * </pre>
+     */
+    public boolean hasPrimaryConstructor() {
+      return ((bitField0_ & 0x00000020) == 0x00000020);
+    }
+    /**
+     * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+     *
+     * <pre>
+     * This field is present if and only if the class has a primary constructor
+     * </pre>
+     */
+    public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor getPrimaryConstructor() {
+      return primaryConstructor_;
+    }
+
     private void initFields() {
       flags_ = 0;
       extraVisibility_ = "";
@@ -5602,9 +6088,10 @@ public final class ProtoBuf {
       supertype_ = java.util.Collections.emptyList();
       nestedClassName_ = java.util.Collections.emptyList();
       nestedObjectName_ = java.util.Collections.emptyList();
-      primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+      primaryConstructorDEPRECATED_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
       member_ = java.util.Collections.emptyList();
       enumEntry_ = java.util.Collections.emptyList();
+      primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
     }
     private byte memoizedIsInitialized = -1;
     public final boolean isInitialized() {
@@ -5633,14 +6120,20 @@ public final class ProtoBuf {
           return false;
         }
       }
-      if (hasPrimaryConstructor()) {
-        if (!getPrimaryConstructor().isInitialized()) {
+      if (hasPrimaryConstructorDEPRECATED()) {
+        if (!getPrimaryConstructorDEPRECATED().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
       }
       for (int i = 0; i < getMemberCount(); i++) {
         if (!getMember(i).isInitialized()) {
+          memoizedIsInitialized = 0;
+          return false;
+        }
+      }
+      if (hasPrimaryConstructor()) {
+        if (!getPrimaryConstructor().isInitialized()) {
           memoizedIsInitialized = 0;
           return false;
         }
@@ -5677,13 +6170,16 @@ public final class ProtoBuf {
         output.writeInt32(8, nestedObjectName_.get(i));
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
-        output.writeMessage(10, primaryConstructor_);
+        output.writeMessage(10, primaryConstructorDEPRECATED_);
       }
       for (int i = 0; i < member_.size(); i++) {
         output.writeMessage(11, member_.get(i));
       }
       for (int i = 0; i < enumEntry_.size(); i++) {
         output.writeInt32(12, enumEntry_.get(i));
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        output.writeMessage(13, primaryConstructor_);
       }
     }
 
@@ -5737,7 +6233,7 @@ public final class ProtoBuf {
       }
       if (((bitField0_ & 0x00000010) == 0x00000010)) {
         size += com.google.protobuf.CodedOutputStream
-          .computeMessageSize(10, primaryConstructor_);
+          .computeMessageSize(10, primaryConstructorDEPRECATED_);
       }
       for (int i = 0; i < member_.size(); i++) {
         size += com.google.protobuf.CodedOutputStream
@@ -5751,6 +6247,10 @@ public final class ProtoBuf {
         }
         size += dataSize;
         size += 1 * getEnumEntryList().size();
+      }
+      if (((bitField0_ & 0x00000020) == 0x00000020)) {
+        size += com.google.protobuf.CodedOutputStream
+          .computeMessageSize(13, primaryConstructor_);
       }
       memoizedSerializedSize = size;
       return size;
@@ -5859,12 +6359,14 @@ public final class ProtoBuf {
         bitField0_ = (bitField0_ & ~0x00000040);
         nestedObjectName_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000080);
-        primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+        primaryConstructorDEPRECATED_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
         bitField0_ = (bitField0_ & ~0x00000100);
         member_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000200);
         enumEntry_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000400);
+        primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
+        bitField0_ = (bitField0_ & ~0x00000800);
         return this;
       }
 
@@ -5927,7 +6429,7 @@ public final class ProtoBuf {
         if (((from_bitField0_ & 0x00000100) == 0x00000100)) {
           to_bitField0_ |= 0x00000010;
         }
-        result.primaryConstructor_ = primaryConstructor_;
+        result.primaryConstructorDEPRECATED_ = primaryConstructorDEPRECATED_;
         if (((bitField0_ & 0x00000200) == 0x00000200)) {
           member_ = java.util.Collections.unmodifiableList(member_);
           bitField0_ = (bitField0_ & ~0x00000200);
@@ -5938,6 +6440,10 @@ public final class ProtoBuf {
           bitField0_ = (bitField0_ & ~0x00000400);
         }
         result.enumEntry_ = enumEntry_;
+        if (((from_bitField0_ & 0x00000800) == 0x00000800)) {
+          to_bitField0_ |= 0x00000020;
+        }
+        result.primaryConstructor_ = primaryConstructor_;
         result.bitField0_ = to_bitField0_;
         return result;
       }
@@ -5998,8 +6504,8 @@ public final class ProtoBuf {
           }
           
         }
-        if (other.hasPrimaryConstructor()) {
-          mergePrimaryConstructor(other.getPrimaryConstructor());
+        if (other.hasPrimaryConstructorDEPRECATED()) {
+          mergePrimaryConstructorDEPRECATED(other.getPrimaryConstructorDEPRECATED());
         }
         if (!other.member_.isEmpty()) {
           if (member_.isEmpty()) {
@@ -6020,6 +6526,9 @@ public final class ProtoBuf {
             enumEntry_.addAll(other.enumEntry_);
           }
           
+        }
+        if (other.hasPrimaryConstructor()) {
+          mergePrimaryConstructor(other.getPrimaryConstructor());
         }
         return this;
       }
@@ -6047,14 +6556,20 @@ public final class ProtoBuf {
             return false;
           }
         }
-        if (hasPrimaryConstructor()) {
-          if (!getPrimaryConstructor().isInitialized()) {
+        if (hasPrimaryConstructorDEPRECATED()) {
+          if (!getPrimaryConstructorDEPRECATED().isInitialized()) {
             
             return false;
           }
         }
         for (int i = 0; i < getMemberCount(); i++) {
           if (!getMember(i).isInitialized()) {
+            
+            return false;
+          }
+        }
+        if (hasPrimaryConstructor()) {
+          if (!getPrimaryConstructor().isInitialized()) {
             
             return false;
           }
@@ -6783,86 +7298,86 @@ public final class ProtoBuf {
         return this;
       }
 
-      // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;
-      private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+      // optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;
+      private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable primaryConstructorDEPRECATED_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public boolean hasPrimaryConstructor() {
+      public boolean hasPrimaryConstructorDEPRECATED() {
         return ((bitField0_ & 0x00000100) == 0x00000100);
       }
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructor() {
-        return primaryConstructor_;
+      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable getPrimaryConstructorDEPRECATED() {
+        return primaryConstructorDEPRECATED_;
       }
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public Builder setPrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
+      public Builder setPrimaryConstructorDEPRECATED(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
         if (value == null) {
           throw new NullPointerException();
         }
-        primaryConstructor_ = value;
+        primaryConstructorDEPRECATED_ = value;
 
         bitField0_ |= 0x00000100;
         return this;
       }
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public Builder setPrimaryConstructor(
+      public Builder setPrimaryConstructorDEPRECATED(
           org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.Builder builderForValue) {
-        primaryConstructor_ = builderForValue.build();
+        primaryConstructorDEPRECATED_ = builderForValue.build();
 
         bitField0_ |= 0x00000100;
         return this;
       }
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public Builder mergePrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
+      public Builder mergePrimaryConstructorDEPRECATED(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable value) {
         if (((bitField0_ & 0x00000100) == 0x00000100) &&
-            primaryConstructor_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance()) {
-          primaryConstructor_ =
-            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.newBuilder(primaryConstructor_).mergeFrom(value).buildPartial();
+            primaryConstructorDEPRECATED_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance()) {
+          primaryConstructorDEPRECATED_ =
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.newBuilder(primaryConstructorDEPRECATED_).mergeFrom(value).buildPartial();
         } else {
-          primaryConstructor_ = value;
+          primaryConstructorDEPRECATED_ = value;
         }
 
         bitField0_ |= 0x00000100;
         return this;
       }
       /**
-       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor = 10;</code>
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Callable primary_constructor_DEPRECATED = 10;</code>
        *
        * <pre>
        * todo: other constructors?
        * </pre>
        */
-      public Builder clearPrimaryConstructor() {
-        primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
+      public Builder clearPrimaryConstructorDEPRECATED() {
+        primaryConstructorDEPRECATED_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Callable.getDefaultInstance();
 
         bitField0_ = (bitField0_ & ~0x00000100);
         return this;
@@ -7056,6 +7571,91 @@ public final class ProtoBuf {
         enumEntry_ = java.util.Collections.emptyList();
         bitField0_ = (bitField0_ & ~0x00000400);
         
+        return this;
+      }
+
+      // optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;
+      private org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public boolean hasPrimaryConstructor() {
+        return ((bitField0_ & 0x00000800) == 0x00000800);
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor getPrimaryConstructor() {
+        return primaryConstructor_;
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public Builder setPrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor value) {
+        if (value == null) {
+          throw new NullPointerException();
+        }
+        primaryConstructor_ = value;
+
+        bitField0_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public Builder setPrimaryConstructor(
+          org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.Builder builderForValue) {
+        primaryConstructor_ = builderForValue.build();
+
+        bitField0_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public Builder mergePrimaryConstructor(org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor value) {
+        if (((bitField0_ & 0x00000800) == 0x00000800) &&
+            primaryConstructor_ != org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance()) {
+          primaryConstructor_ =
+            org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.newBuilder(primaryConstructor_).mergeFrom(value).buildPartial();
+        } else {
+          primaryConstructor_ = value;
+        }
+
+        bitField0_ |= 0x00000800;
+        return this;
+      }
+      /**
+       * <code>optional .org.jetbrains.jet.descriptors.serialization.Class.PrimaryConstructor primary_constructor = 13;</code>
+       *
+       * <pre>
+       * This field is present if and only if the class has a primary constructor
+       * </pre>
+       */
+      public Builder clearPrimaryConstructor() {
+        primaryConstructor_ = org.jetbrains.jet.descriptors.serialization.ProtoBuf.Class.PrimaryConstructor.getDefaultInstance();
+
+        bitField0_ = (bitField0_ & ~0x00000800);
         return this;
       }
 

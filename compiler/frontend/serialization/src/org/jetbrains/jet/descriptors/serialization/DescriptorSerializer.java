@@ -19,6 +19,7 @@ package org.jetbrains.jet.descriptors.serialization;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.jet.lang.descriptors.*;
 import org.jetbrains.jet.lang.descriptors.annotations.Annotated;
+import org.jetbrains.jet.lang.resolve.DescriptorFactory;
 import org.jetbrains.jet.lang.types.JetType;
 import org.jetbrains.jet.lang.types.TypeConstructor;
 import org.jetbrains.jet.lang.types.TypeProjection;
@@ -98,8 +99,20 @@ public class DescriptorSerializer {
 
         ConstructorDescriptor primaryConstructor = classDescriptor.getUnsubstitutedPrimaryConstructor();
         if (primaryConstructor != null) {
-            builder.setPrimaryConstructor(local.callableProto(primaryConstructor));
+            builder.setPrimaryConstructorDEPRECATED(local.callableProto(primaryConstructor));
         }
+
+        if (primaryConstructor != null) {
+            if (DescriptorFactory.isDefaultPrimaryConstructor(primaryConstructor)) {
+                builder.setPrimaryConstructor(ProtoBuf.Class.PrimaryConstructor.getDefaultInstance());
+            }
+            else {
+                ProtoBuf.Class.PrimaryConstructor.Builder constructorBuilder = ProtoBuf.Class.PrimaryConstructor.newBuilder();
+                constructorBuilder.setData(local.callableProto(primaryConstructor));
+                builder.setPrimaryConstructor(constructorBuilder);
+            }
+        }
+
         // TODO: other constructors
 
         for (DeclarationDescriptor descriptor : sort(classDescriptor.getDefaultType().getMemberScope().getAllDescriptors())) {
