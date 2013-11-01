@@ -49,37 +49,41 @@ public final class K2JSTranslator {
     public static final String FLUSH_SYSTEM_OUT = "Kotlin.System.flush();\n";
     public static final String GET_SYSTEM_OUT = "Kotlin.System.output();\n";
 
-    public static void translateWithMainCallParametersAndSaveToFile(
+    public static void translateWithMainCallParameters(
             @NotNull MainCallParameters mainCall,
             @NotNull List<JetFile> files,
-            @NotNull String outputPath,
+            @NotNull File outputFile,
             @Nullable File outputPrefixFile,
             @Nullable File outputPostfixFile,
-            @NotNull Config config
+            @NotNull Config config,
+            @NotNull OutputFileFactoryImpl outFactory
+
     ) throws TranslationException, IOException {
         K2JSTranslator translator = new K2JSTranslator(config);
-        File outFile = new File(outputPath);
         TextOutputImpl output = new TextOutputImpl();
-        SourceMapBuilder sourceMapBuilder = config.isSourcemap() ? new SourceMap3Builder(outFile, output, new SourceMapBuilderConsumer()) : null;
+        SourceMapBuilder sourceMapBuilder = config.isSourcemap() ? new SourceMap3Builder(outputFile, output, new SourceMapBuilderConsumer()) : null;
         String programCode = translator.generateProgramCode(files, mainCall, output, sourceMapBuilder);
 
+        String prefix = "";
         if (outputPrefixFile != null) {
-            String prefix = FileUtil.loadFile(outputPrefixFile);
-            FileUtil.writeToFile(outFile, prefix);
+            prefix = FileUtil.loadFile(outputPrefixFile);
             if (sourceMapBuilder != null) {
                 sourceMapBuilder.skipLinesInBegin(StringUtil.getLineBreakCount(prefix));
             }
         }
 
-        FileUtil.writeToFile(outFile, programCode.getBytes(), outputPrefixFile != null);
-
+        String postfix = "";
         if (outputPostfixFile != null) {
-            byte[] postfix = FileUtil.loadFileBytes(outputPostfixFile);
-            FileUtil.writeToFile(outFile, postfix, true);
+            postfix = FileUtil.loadFile(outputPostfixFile);
         }
 
+        StringBuilder outBuilder = new StringBuilder(programCode.length() + prefix.length() + postfix.length());
+        outBuilder.append(prefix).append(programCode).append(postfix);
+
+        outFactory.addOutput(outputFile.getName(), outBuilder.toString());
+
         if (sourceMapBuilder != null) {
-            FileUtil.writeToFile(sourceMapBuilder.getOutFile(), sourceMapBuilder.build());
+            outFactory.addOutput(sourceMapBuilder.getOutFile().getName(), sourceMapBuilder.build());
         }
     }
 

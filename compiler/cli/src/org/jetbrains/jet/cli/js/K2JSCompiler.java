@@ -16,15 +16,15 @@
 
 package org.jetbrains.jet.cli.js;
 
-import com.google.common.base.Function;
 import com.google.common.base.Joiner;
 import com.google.common.base.Predicates;
-import com.google.common.collect.Iterables;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
+import com.intellij.util.Function;
+import com.intellij.util.containers.ContainerUtil;
 import jet.Function0;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -37,6 +37,9 @@ import org.jetbrains.jet.cli.common.messages.AnalyzerWithCompilerReport;
 import org.jetbrains.jet.cli.common.messages.CompilerMessageLocation;
 import org.jetbrains.jet.cli.common.messages.CompilerMessageSeverity;
 import org.jetbrains.jet.cli.common.messages.MessageCollector;
+import org.jetbrains.jet.OutputDirector;
+import org.jetbrains.jet.SingleDirectoryDirector;
+import org.jetbrains.jet.cli.common.outputUtils.OutputUtilsPackage;
 import org.jetbrains.jet.cli.jvm.compiler.JetCoreEnvironment;
 import org.jetbrains.jet.config.CommonConfigurationKeys;
 import org.jetbrains.jet.config.CompilerConfiguration;
@@ -45,6 +48,7 @@ import org.jetbrains.k2js.analyze.AnalyzerFacadeForJS;
 import org.jetbrains.k2js.config.*;
 import org.jetbrains.k2js.facade.K2JSTranslator;
 import org.jetbrains.k2js.facade.MainCallParameters;
+import org.jetbrains.k2js.facade.OutputFileFactoryImpl;
 
 import java.io.File;
 import java.util.Arrays;
@@ -93,11 +97,12 @@ public class K2JSCompiler extends CLICompiler<K2JSCompilerArguments> {
             reportCompiledSourcesList(messageCollector, environmentForJS);
         }
 
-        String outputFile = arguments.outputFile;
-        if (outputFile == null) {
+        if (arguments.outputFile == null) {
             messageCollector.report(CompilerMessageSeverity.ERROR, "Specify output file via -output", CompilerMessageLocation.NO_LOCATION);
             return ExitCode.INTERNAL_ERROR;
         }
+
+        File outputFile = new File(arguments.outputFile);
 
         Config config = getConfig(arguments, project);
         if (analyzeAndReportErrors(messageCollector, environmentForJS.getSourceFiles(), config)) {
@@ -127,15 +132,28 @@ public class K2JSCompiler extends CLICompiler<K2JSCompilerArguments> {
         }
 
         MainCallParameters mainCallParameters = createMainCallParameters(arguments.main);
-        return translateAndGenerateOutputFile(mainCallParameters, environmentForJS, config, outputFile, outputPrefixFile, outputPostfixFile);
+
+        List<File> sources = ContainerUtil.map(arguments.sourceFiles, new Function<String, File>() {
+            @Override
+            public File fun(String path) {
+                return new File(path);
+            }
+        });
+        OutputFileFactoryImpl outFactory = new OutputFileFactoryImpl(sources);
+        translate(mainCallParameters, environmentForJS, config, outFactory, outputFile, outputPrefixFile, outputPostfixFile);
+
+        OutputDirector outputDirector = new SingleDirectoryDirector(outputFile.getParentFile());
+        OutputUtilsPackage.writeAll(outFactory, outputDirector, messageCollector);
+
+        return OK;
     }
 
     private static void reportCompiledSourcesList(@NotNull MessageCollector messageCollector,
             @NotNull JetCoreEnvironment environmentForJS) {
         List<JetFile> files = environmentForJS.getSourceFiles();
-        Iterable<String> fileNames = Iterables.transform(files, new Function<JetFile, String>() {
+        Iterable<String> fileNames = ContainerUtil.map(files, new Function<JetFile, String>() {
             @Override
-            public String apply(@Nullable JetFile file) {
+            public String fun(@Nullable JetFile file) {
                 assert file != null;
                 VirtualFile virtualFile = file.getVirtualFile();
                 if (virtualFile != null) {
@@ -148,23 +166,22 @@ public class K2JSCompiler extends CLICompiler<K2JSCompilerArguments> {
                                 CompilerMessageLocation.NO_LOCATION);
     }
 
-    @NotNull
-    private static ExitCode translateAndGenerateOutputFile(
+    private static void translate(
             @NotNull MainCallParameters mainCall,
             @NotNull JetCoreEnvironment environmentForJS,
             @NotNull Config config,
-            @NotNull String outputFile,
+            @NotNull OutputFileFactoryImpl outFactory,
+            @NotNull File outputFile,
             @Nullable File outputPrefix,
             @Nullable File outputPostfix
     ) {
         try {
-            K2JSTranslator.translateWithMainCallParametersAndSaveToFile(mainCall, environmentForJS.getSourceFiles(),
-                                                                        outputFile, outputPrefix, outputPostfix, config);
+            K2JSTranslator.translateWithMainCallParameters(mainCall, environmentForJS.getSourceFiles(),
+                                                                  outputFile, outputPrefix, outputPostfix, config, outFactory);
         }
         catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return OK;
     }
 
     private static boolean analyzeAndReportErrors(@NotNull MessageCollector messageCollector,

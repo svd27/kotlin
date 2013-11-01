@@ -26,11 +26,13 @@ import org.jetbrains.annotations.Nullable;
 import org.jetbrains.jet.analyzer.AnalyzeExhaust;
 import org.jetbrains.jet.lang.psi.JetFile;
 import org.jetbrains.jet.lang.resolve.BindingContext;
+import org.jetbrains.jet.outputUtils.OutputUtilsPackage;
 import org.jetbrains.k2js.analyze.AnalyzerFacadeForJS;
 import org.jetbrains.k2js.config.Config;
 import org.jetbrains.k2js.config.EcmaVersion;
-import org.jetbrains.k2js.facade.K2JSTranslator;
 import org.jetbrains.k2js.facade.MainCallParameters;
+import org.jetbrains.k2js.facade.OutputFileFactoryImpl;
+import org.jetbrains.k2js.facade.exceptions.TranslationException;
 import org.jetbrains.k2js.test.config.TestConfigFactory;
 import org.jetbrains.k2js.utils.JetFileUtils;
 
@@ -38,6 +40,8 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.util.List;
+
+import static org.jetbrains.k2js.facade.K2JSTranslator.translateWithMainCallParameters;
 
 //TODO: use method object
 public final class TranslationUtils {
@@ -95,13 +99,31 @@ public final class TranslationUtils {
         return configFactory.create(project, version, getLibFilesWithCode(getAllLibFiles(project)), preanalyzedContext);
     }
 
-    public static void translateFiles(@NotNull Project project, @NotNull List<String> inputFiles,
-            @NotNull String outputFile,
+    public static void translateFiles(
+            @NotNull Project project,
             @NotNull MainCallParameters mainCallParameters,
-            @NotNull EcmaVersion version, TestConfigFactory configFactory) throws Exception {
+            @NotNull List<String> inputFiles,
+            @NotNull String outputFile,
+            @NotNull EcmaVersion version,
+            @NotNull TestConfigFactory configFactory
+    ) throws Exception {
         List<JetFile> jetFiles = createJetFileList(project, inputFiles, null);
-        K2JSTranslator translator = new K2JSTranslator(getConfig(project, version, configFactory));
-        FileUtil.writeToFile(new File(outputFile), translator.generateProgramCode(jetFiles, mainCallParameters));
+        Config config = getConfig(project, version, configFactory);
+        translateFiles(mainCallParameters, jetFiles, outputFile, null, null, config);
+    }
+
+    public static void translateFiles(
+            @NotNull MainCallParameters mainCall,
+            @NotNull List<JetFile> files,
+            @NotNull String outputPath,
+            @Nullable File outputPrefixFile,
+            @Nullable File outputPostfixFile,
+            @NotNull Config config
+    ) throws TranslationException, IOException {
+        OutputFileFactoryImpl outFactory = new OutputFileFactoryImpl();
+        File outputFile = new File(outputPath);
+        translateWithMainCallParameters(mainCall, files, outputFile, outputPrefixFile, outputPostfixFile, config, outFactory);
+        OutputUtilsPackage.writeAllTo(outFactory, outputFile.getParentFile());
     }
 
     @NotNull
