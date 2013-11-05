@@ -43,7 +43,7 @@ public class MockVirtualMachine implements VirtualMachine {
 
     @Override
     public List<ReferenceType> allClasses() {
-        throw new UnsupportedOperationException();
+        return Collections.emptyList();
     }
 
     @Override
